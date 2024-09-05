@@ -36,8 +36,8 @@ export default function GlobalNavbarLayout(props: {
 
   return (
     <div>
-      <div className="flex flex-row justify-between gap-4 px-12 py-12">
-        <div className="flex flex-row justify-center gap-20 align-middle">
+      <div className="flex flex-row justify-between gap-4 px-12 py-8">
+        <div className="flex flex-row justify-center gap-8 align-middle">
           <div className="flex flex-row gap-4 text-3xl">
             <Image
               src="/PumpLogo.png"
@@ -53,7 +53,7 @@ export default function GlobalNavbarLayout(props: {
         </div>
         <div className="flex gap-20 hover:cursor-pointer">
           <DropdownMenu>
-            <DropdownMenuTrigger className="align flex flex-row justify-between gap-7">
+            <DropdownMenuTrigger className="flex flex-row justify-between gap-4 rounded-md border px-4 py-2">
               <div className="flex flex-row gap-4">
                 <Image
                   className="inline-block h-5 w-5 rounded-full"
@@ -63,6 +63,12 @@ export default function GlobalNavbarLayout(props: {
                   height={20}
                 />
                 <h6>{currentProjectState}</h6>
+                <Image
+                  src="/chevron-down.svg"
+                  alt="Chevron Down"
+                  width={20}
+                  height={20}
+                />
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -90,9 +96,8 @@ export default function GlobalNavbarLayout(props: {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
           <DropdownMenu>
-            <DropdownMenuTrigger className="align flex flex-row justify-between gap-7">
+            <DropdownMenuTrigger className="flex flex-row justify-between gap-4 rounded-md border px-4 py-2">
               <div className="flex flex-row gap-4">
                 <Image
                   className="inline-block h-5 w-5 rounded-full"
@@ -103,7 +108,6 @@ export default function GlobalNavbarLayout(props: {
                 />
                 <h6>{username}</h6>
               </div>
-
               <Image
                 src="/chevron-down.svg"
                 alt="Chevron Down"
@@ -124,22 +128,44 @@ export default function GlobalNavbarLayout(props: {
                 </div>
                 <Image
                   src="/ProfileShortcut.png"
-                  alt="Chevron Down"
-                  width={30}
-                  height={30}
+                  alt="Profile"
+                  width={32}
+                  height={32}
                 />
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-row gap-12 hover:cursor-pointer">
+              <DropdownMenuItem className="flex flex-row justify-between gap-16 hover:cursor-pointer">
                 <div className="flex flex-row gap-4">
-                  icon <h5>Settings</h5>
+                  <Image
+                    src="/SettingsIcon.png"
+                    alt="Settings"
+                    width={20}
+                    height={20}
+                  />
+                  <h5>Settings</h5>
                 </div>
-                <h6>Shortcut</h6>
+                <Image
+                  src="/SettingShortcut.png"
+                  alt="Settings"
+                  width={20}
+                  height={20}
+                />
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-row gap-12 hover:cursor-pointer">
+              <DropdownMenuItem className="flex flex-row justify-between gap-16 hover:cursor-pointer">
                 <div className="flex flex-row gap-4">
-                  icon <h5>Log out</h5>
+                  <Image
+                    src="/LogoutIcon.png"
+                    alt="Chevron Down"
+                    width={20}
+                    height={20}
+                  />
+                  <h5>Log out</h5>
                 </div>
-                <h6>Shortcut</h6>
+                <Image
+                  src="/LogoutShortcut.png"
+                  alt="Chevron Down"
+                  width={32}
+                  height={32}
+                />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
