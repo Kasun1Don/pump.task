@@ -14,6 +14,9 @@ export default {
         sans: ["var(--font-geist-sans)", ...fontFamily.sans],
         mono: ["var(--font-geist-mono)", ...fontFamily.mono],
       },
+      colors: {
+        "zesty-green": "#72D524",
+      },
     },
   },
 } satisfies Config;
