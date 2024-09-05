@@ -30,6 +30,7 @@
     "react": "catalog:react18",
     "react-dom": "catalog:react18",
     "superjson": "2.2.1",
+    "thirdweb": "^5.50.0",
     "zod": "catalog:"
   },
   "devDependencies": {
