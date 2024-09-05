@@ -11,8 +11,7 @@ export default function HomePage() {
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
             pump.task
           </h1>
-          {/* ENVIRONMENT: {process.env.NEXT_PUBLIC_DEPLOYMENT_ENVIRONMENT}
-          <CreatePostForm /> */}
+          {/* <CreatePostForm /> */}
           <Login />
         </div>
       </main>

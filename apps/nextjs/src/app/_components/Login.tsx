@@ -5,9 +5,11 @@ import { ConnectButton, useActiveAccount } from "thirdweb/react";
 
 import { useTheme } from "@acme/ui/theme";
 
-// should be in own file
-const CLIENT_ID = "d0038b53c5d72336428a00389e01b3f2";
-const client = createThirdwebClient({ clientId: CLIENT_ID });
+const client_id = process.env.NEXT_PUBLIC_CLIENT_ID!;
+
+const client = createThirdwebClient({
+  clientId: client_id,
+});
 
 export function Login() {
   const activeAccount = useActiveAccount();
