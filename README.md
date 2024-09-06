@@ -57,7 +57,7 @@ packages
   ├─ auth
   |   └─ Authentication using next-auth.
   ├─ db
-  |   └─ Typesafe db calls using Typegoose & MongoDB 
+  |   └─ Typesafe db calls using Typegoose & MongoDB
   └─ ui
       └─ Start of a UI package for the webapp using shadcn-ui
 tooling
