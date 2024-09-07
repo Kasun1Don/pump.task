@@ -10,6 +10,7 @@ import { Calendar } from "@acme/ui/calendar";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -25,10 +26,7 @@ import {
 } from "@acme/ui/select";
 
 const NewTaskModal = () => {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [date, setDate] = useState<Date>();
-
-  const tags = [
+  const presetTags = [
     "Frontend",
     "Backend",
     "Design",
@@ -36,12 +34,33 @@ const NewTaskModal = () => {
     "Integration",
   ];
 
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [userTags, setUserTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState<string>("");
+  const [date, setDate] = useState<Date>();
+
   const toggleTagSelection = (tag: string) => {
     setSelectedTags((prevSelectedTags) =>
       prevSelectedTags.includes(tag)
         ? prevSelectedTags.filter((t) => t !== tag)
         : [...prevSelectedTags, tag],
     );
+  };
+
+  const handleAddTag = () => {
+    if (
+      newTag.trim() &&
+      !presetTags.includes(newTag) &&
+      !userTags.includes(newTag)
+    ) {
+      setUserTags([...userTags, newTag]);
+    }
+    setNewTag("");
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setUserTags(userTags.filter((tag) => tag !== tagToRemove));
+    setSelectedTags(selectedTags.filter((tag) => tag !== tagToRemove)); // Remove from selected if it was selected
   };
 
   return (
@@ -58,25 +77,83 @@ const NewTaskModal = () => {
         <div className="mb-4 flex-shrink-0">
           <h3 className="mb-2">TAGS</h3>
           <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => toggleTagSelection(tag)}
-                style={
-                  selectedTags.includes(tag)
-                    ? {
-                        backgroundColor: "var(--ZESTY-GREEN, #72D524)",
-                        color: "black",
-                      } // Custom background color for selected tags
-                    : {}
-                }
-                className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
-                  !selectedTags.includes(tag) ? "bg-gray-700 text-white" : ""
-                }`}
-              >
-                {tag}
-              </button>
+            {/* Preset Tags (Cannot be deleted) */}
+            {presetTags.map((tag) => (
+              <div key={tag} className="flex items-center">
+                <button
+                  onClick={() => toggleTagSelection(tag)}
+                  style={
+                    selectedTags.includes(tag)
+                      ? {
+                          backgroundColor: "var(--ZESTY-GREEN, #72D524)",
+                          color: "black",
+                        }
+                      : {}
+                  }
+                  className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
+                    !selectedTags.includes(tag) ? "bg-gray-700 text-white" : ""
+                  }`}
+                >
+                  {tag}
+                </button>
+              </div>
             ))}
+
+            {/* User-added Tags (Can be deleted) */}
+            {userTags.map((tag) => (
+              <div key={tag} className="flex items-center">
+                <button
+                  onClick={() => toggleTagSelection(tag)}
+                  style={
+                    selectedTags.includes(tag)
+                      ? {
+                          backgroundColor: "var(--ZESTY-GREEN, #72D524)",
+                          color: "black",
+                        }
+                      : {}
+                  }
+                  className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
+                    !selectedTags.includes(tag) ? "bg-gray-700 text-white" : ""
+                  }`}
+                >
+                  {tag}
+                </button>
+                {/* Remove button for user-added tags */}
+                <button
+                  onClick={() => handleRemoveTag(tag)}
+                  className="ml-2 text-red-500"
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+
+            {/* Add New Tag Button */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="ml-2 rounded-md bg-blue-500 px-3 py-1 text-sm text-white">
+                  + Add Tag
+                </button>
+              </DialogTrigger>
+
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add a New Tag</DialogTitle>
+                </DialogHeader>
+                <Input
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="Enter new tag"
+                  className="w-full rounded-md border border-gray-300 px-2 py-1"
+                />
+                <DialogFooter>
+                  <Button onClick={handleAddTag} className="bg-green-500">
+                    Add Tag
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
