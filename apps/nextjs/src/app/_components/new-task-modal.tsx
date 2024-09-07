@@ -122,11 +122,13 @@ const NewTaskModal = () => {
 
           <div className="w-1/2">
             <h3 className="mb-2">ASSIGNEE</h3>
-            <Select>
-              <SelectTrigger className="w-full">Unassigned</SelectTrigger>
+            <Select defaultValue="un assigned">
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="assigntome">Assign to me</SelectItem>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
+                <SelectItem value="assign to me">Assign To Me</SelectItem>
+                <SelectItem value="un assigned">Un Assigned</SelectItem>
               </SelectContent>
             </Select>
           </div>
