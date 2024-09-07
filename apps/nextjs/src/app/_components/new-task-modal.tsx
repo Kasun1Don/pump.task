@@ -21,6 +21,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@acme/ui/select";
 
 const NewTaskModal = () => {
@@ -105,12 +106,14 @@ const NewTaskModal = () => {
         <div className="mb-6 flex flex-shrink-0 gap-4">
           <div className="w-1/2">
             <h3 className="mb-2">STATUS</h3>
-            <Select>
-              <SelectTrigger className="w-full">To Do</SelectTrigger>
+            <Select defaultValue="to do">
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todo">To Do</SelectItem>
-                <SelectItem value="inprogress">In Progress</SelectItem>
-                <SelectItem value="inqa">In QA</SelectItem>
+                <SelectItem value="to do">To Do</SelectItem>
+                <SelectItem value="in progress">In Progress</SelectItem>
+                <SelectItem value="in qa">In QA</SelectItem>
                 <SelectItem value="done">Done</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
               </SelectContent>
