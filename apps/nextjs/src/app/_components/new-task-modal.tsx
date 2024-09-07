@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 
@@ -25,7 +25,24 @@ import {
 } from "@acme/ui/select";
 
 const NewTaskModal = () => {
-  const [date, setDate] = React.useState<Date>();
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [date, setDate] = useState<Date>();
+
+  const tags = [
+    "Frontend",
+    "Backend",
+    "Design",
+    "Smart Contracts",
+    "Integration",
+  ];
+
+  const toggleTagSelection = (tag: string) => {
+    setSelectedTags((prevSelectedTags) =>
+      prevSelectedTags.includes(tag)
+        ? prevSelectedTags.filter((t) => t !== tag)
+        : [...prevSelectedTags, tag],
+    );
+  };
 
   return (
     <Dialog>
@@ -41,31 +58,40 @@ const NewTaskModal = () => {
         <div className="mb-4 flex-shrink-0">
           <h3 className="mb-2">TAGS</h3>
           <div className="flex flex-wrap gap-2">
-            {[
-              "Frontend",
-              "Backend",
-              "Design",
-              "Smart Contracts",
-              "Integration",
-            ].map((tag) => (
-              <span
+            {tags.map((tag) => (
+              <button
                 key={tag}
-                className="rounded-md bg-gray-700 px-3 py-1 text-sm"
+                onClick={() => toggleTagSelection(tag)}
+                style={
+                  selectedTags.includes(tag)
+                    ? {
+                        backgroundColor: "var(--ZESTY-GREEN, #72D524)",
+                        color: "black",
+                      } // Custom background color for selected tags
+                    : {}
+                }
+                className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
+                  !selectedTags.includes(tag) ? "bg-gray-700 text-white" : ""
+                }`}
               >
                 {tag}
-              </span>
+              </button>
             ))}
           </div>
         </div>
 
         {/* Title */}
+        <div className="mb-4 flex-grow">
+          <h3 className="mb-2">TITLE</h3>
+          <Input placeholder="Enter short task title." className="h-24"></Input>
+        </div>
 
         {/* Description */}
         <div className="mb-4 flex-grow">
           <h3 className="mb-2">DESCRIPTION</h3>
           <Input
             placeholder="Enter detailed task description."
-            className="h-24 w-full"
+            className="h-24 flex-wrap"
           ></Input>
         </div>
 
