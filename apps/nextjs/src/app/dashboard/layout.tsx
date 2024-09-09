@@ -10,6 +10,7 @@ export default function GlobalNavbarLayout(props: {
 }) {
   return (
     <>
+    <div className="min-h-screen bg-custom-bg bg-cover bg-center">
       <div className="flex flex-row justify-between gap-4 px-12 py-8">
         {/* This is the Pump Logo */}
         <div className="flex flex-row items-center justify-center gap-8">
@@ -75,6 +76,7 @@ export default function GlobalNavbarLayout(props: {
 
       {/* This just specifies where the children components will be rendered in application */}
       {props.children}
+    </div>
     </>
   );
 }
