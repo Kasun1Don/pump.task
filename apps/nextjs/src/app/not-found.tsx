@@ -1,4 +1,5 @@
-import Link from "next/link"; 
+import Link from "next/link";
+
 import { Button } from "@acme/ui/button"; //button from monorepo packages/ui
 
 export default function NotFound() {
