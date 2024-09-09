@@ -17,6 +17,9 @@ export default {
       colors: {
         "zesty-green": "#72D524",
       },
+      backgroundImage: {
+        "custom-bg": "url('/Background.svg')", // custom background image
+      },
     },
   },
 } satisfies Config;
