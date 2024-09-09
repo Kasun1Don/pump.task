@@ -1,6 +1,6 @@
 const projects = [
-  { id: 1, name: "CRM" }, // seed data
-  { id: 2, name: "Dog Walkies App" },
+  { id: 1, name: "CRM" }, // replace with correct paths
+  { id: 2, name: "Dog Walkies" },
 ];
 
 const templates = [
