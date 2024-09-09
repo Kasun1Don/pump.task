@@ -18,7 +18,7 @@ export default {
         "zesty-green": "#72D524",
       },
       backgroundImage: {
-        "custom-bg": "url('/Background.svg')", // custom background image from figma (update the path if required)
+        "custom-bg": "url('/Background.svg')", // custom background image
       },
     },
   },
