@@ -22,12 +22,12 @@ export default function ProjectsPage() {
             {projects.map((project) => (
               <div
                 key={project.id}
-                className="min-h-32 overflow-hidden rounded-lg bg-[#09090B] font-bold border border-gray-700"
+                className="min-h-32 overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold"
               >
                 <h3 className="p-4 text-white">{project.name}</h3>
               </div>
             ))}
-            <div className="flex min-h-32 items-center justify-center rounded-lg bg-[#72D524] border border-gray-700">
+            <div className="flex min-h-32 items-center justify-center rounded-lg border border-gray-700 bg-[#72D524] hover:bg-[#5CAB1D]">
               <h3 className="text-[#18181B]">Create new task board</h3>
             </div>
           </div>
@@ -44,7 +44,7 @@ export default function ProjectsPage() {
             {templates.map((template) => (
               <div
                 key={template.id}
-                className="min-h-32 overflow-hidden rounded-lg bg-[#18181B] font-bold border border-gray-700"
+                className="min-h-32 overflow-hidden rounded-lg border border-gray-700 bg-[#18181B] font-bold"
               >
                 <h3 className="p-4 text-center text-white">{template.name}</h3>
               </div>
