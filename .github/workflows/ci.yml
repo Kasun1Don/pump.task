@@ -28,7 +28,7 @@ jobs:
         uses: ./tooling/github/setup
 
       - name: Lint
-        run: pnpm lint:fix && pnpm lint:ws -f
+        run: pnpm lint:fix && pnpm lint:ws
 
   format:
     runs-on: ubuntu-latest

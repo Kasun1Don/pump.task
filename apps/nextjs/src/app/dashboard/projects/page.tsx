@@ -1,6 +1,6 @@
 const projects = [
-  { id: 1, name: "CRM"}, // replace with correct paths
-  { id: 2, name: "Dog Walkies"}
+  { id: 1, name: "CRM" }, // replace with correct paths
+  { id: 2, name: "Dog Walkies" },
 ];
 
 export default function ProjectsPage() {
