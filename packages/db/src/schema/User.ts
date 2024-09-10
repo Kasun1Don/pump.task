@@ -13,6 +13,9 @@ import {
 @modelOptions({ schemaOptions: { collection: "users" } })
 export class UserClass {
   @prop()
+  public walletId?: string;
+
+  @prop()
   public name?: string;
 
   @prop()
