@@ -9,4 +9,12 @@ import baseConfig from "@acme/tailwind-config/web";
 export default {
   content: ["./src/**/*.tsx"],
   presets: [baseConfig],
+  theme: {
+    extend: {
+      colors: {
+        // Add your custom color without removing existing ones
+        "zesty-green": "var(--ZESTY-GREEN, #72D524)",
+      },
+    },
+  },
 } satisfies Config;

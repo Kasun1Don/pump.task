@@ -11,7 +11,7 @@ export default function NotFound() {
 
         <Link href="/">
           {/* TODO: update button style to match the project design guide */}
-          <Button className="mt-4 bg-[#72D524]" variant="primary" size="md">
+          <Button className="mt-4 bg-[#72D524]" variant="link" size="lg">
             Return to Home
           </Button>
         </Link>
