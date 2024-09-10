@@ -13,18 +13,4 @@ export default [
   ...baseConfig,
   ...reactConfig,
   ...nextjsConfig,
-  {
-    files: ["**/*.ts", "**/*.tsx"],
-    plugins: {
-      "@typescript-eslint": tsPlugin,
-    },
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        project: "./tsconfig.json",
-        tsconfigRootDir: ".",
-        allowDefaultProject: true,
-      },
-    },
-  },
 ];
