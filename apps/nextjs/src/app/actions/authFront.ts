@@ -4,18 +4,12 @@
 import type { VerifyLoginPayloadParams } from "thirdweb/auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createThirdwebClient } from "thirdweb";
 import { createAuth } from "thirdweb/auth";
 import { privateKeyToAccount } from "thirdweb/wallets";
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const client_id = process.env.NEXT_PUBLIC_CLIENT_ID!;
+import { client } from "../thirdwebClient";
 
-const client = createThirdwebClient({
-  clientId: client_id,
-});
-
-const privateKey = process.env.NEXT_PUBLIC_THIRDWEB_ADMIN_PRIVATE_KEY;
+const privateKey = process.env.THIRDWEB_ADMIN_PRIVATE_KEY;
 
 if (!privateKey) {
   throw new Error("Missing THIRDWEB_ADMIN_PRIVATE_KEY in .env file.");
@@ -35,7 +29,10 @@ export async function login(payload: VerifyLoginPayloadParams) {
       payload: verifiedPayload.payload,
     });
     cookies().set("jwt", jwt);
-    redirect("/secure");
+    // check if payload.address is alreading in db
+    //if not redirect to newuser
+    redirect("/newuser");
+    redirect("/dashboard");
   }
 }
 
