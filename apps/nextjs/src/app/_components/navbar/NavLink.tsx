@@ -23,7 +23,7 @@ export default function NavLink({ href, children }: NavLinkProps) {
       <h2
         className={`mb-1 w-full items-center rounded-md px-2 py-1 text-base font-medium outline-none transition-colors ${
           isActive
-            ? "cursor-default bg-none text-inherit"
+            ? "cursor-default bg-none text-accent-foreground"
             : "hover:cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
         }`}
       >
