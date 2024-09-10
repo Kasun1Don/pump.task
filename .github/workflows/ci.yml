@@ -28,7 +28,7 @@ jobs:
         uses: ./tooling/github/setup
 
       - name: Lint
-        run: pnpm lint && pnpm lint:ws
+        run: pnpm lint:fix && pnpm lint:ws
 
   format:
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
         uses: ./tooling/github/setup
 
       - name: Format
-        run: pnpm format
+        run: pnpm format:fix --write
 
   typecheck:
     runs-on: ubuntu-latest

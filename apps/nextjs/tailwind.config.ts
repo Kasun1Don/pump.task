@@ -14,6 +14,12 @@ export default {
         sans: ["var(--font-geist-sans)", ...fontFamily.sans],
         mono: ["var(--font-geist-mono)", ...fontFamily.mono],
       },
+      colors: {
+        "zesty-green": "#72D524",
+      },
+      backgroundImage: {
+        "custom-bg": "url('/Background.svg')", // custom background image
+      },
     },
   },
 } satisfies Config;
