@@ -1,7 +1,10 @@
+'use client';
+import { useState } from 'react';
+
 const projects = [
-  { id: 1, name: "Maker DAO" }, // replace with correct paths
-  { id: 2, name: "Algorand" },
-  { id: 3, name: "Immutable" },
+  { id: 1, name: "Maker DAO", owner: false },
+  { id: 2, name: "Algorand", owner: false },
+  { id: 3, name: "Immutable", owner: true },
 ];
 
 const templates = [
@@ -12,6 +15,12 @@ const templates = [
 
 // TODO: card fills with related images + UI adjustments
 export default function ProjectsPage() {
+  const [showOwnedOnly, setShowOwnedOnly] = useState(false);
+
+  const filteredProjects = showOwnedOnly
+    ? projects.filter(project => project.owner)
+    : projects;
+
   return (
     <>
       <div className="m-8">
@@ -21,10 +30,24 @@ export default function ProjectsPage() {
               <h1 className="text-xl font-bold">Your Project Task Boards</h1>
             </div>
             <div className="flex overflow-hidden rounded-lg border border-gray-700">
-              <button className="bg-[#18181B] px-4 py-2 font-semibold text-white hover:bg-[#27272A]">
+              <button
+                className={`px-4 py-2 font-semibold ${
+                  !showOwnedOnly
+                    ? "bg-[#18181B] text-white"
+                    : "bg-[#09090B] text-gray-400"
+                } hover:bg-[#27272A]`}
+                onClick={() => setShowOwnedOnly(false)}
+              >
                 All projects
               </button>
-              <button className="bg-[#09090B] px-4 py-2 font-semibold text-gray-400 hover:bg-[#18181B]">
+              <button
+                className={`px-4 py-2 font-semibold ${
+                  showOwnedOnly
+                    ? "bg-[#18181B] text-white"
+                    : "bg-[#09090B] text-gray-400"
+                } hover:bg-[#27272A]`}
+                onClick={() => setShowOwnedOnly(true)}
+              >
                 Created by me
               </button>
             </div>
@@ -33,7 +56,7 @@ export default function ProjectsPage() {
             </div>
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <div
                 key={project.id}
                 className="flex min-h-32 flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold"
