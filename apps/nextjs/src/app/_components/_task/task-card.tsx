@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const TaskCard = () => {
   return (
-    <div className="max-w-md rounded-lg border border-zinc-900 bg-zinc-950 p-4 text-white shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">
+    <div className="max-w-md rounded-lg border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">
       {/* Tags */}
       <div className="mb-3 flex space-x-2">
         <span className="rounded-full bg-emerald-300 px-2 py-1 text-xs text-black">
