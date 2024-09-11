@@ -26,27 +26,18 @@ export default function HotKeyEventListeners() {
 
   // Function to handle key presses
   const handleKeyPress = (event: KeyboardEvent) => {
-    // Check for Ctrl + P (for Profile)
-    if (event.ctrlKey && event.key.toLowerCase() === "p") {
     // Check for Shift + Command + P (for Profile)
     if (event.shiftKey && event.metaKey && event.key.toLowerCase() === "p") {
       event.preventDefault();
-      console.log("Profile button pressed");
-
       router.push("/dashboard/profile");
     }
 
-    // Check for Ctrl + s (for Settings)
-    if (event.ctrlKey && event.key.toLowerCase() === "s") {
     // Check for Command + S (for Settings)
     if (event.metaKey && event.key.toLowerCase() === "s") {
       event.preventDefault();
-      console.log("Settings button pressed");
       router.push("/dashboard/settings");
     }
 
-    // Logout for Ctrl + Shift + Q
-    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "q") {
     // Logout for Shift + Q
     if (event.shiftKey && event.key.toLowerCase() === "q") {
       event.preventDefault();
@@ -60,12 +51,10 @@ export default function HotKeyEventListeners() {
     }
   };
 
-  // Add all events to for listen when component is mounted
   // Add all events to listen when the component is mounted
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
 
-    // Cleanup event listener when component is unmounted remove the events
     // Cleanup event listener when the component is unmounted
     return () => {
       window.removeEventListener("keydown", handleKeyPress);

@@ -67,7 +67,6 @@ export default function NavUserDropdown() {
               <h5>Settings</h5>
             </Link>
           </div>
-          <Image
             src="/SettingShortcut.png"
             alt="Settings"
             width={20}
@@ -86,8 +85,6 @@ export default function NavUserDropdown() {
             />
             <h5>Log out</h5>
           </div>
-          <Image
-            src="/LogoutShortcut.png"
             alt="Chevron Down"
             width={20}
             height={20}
