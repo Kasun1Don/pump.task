@@ -4,10 +4,19 @@ import HotKeyEventListeners from "../_components/navbar/HotKeyEventListeners";
 import NavLink from "../_components/navbar/NavLink";
 import NavProjectDropdown from "../_components/navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/navbar/NavUserDropdown";
+import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
 
-export default function GlobalNavbarLayout(props: {
+export default async function GlobalNavbarLayout(props: {
   children: React.ReactNode;
 }) {
+  // Get the tRPC callclear
+  const caller = await createServerSideFetch();
+
+  // Fetch user data using the caller
+  const userData = await caller.user.all();
+
+  console.log(userData);
+
   return (
     <>
       <div className="bg-custom-bg min-h-screen bg-cover bg-center">
@@ -30,14 +39,11 @@ export default function GlobalNavbarLayout(props: {
           </div>
 
           <div className="flex gap-10 hover:cursor-pointer">
-            {/* This is the Project dropdown Menu. Quick note will probably make this conditional rendered in the future so if users don't have any projects it just renders a button to create a new project. */}
             <NavProjectDropdown />
-            {/* This is the users Drop down Menu with profile, setting and logout buttons*/}
             <NavUserDropdown />
           </div>
         </div>
 
-        {/* This is the navigation bar at the bottom of the display it just creates links to each page */}
         <div className="flex flex-wrap border-b-2">
           <NavLink href="/dashboard/projects">Projects</NavLink>
           <NavLink href="/dashboard/tasks">Tasks</NavLink>
@@ -45,10 +51,10 @@ export default function GlobalNavbarLayout(props: {
           <NavLink href="/dashboard/users">Users</NavLink>
           <NavLink href="/dashboard/settings">Settings</NavLink>
         </div>
+
         {/* This is the event listener for hotkeys profile, setting, logout */}
         <HotKeyEventListeners />
 
-        {/* This just specifies where the children components will be rendered in application */}
         {props.children}
       </div>
     </>

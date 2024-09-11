@@ -26,6 +26,9 @@ export class UserClass {
 
   @prop()
   public emailVerified?: boolean;
+
+  @prop({ type: () => [String] })
+  public projects?: string[];
 }
 
 export const User =
