@@ -98,7 +98,9 @@ const NewTaskModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-zesty-green text-black">+ New task</Button>
+        <Button className="max=h=[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
+          + New task
+        </Button>
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] max-w-[50vw] flex-col overflow-auto rounded-lg bg-gray-900 p-6 text-white">
         <DialogHeader>

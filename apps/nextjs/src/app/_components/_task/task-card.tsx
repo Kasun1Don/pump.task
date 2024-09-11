@@ -15,11 +15,11 @@ const TaskCard = () => {
       {/* Task Title */}
       <h3 className="text-lg font-semibold">Task Title</h3>
       {/* Task Description */}
-      <p className="line-clamp-2 text-sm text-gray-400">
+      <p className="line-clamp-2 text-sm text-zinc-400">
         Brief description of what the task is. Can expand to 2 lines but gets
         truncated if longer.
       </p>
-      s{/* Assignee and Due Date */}
+      {/* Assignee and Due Date */}
       <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center space-x-1">
           <Image
