@@ -9,12 +9,15 @@ import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
 export default async function GlobalNavbarLayout(props: {
   children: React.ReactNode;
 }) {
-  // Get the tRPC callclear
+  // Get the tRPC caller
   const caller = await createServerSideFetch();
 
   // Fetch user data using the caller
   const userData = await caller.user.all();
 
+  // From here you can pass the userData to the children components to render the user data
+
+  // This will show up on the server console NOT the browser console
   console.log(userData);
 
   return (
@@ -39,11 +42,14 @@ export default async function GlobalNavbarLayout(props: {
           </div>
 
           <div className="flex gap-10 hover:cursor-pointer">
+            {/* Project dropdown, I should properly make this conditional in the future so if the user doesn't have any projects it renders a button to create a new project */}
             <NavProjectDropdown />
+            {/* User dropdown */}
             <NavUserDropdown />
           </div>
         </div>
 
+        {/* Navigation links */}
         <div className="flex flex-wrap border-b-2">
           <NavLink href="/dashboard/projects">Projects</NavLink>
           <NavLink href="/dashboard/tasks">Tasks</NavLink>
@@ -55,6 +61,7 @@ export default async function GlobalNavbarLayout(props: {
         {/* This is the event listener for hotkeys profile, setting, logout */}
         <HotKeyEventListeners />
 
+        {/* Render children components */}
         {props.children}
       </div>
     </>
