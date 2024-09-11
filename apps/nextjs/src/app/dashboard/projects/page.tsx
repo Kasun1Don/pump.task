@@ -1,5 +1,6 @@
-'use client';
-import { useState } from 'react';
+"use client";
+
+import { useState } from "react";
 
 const projects = [
   { id: 1, name: "Maker DAO", owner: false },
@@ -16,9 +17,12 @@ const templates = [
 // TODO: card fills with related images + UI adjustments
 export default function ProjectsPage() {
   const [showOwnedOnly, setShowOwnedOnly] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
 
   const filteredProjects = showOwnedOnly
-    ? projects.filter(project => project.owner)
+    ? projects.filter((project) => project.owner)
     : projects;
 
   return (
@@ -52,7 +56,9 @@ export default function ProjectsPage() {
               </button>
             </div>
             <div className="mr-8 flex items-center justify-center rounded-lg border border-gray-700 bg-[#72D524] p-1 font-bold hover:bg-[#5CAB1D]">
-              <h3 className="text-[#18181B]"> + Create new project </h3>
+              <button onClick={() => setIsModalOpen(true)} className="text-[#18181B]">
+                + Create new project
+              </button>
             </div>
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
@@ -89,6 +95,51 @@ export default function ProjectsPage() {
           </div>
         </div>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-96 rounded-lg bg-[#18181B] p-6">
+            <h2 className="mb-4 text-xl font-bold text-white">Create New Project</h2>
+            <input
+              type="text"
+              placeholder="Project Name"
+              value={newProjectName}
+              onChange={(e) => setNewProjectName(e.target.value)}
+              className="mb-4 w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
+            />
+            <select
+              value={selectedTemplate}
+              onChange={(e) => setSelectedTemplate(e.target.value)}
+              className="mb-4 w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
+            >
+              <option value="">Select a template (optional)</option>
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="mr-2 rounded-lg bg-gray-700 px-4 py-2 text-white hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // TODO: Implement project creation logic
+                  console.log("Creating project:", newProjectName, "with template:", selectedTemplate);
+                  setIsModalOpen(false);
+                }}
+                className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
