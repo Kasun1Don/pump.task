@@ -50,6 +50,7 @@ export default function NavUserDropdown() {
             height={20}
             className="h-auto w-auto"
           />
+          <div className="text-xxs">⇧⌘P</div>
         </DropdownMenuItem>
         <DropdownMenuItem className="flex flex-row justify-between gap-16 hover:cursor-pointer">
           <div className="flex flex-row gap-4">
@@ -73,6 +74,7 @@ export default function NavUserDropdown() {
             height={20}
             className="h-auto w-auto"
           />
+          <div className="text-xxs">⌘S</div>
         </DropdownMenuItem>
         <DropdownMenuItem className="flex flex-row justify-between gap-16 hover:cursor-pointer">
           <div className="flex flex-row gap-4">
@@ -91,6 +93,7 @@ export default function NavUserDropdown() {
             height={20}
             className="h-autp w-auto"
           />
+          <div className="text-xxs">⇧Q</div>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
