@@ -41,8 +41,6 @@ export default function HotKeyEventListeners() {
     // Logout for Shift + Q
     if (event.shiftKey && event.key.toLowerCase() === "q") {
       event.preventDefault();
-      console.log("Logging out");
-      // router.push("/dashboard/logout");
       try {
         handleLogout();
       } catch (error) {

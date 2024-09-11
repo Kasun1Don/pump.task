@@ -43,13 +43,6 @@ export default function NavUserDropdown() {
               <h5>My Profile</h5>
             </Link>
           </div>
-          <Image
-            src="/ProfileShortcut.png"
-            alt="Profile"
-            width={32}
-            height={20}
-            className="h-auto w-auto"
-          />
           <div className="text-xxs">⇧⌘P</div>
         </DropdownMenuItem>
         <DropdownMenuItem className="flex flex-row justify-between gap-16 hover:cursor-pointer">
@@ -67,12 +60,6 @@ export default function NavUserDropdown() {
               <h5>Settings</h5>
             </Link>
           </div>
-            src="/SettingShortcut.png"
-            alt="Settings"
-            width={20}
-            height={20}
-            className="h-auto w-auto"
-          />
           <div className="text-xxs">⌘S</div>
         </DropdownMenuItem>
         <DropdownMenuItem className="flex flex-row justify-between gap-16 hover:cursor-pointer">
@@ -85,11 +72,6 @@ export default function NavUserDropdown() {
             />
             <h5>Log out</h5>
           </div>
-            alt="Chevron Down"
-            width={20}
-            height={20}
-            className="h-autp w-auto"
-          />
           <div className="text-xxs">⇧Q</div>
         </DropdownMenuItem>
       </DropdownMenuContent>
