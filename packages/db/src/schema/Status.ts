@@ -16,7 +16,7 @@ export class StatusSchema {
   public tasks!: TaskClass[];
 }
 
-@modelOptions({ schemaOptions: { collection: "status" } })
+@modelOptions({ schemaOptions: { collection: "status" } }) // specify collection name for mongoose
 export class StatusClass extends StatusSchema {}
 
 export const Status =

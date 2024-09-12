@@ -17,7 +17,7 @@ export class MemberSchema {
   public role!: "observer" | "admin" | "owner";
 }
 
-@modelOptions({ schemaOptions: { collection: "members" } })
+@modelOptions({ schemaOptions: { collection: "members" } }) // specify collection name for mongoose
 export class MemberClass extends MemberSchema {}
 
 export const Member =

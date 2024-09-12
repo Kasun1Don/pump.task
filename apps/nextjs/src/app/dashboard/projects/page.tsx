@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+// import { api } from "~/trpc/react"; // sets up the tRPC client for React components
+
 const projects = [
   { id: 1, name: "Maker DAO", owner: false },
   { id: 2, name: "Algorand", owner: false },
@@ -24,6 +26,14 @@ export default function ProjectsPage() {
   const filteredProjects = showOwnedOnly
     ? projects.filter((project) => project.owner)
     : projects;
+
+  // const createProject = api.project.create.useMutation({
+  //   onSuccess: () => {
+  //     setIsModalOpen(false);
+  //     setNewProjectName("");
+  //     // setSelectedTemplate("");
+  //   },
+  // });
 
   return (
     <>
@@ -132,16 +142,14 @@ export default function ProjectsPage() {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  // TODO: Implement project creation logic
-                  console.log(
-                    "Creating project:",
-                    newProjectName,
-                    "with template:",
-                    selectedTemplate,
-                  );
-                  setIsModalOpen(false);
-                }}
+                // onClick={() => {
+                //   // project creation logic
+                //   createProject.mutate({
+                //     name: newProjectName,
+                //     isPrivate: false, // TODO: add option for this in the form
+                //     // templateId: selectedTemplate || undefined,
+                //   });
+                // }}
                 className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
               >
                 Create
