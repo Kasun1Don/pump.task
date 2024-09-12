@@ -4,7 +4,11 @@ export default function TasksPage() {
   return (
     <div>
       <h1 className="flex justify-center">Tasks Page</h1>
-      <TaskStatusColumn />
+      <div className="flex flex-row gap-3 p-6">
+        <TaskStatusColumn statusTitle="To Do" />
+        <TaskStatusColumn statusTitle="In Progress" />
+        <TaskStatusColumn statusTitle="Done" />
+      </div>
     </div>
   );
 }

@@ -1,11 +1,11 @@
 import NewTaskModal from "./new-task-modal";
 import TaskCard from "./task-card";
 
-const TaskStatusColumn = () => {
+const TaskStatusColumn = ({ statusTitle }: { statusTitle: string }) => {
   return (
     <div className="bg-transparent-[16] flex w-fit flex-col gap-5 rounded-lg bg-[#00000029] p-5">
       <h2 className="flex justify-center text-lg font-extrabold">
-        In Progress
+        {statusTitle}
       </h2>
       <TaskCard />
       <TaskCard />
