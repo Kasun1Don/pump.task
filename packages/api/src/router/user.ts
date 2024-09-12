@@ -4,9 +4,10 @@ import { User } from "@acme/db";
 
 import { publicProcedure } from "../trpc";
 
-export const userRouter = {
+export const userRouter: TRPCRouterRecord = {
   all: publicProcedure.query(async () => {
-    const users = await User.find();
+    // Fetch all users and populate the projects field
+    const users = await User.find().populate("projects");
 
     return users.map((user) => ({
       walletId: user.walletId,
