@@ -29,8 +29,8 @@ export class UserClass {
 
   @prop()
   public emailVerified?: boolean;
-
-  @prop({ ref: () => ProjectClass, type: mongoose.Schema.Types.ObjectId })
+  
+  @prop({ ref: () => ProjectClass, type: () => [ProjectClass] })
   public projects?: Ref<ProjectClass>[];
 }
 

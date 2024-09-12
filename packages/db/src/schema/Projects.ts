@@ -3,22 +3,36 @@ import {
   modelOptions,
   mongoose,
   prop,
+  Ref,
   ReturnModelType,
 } from "@typegoose/typegoose";
+import { StatusClass } from "./Status";
+import { MemberClass } from "./Member";
 
 @modelOptions({ schemaOptions: { collection: "projects" } })
 export class ProjectClass {
-  @prop({ default: "A user" })
-  public user?: string;
+  @prop({ required: true })
+  public name!: string;
 
-  @prop({ default: "New Project" })
-  public name?: string;
-
-  @prop({ default: "New Project" })
+  @prop()
   public image?: string;
+
+  @prop({ required: true })
+  public isPrivate!: boolean;
+
+  @prop({ default: [], type: () => [StatusClass] })
+  public status!: StatusClass[];
+
+  @prop({ default: [], ref: () => MemberClass })
+  public members!: Ref<MemberClass>[];
+
+  @prop({ default: Date.now })
+  public createdAt?: Date;
+
+  @prop({ default: Date.now })
+  public updatedAt?: Date;
 }
 
-// Create the Project model
 export const Project =
   (mongoose.models.ProjectClass as
     | ReturnModelType<typeof ProjectClass>
