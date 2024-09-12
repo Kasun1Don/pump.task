@@ -8,6 +8,14 @@ import {
 
 import { TagsSchema } from "./TagsSchema";
 
+class CustomField {
+  @prop({ required: true })
+  public fieldName!: string;
+
+  @prop({ required: true })
+  public fieldValue!: string;
+}
+
 export class TasksSchema {
   @prop({
     required: true,
@@ -40,11 +48,8 @@ export class TasksSchema {
   @prop({ required: true })
   public assignee!: string;
 
-  @prop({
-    type: () => [{ fieldName: String, fieldValue: String }],
-    required: false,
-  })
-  public customFields?: { fieldName: string; fieldValue: string }[];
+  @prop({ type: () => [CustomField], required: false })
+  public customFields?: CustomField[];
 }
 
 @modelOptions({ schemaOptions: { collection: "tasks" } })
