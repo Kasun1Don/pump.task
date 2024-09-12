@@ -6,7 +6,7 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
-import { TagsSchema } from "./TagSchema.js";
+import { TagsSchema } from "./TagSchema";
 
 export class TasksSchema {
   @prop({
