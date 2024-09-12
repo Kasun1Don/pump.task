@@ -14,6 +14,7 @@ export const userRouter = {
       email: user.email,
       image: user.image,
       emailVerified: user.emailVerified,
+      projects: user.projects,
     }));
   }),
 } satisfies TRPCRouterRecord;
