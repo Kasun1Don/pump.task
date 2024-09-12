@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useActiveWallet, useDisconnect } from "thirdweb/react";
 
 import {
   DropdownMenu,
@@ -10,8 +12,22 @@ import {
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
 
+import { logout } from "~/app/actions/authFront";
+
 export default function NavUserDropdown() {
   const username = "Benjamin Davies";
+  const router = useRouter();
+  const { disconnect } = useDisconnect();
+  const wallet = useActiveWallet();
+
+  async function handleLogout() {
+    if (wallet) {
+      disconnect(wallet);
+      console.log("disconnecting");
+    }
+    await logout();
+    router.push("/");
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="relative flex cursor-default select-none items-center rounded-md border px-4 py-2 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
@@ -62,7 +78,10 @@ export default function NavUserDropdown() {
           </div>
           <div className="text-xxs">⌘S</div>
         </DropdownMenuItem>
-        <DropdownMenuItem className="flex flex-row justify-between gap-16 hover:cursor-pointer">
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="flex flex-row justify-between gap-16 hover:cursor-pointer"
+        >
           <div className="flex flex-row gap-4">
             <Image
               src="/LogoutIcon.png"

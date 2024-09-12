@@ -3,8 +3,11 @@ import {
   modelOptions,
   mongoose,
   prop,
+  Ref,
   ReturnModelType,
 } from "@typegoose/typegoose";
+
+import { ProjectClass } from "./Projects";
 
 /**
  * This collection is used by NextAuth to store user information.
@@ -12,6 +15,9 @@ import {
  */
 @modelOptions({ schemaOptions: { collection: "users" } })
 export class UserClass {
+  @prop()
+  public walletId?: string;
+
   @prop()
   public name?: string;
 
@@ -23,8 +29,12 @@ export class UserClass {
 
   @prop()
   public emailVerified?: boolean;
+
+  @prop({ ref: () => ProjectClass, type: mongoose.Schema.Types.ObjectId })
+  public projects?: Ref<ProjectClass>[];
 }
 
+// Create the User model
 export const User =
   (mongoose.models.UserClass as
     | ReturnModelType<typeof UserClass>

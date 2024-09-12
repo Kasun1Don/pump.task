@@ -1,9 +1,7 @@
 "use client";
 
 // import type { VerifyLoginPayloadParams } from "thirdweb/auth";
-import { useRouter } from "next/navigation";
-import { createThirdwebClient } from "thirdweb";
-import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
+import { ConnectButton, darkTheme } from "thirdweb/react";
 
 import {
   generatePayload,
@@ -11,23 +9,17 @@ import {
   login,
   logout,
 } from "../actions/authFront";
+import { client } from "../thirdwebClient";
 
 // import { useTheme } from "@acme/ui/theme";
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars
-const client_id = process.env.NEXT_PUBLIC_CLIENT_ID!;
-
-export const client = createThirdwebClient({
-  clientId: client_id,
-});
-
 export function Login() {
-  const activeAccount = useActiveAccount();
-  const router = useRouter();
+  // const activeAccount = useActiveAccount();
+  // const router = useRouter();
 
   //   const { theme } = useTheme();
   //   const connectButtonTheme = theme as "dark" | "light" | undefined;
-  if (activeAccount) router.push("/secure");
+  // if (activeAccount) router.push("/secure");
   return (
     <>
       <ConnectButton

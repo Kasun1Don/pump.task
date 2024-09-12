@@ -1,11 +1,16 @@
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
 import { HydrateClient } from "~/trpc/server";
 import { Login } from "./_components/Login";
+import { isLoggedIn } from "./actions/authFront";
 
 // import { CreatePostForm } from "./_components/posts";
 
-export default function HomePage() {
+export default async function HomePage() {
+  if (await isLoggedIn()) {
+    redirect("/dashboard");
+  }
   return (
     <HydrateClient>
       <main className="container h-screen max-w-5xl py-16 text-center">

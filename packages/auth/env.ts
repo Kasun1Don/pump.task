@@ -3,10 +3,7 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    AUTH_SECRET:
-      process.env.NODE_ENV === "production"
-        ? z.string().min(1).optional()
-        : z.string().min(1).optional(),
+    AUTH_SECRET: z.string().optional().default("secret"),
     NODE_ENV: z.enum(["development", "production"]).optional(),
   },
   client: {},

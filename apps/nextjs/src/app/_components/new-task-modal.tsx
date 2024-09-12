@@ -39,6 +39,11 @@ const NewTaskModal = () => {
   const [newTag, setNewTag] = useState<string>("");
   const [date, setDate] = useState<Date>();
 
+  const [extraFields, setExtraFields] = useState<
+    { fieldName: string; fieldValue: string }[]
+  >([]);
+  const [newFieldName, setNewFieldName] = useState<string>("");
+
   const toggleTagSelection = (tag: string) => {
     setSelectedTags((prevSelectedTags) =>
       prevSelectedTags.includes(tag)
@@ -63,10 +68,37 @@ const NewTaskModal = () => {
     setSelectedTags(selectedTags.filter((tag) => tag !== tagToRemove)); // Remove from selected if it was selected
   };
 
+  // Handle adding new custom field
+  const handleAddField = () => {
+    if (newFieldName.trim()) {
+      setExtraFields((prevFields) => [
+        ...prevFields,
+        { fieldName: newFieldName, fieldValue: "" },
+      ]);
+      setNewFieldName(""); // Reset the field name input
+    }
+  };
+
+  // Handle removing a custom field
+  const handleRemoveField = (index: number) => {
+    const updatedFields = [...extraFields];
+    updatedFields.splice(index, 1);
+    setExtraFields(updatedFields);
+  };
+
+  // Handle field value change
+  const handleFieldChange = (index: number, value: string) => {
+    const updatedFields = [...extraFields];
+    if (updatedFields[index]) {
+      updatedFields[index].fieldValue = value;
+      setExtraFields(updatedFields);
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-green-500 text-white">+ New task</Button>
+        <Button className="bg-zesty-green text-black">+ New task</Button>
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] max-w-[50vw] flex-col overflow-auto rounded-lg bg-gray-900 p-6 text-white">
         <DialogHeader>
@@ -80,44 +112,32 @@ const NewTaskModal = () => {
             {/* Preset Tags (Cannot be deleted) */}
             {presetTags.map((tag) => (
               <div key={tag} className="flex items-center">
-                <button
+                <Button
                   onClick={() => toggleTagSelection(tag)}
-                  style={
-                    selectedTags.includes(tag)
-                      ? {
-                          backgroundColor: "var(--ZESTY-GREEN, #72D524)",
-                          color: "black",
-                        }
-                      : {}
-                  }
                   className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
-                    !selectedTags.includes(tag) ? "bg-gray-700 text-white" : ""
+                    !selectedTags.includes(tag)
+                      ? "bg-gray-700 text-white"
+                      : "bg-zesty-green text-black"
                   }`}
                 >
                   {tag}
-                </button>
+                </Button>
               </div>
             ))}
 
             {/* User-added Tags (Can be deleted) */}
             {userTags.map((tag) => (
               <div key={tag} className="flex items-center">
-                <button
+                <Button
                   onClick={() => toggleTagSelection(tag)}
-                  style={
-                    selectedTags.includes(tag)
-                      ? {
-                          backgroundColor: "var(--ZESTY-GREEN, #72D524)",
-                          color: "black",
-                        }
-                      : {}
-                  }
                   className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
-                    !selectedTags.includes(tag) ? "bg-gray-700 text-white" : ""
+                    !selectedTags.includes(tag)
+                      ? "bg-gray-700 text-white"
+                      : "bg-zesty-green text-black"
                   }`}
                 >
                   {tag}
-                </button>
+                </Button>
                 {/* Remove button for user-added tags */}
                 <button
                   onClick={() => handleRemoveTag(tag)}
@@ -131,9 +151,9 @@ const NewTaskModal = () => {
             {/* Add New Tag Button */}
             <Dialog>
               <DialogTrigger asChild>
-                <button className="ml-2 rounded-md bg-blue-500 px-3 py-1 text-sm text-white">
+                <Button className="ml-2 rounded-md bg-blue-400 px-3 py-1 text-sm text-black">
                   + Add Tag
-                </button>
+                </Button>
               </DialogTrigger>
 
               <DialogContent>
@@ -148,7 +168,7 @@ const NewTaskModal = () => {
                   className="w-full rounded-md border border-gray-300 px-2 py-1"
                 />
                 <DialogFooter>
-                  <Button onClick={handleAddTag} className="bg-green-500">
+                  <Button onClick={handleAddTag} className="bg-zesty-green">
                     Add Tag
                   </Button>
                 </DialogFooter>
@@ -237,11 +257,63 @@ const NewTaskModal = () => {
           </div>
         </div>
 
+        {/* Extra Fields */}
+        {extraFields.length > 0 && (
+          <div className="mb-4">
+            <h3 className="mb-2">CUSTOM FIELDS</h3>
+            {extraFields.map((field, index) => (
+              <div key={index} className="mb-2 flex items-center gap-2">
+                <span className="w-1/4">{field.fieldName}</span>
+                <Input
+                  className="w-full"
+                  value={field.fieldValue}
+                  onChange={(e) => handleFieldChange(index, e.target.value)}
+                  placeholder={`Enter ${field.fieldName}`}
+                />
+                <button
+                  onClick={() => handleRemoveField(index)}
+                  className="text-red-500"
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add Extra Fields Button */}
+        <div className="mb-4 flex-shrink-0">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="w-auto rounded-md bg-blue-400 px-3 py-1 text-sm text-black">
+                + Add Custom Field
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add a Custom Field</DialogTitle>
+              </DialogHeader>
+              <Input
+                type="text"
+                value={newFieldName}
+                onChange={(e) => setNewFieldName(e.target.value)}
+                placeholder="Enter field name"
+                className="w-full rounded-md border border-gray-300 px-2 py-1"
+              />
+              <DialogFooter>
+                <DialogTrigger asChild>
+                  <Button onClick={handleAddField} className="bg-zesty-green">
+                    Add Field
+                  </Button>
+                </DialogTrigger>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
         {/* Submit Button */}
-        <Button
-          style={{ backgroundColor: "var(--ZESTY-GREEN, #72D524)" }}
-          className="w-full text-black"
-        >
+        <Button className="bg-zesty-green w-full text-black">
           Create task
         </Button>
       </DialogContent>
