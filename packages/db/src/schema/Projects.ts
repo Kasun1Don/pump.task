@@ -6,8 +6,9 @@ import {
   Ref,
   ReturnModelType,
 } from "@typegoose/typegoose";
-import { StatusClass } from "./Status";
+
 import { MemberClass } from "./Member";
+import { StatusClass } from "./Status";
 
 @modelOptions({ schemaOptions: { collection: "projects" } })
 export class ProjectClass {
