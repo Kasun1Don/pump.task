@@ -1,22 +1,34 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import HotKeyEventListeners from "../_components/navbar/HotKeyEventListeners";
+import NavLink from "../_components/navbar/NavLink";
 import NavProjectDropdown from "../_components/navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/navbar/NavUserDropdown";
+import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
 
-export default function GlobalNavbarLayout(props: {
+export default async function GlobalNavbarLayout(props: {
   children: React.ReactNode;
 }) {
+  // Get the tRPC caller
+  const caller = await createServerSideFetch();
+
+  // Fetch user data using the caller
+  const userData = await caller.user.all();
+
+  // From here you can pass the userData to the children components to render the user data
+
+  // This will show up on the server console NOT the browser console
+  console.log(userData);
+
   return (
     <>
       <div className="bg-custom-bg min-h-screen bg-cover bg-center">
-        <div className="flex flex-row justify-between gap-4 px-12 py-8">
+        <div className="flex flex-row justify-between gap-4 px-12 pb-4 pt-8">
           {/* This is the Pump Logo */}
           <div className="flex flex-row items-center justify-center gap-8">
             <div className="flex flex-row gap-4 text-xl">
               <Image
-                src="/PumpLogo.png"
+                src="/pump.taskLogo.png"
                 alt="Chevron Down"
                 width={26}
                 height={18}
@@ -30,51 +42,26 @@ export default function GlobalNavbarLayout(props: {
           </div>
 
           <div className="flex gap-10 hover:cursor-pointer">
-            {/* This is the Project dropdown Menu. Quick note will probably make this conditional rendered in the future so if users don't have any projects it just renders a button to create a new project. */}
+            {/* Project dropdown, I should properly make this conditional in the future so if the user doesn't have any projects it renders a button to create a new project */}
             <NavProjectDropdown />
-            {/* This is the users Drop down Menu with profile, setting and logout buttons*/}
+            {/* User dropdown */}
             <NavUserDropdown />
           </div>
         </div>
 
-        {/* This is the navigation bar at the bottom of the display it just creates links to each page */}
+        {/* Navigation links */}
         <div className="flex flex-wrap border-b-2">
-          <Link
-            href="/dashboard/projects"
-            className="flex h-8 w-32 items-center justify-center text-center text-lg text-slate-500 hover:border-b-2 hover:border-white hover:text-slate-50"
-          >
-            Projects
-          </Link>
-          <Link
-            href="/dashboard/tasks"
-            className="flex h-8 w-32 items-center justify-center text-center text-lg text-slate-500 hover:border-b-2 hover:border-white hover:text-slate-50"
-          >
-            Tasks
-          </Link>
-          <Link
-            href="/dashboard/profile"
-            className="flex h-8 w-32 items-center justify-center text-center text-lg text-slate-500 hover:border-b-2 hover:border-white hover:text-slate-50"
-          >
-            My Profile
-          </Link>
-          <Link
-            href="/dashboard/users"
-            className="flex h-8 w-32 items-center justify-center text-center text-lg text-slate-500 hover:border-b-2 hover:border-white hover:text-slate-50"
-          >
-            Users
-          </Link>
-          <Link
-            href="/dashboard/settings"
-            className="flex h-8 w-32 items-center justify-center text-center text-lg text-slate-500 hover:border-b-2 hover:border-white hover:text-slate-50"
-          >
-            Settings
-          </Link>
+          <NavLink href="/dashboard/projects">Projects</NavLink>
+          <NavLink href="/dashboard/tasks">Tasks</NavLink>
+          <NavLink href="/dashboard/profile">My Profile</NavLink>
+          <NavLink href="/dashboard/users">Users</NavLink>
+          <NavLink href="/dashboard/settings">Settings</NavLink>
         </div>
 
         {/* This is the event listener for hotkeys profile, setting, logout */}
         <HotKeyEventListeners />
 
-        {/* This just specifies where the children components will be rendered in application */}
+        {/* Render children components */}
         {props.children}
       </div>
     </>

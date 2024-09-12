@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+// import type { NextRequest } from 'next/server';
+
 import { isLoggedIn } from "./app/actions/authFront";
 
 export async function middleware(request: NextResponse) {
@@ -11,5 +13,5 @@ export async function middleware(request: NextResponse) {
 }
 
 export const config = {
-  matcher: ["/secure"],
+  matcher: ["/dashboard"],
 };
