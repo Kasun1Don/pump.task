@@ -56,7 +56,10 @@ export default function ProjectsPage() {
               </button>
             </div>
             <div className="mr-8 flex items-center justify-center rounded-lg border border-gray-700 bg-[#72D524] p-1 font-bold hover:bg-[#5CAB1D]">
-              <button onClick={() => setIsModalOpen(true)} className="text-[#18181B]">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="text-[#18181B]"
+              >
                 + Create new project
               </button>
             </div>
@@ -99,7 +102,9 @@ export default function ProjectsPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-96 rounded-lg bg-[#18181B] p-6">
-            <h2 className="mb-4 text-xl font-bold text-white">Create New Project</h2>
+            <h2 className="mb-4 text-xl font-bold text-white">
+              Create New Project
+            </h2>
             <input
               type="text"
               placeholder="Project Name"
@@ -129,7 +134,12 @@ export default function ProjectsPage() {
               <button
                 onClick={() => {
                   // TODO: Implement project creation logic
-                  console.log("Creating project:", newProjectName, "with template:", selectedTemplate);
+                  console.log(
+                    "Creating project:",
+                    newProjectName,
+                    "with template:",
+                    selectedTemplate,
+                  );
                   setIsModalOpen(false);
                 }}
                 className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
