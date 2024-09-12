@@ -4,21 +4,22 @@ import HotKeyEventListeners from "../_components/navbar/HotKeyEventListeners";
 import NavLink from "../_components/navbar/NavLink";
 import NavProjectDropdown from "../_components/navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/navbar/NavUserDropdown";
-import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
 
-export default async function GlobalNavbarLayout(props: {
+// import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
+
+export default function GlobalNavbarLayout(props: {
   children: React.ReactNode;
 }) {
-  // Get the tRPC caller
-  const caller = await createServerSideFetch();
+  // // Get the tRPC caller
+  // const caller = await createServerSideFetch();
 
-  // Fetch user data using the caller
-  const userData = await caller.user.all();
+  // // Fetch user data using the caller
+  // const userData = await caller.user.all();
 
   // From here you can pass the userData to the children components to render the user data
 
   // This will show up on the server console NOT the browser console
-  console.log(userData);
+  // console.log(userData);
 
   return (
     <>

@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
 
+// import { api } from "~/trpc/react";
+
 export default function NavProjectDropdown() {
   /**
    * This is a mockup of the data that would be passed to the Navbar component just so that we can see how it would look.
