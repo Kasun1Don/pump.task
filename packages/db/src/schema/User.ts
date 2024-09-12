@@ -31,7 +31,7 @@ export class UserClass {
   public emailVerified?: boolean;
 
   // explicitly indicates that projects is an array of references, not just a single ObjectId but an array of them
-  @prop({ ref: () => ProjectClass, type: () => [ProjectClass] }) 
+  @prop({ ref: () => ProjectClass, type: () => [ProjectClass] })
   public projects?: Ref<ProjectClass>[];
 }
 
