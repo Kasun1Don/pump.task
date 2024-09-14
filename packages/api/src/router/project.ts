@@ -1,10 +1,10 @@
-import type { TRPCRouterRecord } from "@trpc/server"; //ensure that the router object conforms to the expected structure for a TRPC router
+import type { TRPCRouterRecord } from "@trpc/server"; 
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { Project, User } from "@acme/db";
 
-import { protectedProcedure } from "../trpc";
+import { publicProcedure } from "../trpc";
 
 // requirements`validation with zod
 const createProjectSchema = z.object({
@@ -14,10 +14,10 @@ const createProjectSchema = z.object({
 });
 
 export const projectRouter: TRPCRouterRecord = {
-  create: protectedProcedure
+  create: publicProcedure
     .input(createProjectSchema)
     .mutation(async ({ input, ctx }) => {
-      if (!ctx.session.user.id) {
+      if (!ctx.session?.user?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You must be logged in to create a project",
@@ -40,3 +40,4 @@ export const projectRouter: TRPCRouterRecord = {
       return newProject;
     }),
 } satisfies TRPCRouterRecord;
+
