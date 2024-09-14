@@ -14,8 +14,15 @@ import {
 
 import { logout } from "~/app/actions/authFront";
 
-export default function NavUserDropdown() {
-  const username = "Benjamin Davies";
+interface NavUserDropdownProps {
+  username: string;
+  profileImage: string;
+}
+
+export default function NavUserDropdown({
+  username,
+  profileImage,
+}: NavUserDropdownProps) {
   const router = useRouter();
   const { disconnect } = useDisconnect();
   const wallet = useActiveWallet();
@@ -28,14 +35,15 @@ export default function NavUserDropdown() {
     await logout();
     router.push("/");
   }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="relative flex cursor-default select-none items-center rounded-md border px-4 py-2 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
         <div className="flex flex-row items-center gap-4">
           <Image
             className="inline-block h-4 w-4 rounded-full"
-            src="/userProfileIcon.png"
-            alt="badge"
+            src={profileImage}
+            alt="profile"
             width={12}
             height={12}
           />
@@ -48,19 +56,18 @@ export default function NavUserDropdown() {
           />
         </div>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent className="w-full min-w-full">
         <DropdownMenuItem className="flex flex-row justify-between hover:cursor-pointer">
           <div className="flex flex-row gap-4">
             <Image src="/userIcon.png" alt="userIcon" width={20} height={20} />
-            <Link
-              href="/dashboard/profile"
-              className="flex flex-row gap-4 hover:cursor-pointer"
-            >
+            <Link href="/dashboard/profile">
               <h5>My Profile</h5>
             </Link>
           </div>
           <div className="text-xxs">⇧⌘P</div>
         </DropdownMenuItem>
+
         <DropdownMenuItem className="flex flex-row justify-between gap-16 hover:cursor-pointer">
           <div className="flex flex-row gap-4">
             <Image
@@ -69,26 +76,19 @@ export default function NavUserDropdown() {
               width={20}
               height={20}
             />
-            <Link
-              href="/dashboard/settings"
-              className="flex flex-row gap-4 hover:cursor-pointer"
-            >
+            <Link href="/dashboard/settings">
               <h5>Settings</h5>
             </Link>
           </div>
           <div className="text-xxs">⌘S</div>
         </DropdownMenuItem>
+
         <DropdownMenuItem
           onClick={handleLogout}
           className="flex flex-row justify-between gap-16 hover:cursor-pointer"
         >
           <div className="flex flex-row gap-4">
-            <Image
-              src="/LogoutIcon.png"
-              alt="Chevron Down"
-              width={20}
-              height={20}
-            />
+            <Image src="/LogoutIcon.png" alt="Logout" width={20} height={20} />
             <h5>Log out</h5>
           </div>
           <div className="text-xxs">⇧Q</div>

@@ -11,25 +11,20 @@ import {
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
 
-// import { api } from "~/trpc/react";
+interface Project {
+  name: string;
+  image: string;
+}
 
-export default function NavProjectDropdown() {
-  /**
-   * This is a mockup of the data that would be passed to the Navbar component just so that we can see how it would look.
-   */
-  interface Project {
-    projectName: string;
-    projectIcon: string;
-  }
+interface NavProjectDropdownProps {
+  projects: Project[];
+}
 
-  const projects: Project[] = [
-    { projectName: "Project 1", projectIcon: "projectImage1" },
-    { projectName: "Project 2", projectIcon: "projectImage2" },
-    { projectName: "Project 3", projectIcon: "projectImage3" },
-  ];
-  // This is the current project state that is being displayed in the project dropdown
-  const [currentProjectState, setCurrentProjectState] = useState(
-    projects[0]?.projectName ?? "",
+export default function NavProjectDropdown({
+  projects,
+}: NavProjectDropdownProps) {
+  const [currentProject, setCurrentProject] = useState(
+    projects[0]?.name ?? "No Projects Available",
   );
 
   return (
@@ -43,7 +38,7 @@ export default function NavProjectDropdown() {
             width={12}
             height={12}
           />
-          <h6 className="text-sm">{currentProjectState}</h6>
+          <h6 className="text-sm">{currentProject}</h6>
           <Image
             src="/chevron-down.svg"
             alt="Chevron Down"
@@ -53,26 +48,29 @@ export default function NavProjectDropdown() {
         </div>
       </DropdownMenuTrigger>
 
-      {/* This is the map function to display the users projects inside the projects drop down menu*/}
       <DropdownMenuContent>
-        {projects.map((project, index) => (
-          <DropdownMenuItem
-            className="flex flex-row items-center gap-4 hover:cursor-pointer"
-            key={index}
-            onClick={() => setCurrentProjectState(project.projectName)}
-          >
-            <div className="flex flex-row items-center gap-4 hover:cursor-pointer">
+        {projects.length > 0 ? (
+          projects.map((project) => (
+            <DropdownMenuItem
+              key={project.name}
+              className="flex flex-row items-center gap-4 hover:cursor-pointer"
+              onClick={() => setCurrentProject(project.name)}
+            >
               <Image
                 className="inline-block h-5 w-5 rounded-full"
-                src="/badge.png"
-                alt="badge"
+                src={project.image}
+                alt={project.name}
                 width={20}
                 height={20}
               />
-              <h1 className="text-sm">{project.projectName}</h1>
-            </div>
+              <h1 className="text-sm">{project.name}</h1>
+            </DropdownMenuItem>
+          ))
+        ) : (
+          <DropdownMenuItem className="flex flex-row items-center gap-4">
+            <h1 className="text-sm">No Projects Available</h1>
           </DropdownMenuItem>
-        ))}
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem className="hover:cursor-pointer">
           Create New Project
