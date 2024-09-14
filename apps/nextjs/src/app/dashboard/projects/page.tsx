@@ -141,19 +141,19 @@ export default function ProjectsPage() {
               >
                 Cancel
               </button>
-              <button
-                // onClick={() => {
-                //   // project creation logic
-                //   createProject.mutate({
-                //     name: newProjectName,
-                //     isPrivate: false, // TODO: add option for this in the form
-                //     // templateId: selectedTemplate || undefined,
-                //   });
-                // }}
+              {/* <button
+                onClick={() => {
+                  // project creation logic
+                  createProject.mutate({
+                    name: newProjectName,
+                    isPrivate: false, // TODO: add option for this in the form
+                    // templateId: selectedTemplate || undefined,
+                  });
+                }}
                 className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
               >
                 Create
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

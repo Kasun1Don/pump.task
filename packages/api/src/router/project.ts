@@ -1,4 +1,4 @@
-import type { TRPCRouterRecord } from "@trpc/server"; 
+import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -17,7 +17,7 @@ export const projectRouter: TRPCRouterRecord = {
   create: publicProcedure
     .input(createProjectSchema)
     .mutation(async ({ input, ctx }) => {
-      if (!ctx.session?.user?.id) {
+      if (!ctx.session?.user.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You must be logged in to create a project",
@@ -40,4 +40,3 @@ export const projectRouter: TRPCRouterRecord = {
       return newProject;
     }),
 } satisfies TRPCRouterRecord;
-
