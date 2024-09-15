@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
+import type { ProjectClass } from "@acme/db";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,13 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
 
-interface Project {
-  name: string;
-  image: string;
-}
-
 interface NavProjectDropdownProps {
-  projects: Project[];
+  projects: ProjectClass[];
 }
 
 export default function NavProjectDropdown({
@@ -54,12 +50,12 @@ export default function NavProjectDropdown({
             <DropdownMenuItem
               key={project.name}
               className="flex flex-row items-center gap-4 hover:cursor-pointer"
-              onClick={() => setCurrentProject(project.name)}
+              onClick={() => setCurrentProject(project.name ?? "")}
             >
               <Image
                 className="inline-block h-5 w-5 rounded-full"
-                src={project.image}
-                alt={project.name}
+                src={project.image ?? ""}
+                alt={project.name ?? ""}
                 width={20}
                 height={20}
               />

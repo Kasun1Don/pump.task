@@ -1,66 +1,39 @@
+// Import React and Next.js modules
 import type { ReactNode } from "react";
 import Image from "next/image";
 
+// Import UserClass and ProjectClass from Typegoose models
+import type { ProjectClass, UserClass } from "@acme/db";
+
+// Import Client Components
 import HotKeyEventListeners from "../_components/navbar/HotKeyEventListeners";
 import NavLink from "../_components/navbar/NavLink";
 import NavProjectDropdown from "../_components/navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/navbar/NavUserDropdown";
+// Import createServerSideFetch Helper function
 import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
 
-// Interface definitions
-interface Projects {
-  _id: string; // Mongo ID
-  name: string;
-  user: string;
-  image: string;
-}
-
-interface User {
-  walletId: string;
-  name: string;
-  email: string;
-  image: string;
-  emailVerified: boolean;
-  projects: Projects[];
-}
-
-// Main layout component
 export default async function Layout({ children }: { children: ReactNode }) {
-  // Fetch user data
-
-  /*
-    This is an example of how to use the createServerSideFetch helper function.
-    The helper function automatically sets the correct headers for the server-side API.
-
-    At the momemnt, the user.all() function returns all of the users in the database. so in order get the current user's data, we need to get the first user in the array.
-
-  */
+  // Fetch user data with server-side fetch Helper function
   const caller = await createServerSideFetch();
+  const response = await caller.user.all();
 
-  const response = (await caller.user.all()) as User[] | null;
-
-  const userData: User = response?.[0] ?? {
-    walletId: "",
-    name: "",
-    email: "",
-    image: "",
-    emailVerified: false,
-    projects: [],
-  };
+  // Destructure user data from response
+  const userData: UserClass | null = response[0] as UserClass;
 
   return (
     <div className="bg-custom-bg min-h-screen bg-cover bg-center">
       {/* Hotkeys Event Listener */}
       <HotKeyEventListeners />
 
-      {/* Navbar section */}
+      {/* Navbar section lefthand side*/}
       <div className="flex flex-row justify-between gap-4 px-12 pb-4 pt-8">
         {/* Logo and title */}
         <div className="flex flex-row items-center justify-center gap-8">
           <div className="flex flex-row gap-4 text-xl">
             <Image
               src="/pump.taskLogo.png"
-              alt="Chevron Down"
+              alt="Pump Task Logo"
               width={26}
               height={18}
               className="h-auto w-auto"
@@ -73,12 +46,12 @@ export default async function Layout({ children }: { children: ReactNode }) {
         </div>
 
         <div className="flex gap-10 hover:cursor-pointer">
-          {/* Pass projects to Project dropdown */}
-          <NavProjectDropdown projects={userData.projects} />
+          {/* Pass projects to Project dropdown make sure to add ProjectClass */}
+          <NavProjectDropdown projects={userData.projects as ProjectClass[]} />
           {/* Pass user data to User dropdown */}
           <NavUserDropdown
-            username={userData.name}
-            profileImage={userData.image}
+            username={userData.name ?? ""}
+            profileImage={userData.image ?? ""}
           />
         </div>
       </div>

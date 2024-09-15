@@ -26,20 +26,32 @@
  *      call methods on this caller (e.g., `caller.user.all()`), just type "caller." and you will see all the available methods.
  *
  *
- * @returns {Promise<ReturnType<typeof createCaller>>} A Promise that resolves to the tRPC caller, ready to use for server component API requests.
+ * @returns {Promise<ReturnType<typeof createCaller>>} A Promise that resolves to the tRPC caller.
  */
+
+import { cookies } from "next/headers";
 
 import { createCaller, createTRPCContext } from "@acme/api";
 import { auth } from "@acme/auth";
 
 // Function to create and return the tRPC caller, which is required for server-side data fetching
 export async function createServerSideFetch() {
+  // Retrieve the JWT from the cookies
+  const jwt = cookies().get("jwt")?.value;
+
+  // Create headers and add the JWT if it exists
+  const headers = new Headers();
+  if (jwt) {
+    headers.set("Authorization", jwt);
+  }
+
   // Create the tRPC context (grabs the authenticated user session, allows setting headers if needed)
   const context = await createTRPCContext({
-    session: await auth(), // Fetch the authenticated user session
-    headers: new Headers(), // Set any additional headers if necessary
+    session: await auth(),
+    headers,
   });
 
-  // Create and return the tRPC caller with the provided context
+  console.log("context", context);
+
   return createCaller(context);
 }
