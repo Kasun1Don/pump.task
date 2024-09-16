@@ -5,7 +5,6 @@ import {
   prop,
 } from "@typegoose/typegoose";
 
-
 /**
  * This collection is used by NextAuth to store user information.
  * This must contain the user's name, email, image, and email verification status.
@@ -28,7 +27,7 @@ export class UserClass {
   public emailVerified?: boolean;
 
   // reference projects using ObjectId and a string ref to collection name
-  @prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Project' })
+  @prop({ type: [mongoose.Schema.Types.ObjectId], ref: "Project" })
   public projects?: mongoose.Types.ObjectId[];
 }
 

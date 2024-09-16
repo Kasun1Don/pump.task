@@ -1,4 +1,5 @@
-import { getModelForClass, modelOptions, prop} from "@typegoose/typegoose";
+import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose";
+
 import { MemberSchema } from "./Member";
 import { StatusSchema } from "./Status";
 

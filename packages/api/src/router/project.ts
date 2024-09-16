@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-import { z } from "zod";
 import mongoose from "mongoose";
+import { z } from "zod";
 
 import { Project } from "@acme/db";
 
@@ -13,14 +13,16 @@ export const projectRouter = {
         name: z.string().min(1, "Project name is required"),
         isPrivate: z.boolean().default(false),
         templateId: z.string().optional(),
-        members: z.array(
-          z.object({
-            user: z.string(),
-            role: z.enum(["observer", "admin", "owner"]),
-          })
-        ).default([]),
+        members: z
+          .array(
+            z.object({
+              user: z.string(),
+              role: z.enum(["observer", "admin", "owner"]),
+            }),
+          )
+          .default([]),
         status: z.array(z.string()).default([]),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       try {
@@ -29,9 +31,12 @@ export const projectRouter = {
           throw new Error("User not authenticated");
         }
 
-        const members = input.members.map(member => ({
+        const members = input.members.map((member) => ({
           ...member,
-          user: member.user === "currentUser" ? new mongoose.Types.ObjectId(currentUserId) : new mongoose.Types.ObjectId(member.user),
+          user:
+            member.user === "currentUser"
+              ? new mongoose.Types.ObjectId(currentUserId)
+              : new mongoose.Types.ObjectId(member.user),
         }));
 
         if (members.length === 0) {

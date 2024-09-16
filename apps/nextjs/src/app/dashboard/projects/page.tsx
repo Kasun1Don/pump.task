@@ -146,7 +146,7 @@ export default function ProjectsPage() {
                 Cancel
               </button>
               <button
-                onClick={() => { 
+                onClick={() => {
                   console.log("Attempting to create project with:", {
                     name: newProjectName,
                     isPrivate: false,
