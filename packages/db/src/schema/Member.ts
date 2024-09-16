@@ -1,26 +1,16 @@
-import type { Ref } from "@typegoose/typegoose";
+
 import {
-  getModelForClass,
-  modelOptions,
   mongoose,
   prop,
-  ReturnModelType,
 } from "@typegoose/typegoose";
 
-import { UserClass } from "./User";
-
 export class MemberSchema {
-  @prop({ ref: () => UserClass })
-  public user!: Ref<UserClass>;
+  @prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  public user!: mongoose.Types.ObjectId;
 
   @prop({ required: true, enum: ["observer", "admin", "owner"] })
   public role!: "observer" | "admin" | "owner";
 }
 
-@modelOptions({ schemaOptions: { collection: "members" } }) // specify collection name for mongoose
-export class MemberClass extends MemberSchema {}
-
-export const Member =
-  (mongoose.models.MemberClass as
-    | ReturnModelType<typeof MemberClass>
-    | undefined) ?? getModelForClass(MemberClass);
+//Since MemberSchema is used as a subdocument, it doesn’t require a separate model.
+// embedding MemberSchema directly into ProjectClass, you eliminate the need for a separate MemberClass

@@ -1,14 +1,6 @@
-import {
-  getModelForClass,
-  modelOptions,
-  mongoose,
-  prop,
-  Ref,
-  ReturnModelType,
-} from "@typegoose/typegoose";
-
-import { MemberClass } from "./Member";
-import { StatusClass } from "./Status";
+import { getModelForClass, modelOptions, prop} from "@typegoose/typegoose";
+import { MemberSchema } from "./Member";
+import { StatusSchema } from "./Status";
 
 @modelOptions({ schemaOptions: { collection: "projects" } })
 export class ProjectClass {
@@ -21,11 +13,11 @@ export class ProjectClass {
   @prop({ required: true })
   public isPrivate!: boolean;
 
-  @prop({ default: [], type: () => [StatusClass] })
-  public status!: StatusClass[];
+  @prop({ type: () => [MemberSchema], default: [] })
+  public members!: MemberSchema[];
 
-  @prop({ default: [], ref: () => MemberClass })
-  public members!: Ref<MemberClass>[];
+  @prop({ type: () => [StatusSchema], default: [] })
+  public status!: StatusSchema[];
 
   @prop({ default: Date.now })
   public createdAt?: Date;
@@ -34,7 +26,4 @@ export class ProjectClass {
   public updatedAt?: Date;
 }
 
-export const Project =
-  (mongoose.models.ProjectClass as
-    | ReturnModelType<typeof ProjectClass>
-    | undefined) ?? getModelForClass(ProjectClass);
+export const Project = getModelForClass(ProjectClass);

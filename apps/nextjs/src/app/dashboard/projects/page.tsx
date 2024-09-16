@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-// import { api } from "~/trpc/react"; // sets up the tRPC client for React components
+import { api } from "~/trpc/react"; // sets up the tRPC client for React components
 
 const projects = [
   { id: 1, name: "Maker DAO", owner: false },
@@ -16,7 +16,7 @@ const templates = [
   { id: 3, name: "Agile Sprint Board Template" },
 ];
 
-// TODO: card fills with related images + UI adjustments
+// TODO: card fills with related images + figma UI adjustments
 export default function ProjectsPage() {
   const [showOwnedOnly, setShowOwnedOnly] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,13 +27,17 @@ export default function ProjectsPage() {
     ? projects.filter((project) => project.owner)
     : projects;
 
-  // const createProject = api.project.create.useMutation({
-  //   onSuccess: () => {
-  //     setIsModalOpen(false);
-  //     setNewProjectName("");
-  //     // setSelectedTemplate("");
-  //   },
-  // });
+  const createProject = api.project.create.useMutation({
+    onMutate: (variables) => {
+      console.log("Creating Project with variables:", variables); // log the mutation input before it's sent
+    },
+    onSuccess: (data) => {
+      console.log("Project Created Successfully:", data);
+      setIsModalOpen(false);
+      setNewProjectName("");
+      setSelectedTemplate("");
+    },
+  });
 
   return (
     <>
@@ -141,19 +145,23 @@ export default function ProjectsPage() {
               >
                 Cancel
               </button>
-              {/* <button
-                onClick={() => {
-                  // project creation logic
+              <button
+                onClick={() => { 
+                  console.log("Attempting to create project with:", {
+                    name: newProjectName,
+                    isPrivate: false,
+                    templateId: selectedTemplate || undefined,
+                  });
                   createProject.mutate({
                     name: newProjectName,
-                    isPrivate: false, // TODO: add option for this in the form
-                    // templateId: selectedTemplate || undefined,
+                    isPrivate: false,
+                    templateId: selectedTemplate || undefined,
                   });
                 }}
                 className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
               >
                 Create
-              </button> */}
+              </button>
             </div>
           </div>
         </div>
