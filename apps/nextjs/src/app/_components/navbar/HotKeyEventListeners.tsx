@@ -1,10 +1,15 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveWallet, useDisconnect } from "thirdweb/react";
 
+/**
+ * @author Benjamin Davies
+ * @description HotKeyEventListeners component to listen for key presses when the user has signed into there account, additional hotkeys can be added here also has some, At the moment both hotkeys for Mac and Windows are the truthy is dosent matter if the user is on a Mac and presses Ctrl instead of Command it will still work and vise versa.
+ *
+ * @returns Null because it doesn't render anything
+ */
 export default function HotKeyEventListeners() {
   const router = useRouter();
   const { disconnect } = useDisconnect();
@@ -28,19 +33,26 @@ export default function HotKeyEventListeners() {
   // Function to handle key presses
   const handleKeyPress = (event: KeyboardEvent) => {
     // Check for Shift + Command + P (for Profile)
-    if (event.shiftKey && event.metaKey && event.key.toLowerCase() === "p") {
+    if (
+      event.shiftKey &&
+      (event.metaKey || event.ctrlKey) &&
+      event.key.toLowerCase() === "p"
+    ) {
       event.preventDefault();
       router.push("/dashboard/profile");
     }
 
     // Check for Command + S (for Settings)
-    if (event.metaKey && event.key.toLowerCase() === "s") {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
       event.preventDefault();
       router.push("/dashboard/settings");
     }
 
     // Logout for Shift + Q
-    if (event.shiftKey && event.key.toLowerCase() === "q") {
+    if (
+      (event.shiftKey && event.ctrlKey && event.key.toLowerCase() === "q") ||
+      (event.shiftKey && event.key.toLowerCase() === "q")
+    ) {
       event.preventDefault();
       try {
         handleLogout();

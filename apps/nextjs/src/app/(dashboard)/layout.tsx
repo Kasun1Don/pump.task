@@ -23,9 +23,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="bg-custom-bg min-h-screen bg-cover bg-center">
-      {/* Hotkeys Event Listener */}
-      <HotKeyEventListeners />
-
       {/* Navbar section lefthand side*/}
       <div className="flex flex-row justify-between gap-4 px-12 pb-4 pt-8">
         {/* Logo and title */}
@@ -45,27 +42,31 @@ export default async function Layout({ children }: { children: ReactNode }) {
           </h5>
         </div>
 
+        {/* Navbar section right hand side */}
         <div className="flex gap-10 hover:cursor-pointer">
           {/* Pass projects to Project dropdown make sure to add ProjectClass */}
           <NavProjectDropdown projects={userData.projects as ProjectClass[]} />
           {/* Pass user data to User dropdown */}
           <NavUserDropdown
             username={userData.name ?? ""}
-            profileImage={userData.image ?? ""}
+            image={userData.image ?? ""}
           />
         </div>
       </div>
 
       {/* Navigation links */}
       <div className="flex flex-wrap border-b-2">
-        <NavLink href="/dashboard/projects">Projects</NavLink>
-        <NavLink href="/dashboard/tasks">Tasks</NavLink>
-        <NavLink href="/dashboard/profile">My Profile</NavLink>
-        <NavLink href="/dashboard/users">Users</NavLink>
-        <NavLink href="/dashboard/settings">Settings</NavLink>
+        <NavLink href="/projects">Projects</NavLink>
+        <NavLink href="/tasks">Tasks</NavLink>
+        <NavLink href="/profile">My Profile</NavLink>
+        <NavLink href="/users">Users</NavLink>
+        <NavLink href="/settings">Settings</NavLink>
       </div>
 
-      {/* Page content */}
+      {/* Hotkeys Event Listener */}
+      <HotKeyEventListeners />
+
+      {/* Where the page content will be rendered */}
       <main>{children}</main>
     </div>
   );
