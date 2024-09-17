@@ -1,6 +1,7 @@
 // Import React and Next.js modules
 import type { ReactNode } from "react";
 import Image from "next/image";
+import { ConnectButton } from "thirdweb/react";
 
 // Import UserClass and ProjectClass from Typegoose models
 import type { ProjectClass, UserClass } from "@acme/db";
@@ -12,6 +13,7 @@ import NavProjectDropdown from "../_components/navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/navbar/NavUserDropdown";
 // Import createServerSideFetch Helper function
 import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
+import { client } from "../thirdwebClient";
 
 /**
  * @author Benjamin davies
@@ -50,6 +52,8 @@ export default async function Layout({ children }: { children: ReactNode }) {
             Web3 Project Tracker
           </h5>
         </div>
+
+        <ConnectButton client={client} />
 
         {/* Navbar section right hand side */}
         <div className="flex gap-10 hover:cursor-pointer">
