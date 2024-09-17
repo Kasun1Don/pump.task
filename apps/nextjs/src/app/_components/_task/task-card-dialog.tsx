@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 "use client";
 
 import type { z } from "zod";
@@ -5,7 +6,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
@@ -34,15 +35,13 @@ import { taskCardSchema } from "./task-card-schema";
 export interface TaskCardDialogProps {
   initialValues?: z.infer<typeof taskCardSchema>;
   onSubmit: (taskData: z.infer<typeof taskCardSchema>) => void;
-  dialogButtonText?: string;
-  submitButtonText?: string;
+  taskCardTriggerText?: string;
 }
 
 const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
   initialValues,
   onSubmit,
-  dialogButtonText = "Dialog Button",
-  submitButtonText = "Submit Button",
+  taskCardTriggerText = "",
 }) => {
   const defaultTags = [
     "Frontend",
@@ -54,26 +53,22 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
   const [userTags, setUserTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
   const [isTagDialogOpen, setIsTagDialogOpen] = useState<boolean>(false);
-  const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState<boolean>(false);
-
-  const [newFieldName, setNewFieldName] = useState("");
 
   // Setup form with React Hook Form and Zod validation
   const {
-    control,
     register,
     handleSubmit,
     setValue,
     watch,
-    trigger,
     formState: { errors },
-  } = useForm<z.infer<typeof taskCardSchema>>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } = useForm<z.infer<typeof taskCardSchema>, any, any>({
     resolver: zodResolver(taskCardSchema),
     defaultValues: initialValues ?? {
       title: "",
       description: "",
-      dueDate: "",
+      dueDate: undefined,
       status: "To Do",
       assignee: "Un Assigned",
       tags: {
@@ -84,12 +79,6 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     },
   });
 
-  // Use useFieldArray to manage custom fields dynamically
-  const { fields, append, remove } = useFieldArray({
-    control, // control object from useForm
-    name: "customFields", // the field name for custom fields array
-  });
-
   // Watch form values
   const dueDate = watch("dueDate");
   const status = watch("status");
@@ -97,8 +86,8 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
 
   // Toggle tag selection
   const toggleTagSelection = (tag: string) => {
-    const currentDefaultTags = selectedTags.defaultTags;
-    const currentUserTags = selectedTags.userGeneratedTags;
+    const currentDefaultTags = selectedTags.defaultTags ?? [];
+    const currentUserTags = selectedTags.userGeneratedTags ?? [];
 
     const updatedTags = currentDefaultTags.includes(tag)
       ? currentDefaultTags.filter((t) => t !== tag)
@@ -113,15 +102,13 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     } else {
       setValue("tags.userGeneratedTags", updatedUserTags);
     }
-
-    void trigger("tags");
   };
 
   // Add new custom tag
   const handleAddTag = () => {
     if (newTag.trim() && !userTags.includes(newTag)) {
       setUserTags([...userTags, newTag]);
-      toggleTagSelection(newTag);
+      setValue("tags.userGeneratedTags", [...userTags, newTag]);
       setNewTag("");
       setIsTagDialogOpen(false); // Close the add tag dialog when a tag is added
     }
@@ -134,34 +121,46 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
       "tags.userGeneratedTags",
       userTags.filter((tag) => tag !== tagToRemove),
     );
-    void trigger("tags");
   };
 
+  // Handle custom field addition
+  const [customFields, setCustomFields] = useState<
+    { fieldName: string; fieldValue: string }[]
+  >([]);
+  const [newFieldName, setNewFieldName] = useState("");
+
   const handleAddCustomField = () => {
-    // Append a new field with empty value to the form array
-    append({ fieldName: newFieldName, fieldValue: "" });
-
-    // Reset the input field for the custom field name
-    setNewFieldName("");
-
-    // Close the custom field dialog
-    setIsFieldDialogOpen(false);
+    if (newFieldName.trim()) {
+      setCustomFields([
+        ...customFields,
+        { fieldName: newFieldName, fieldValue: "" },
+      ]);
+      setNewFieldName("");
+      setIsFieldDialogOpen(false);
+    }
   };
 
   // Handle removing a custom field
   const handleRemoveCustomField = (index: number) => {
-    // Remove the specific field from the array
-    remove(index);
+    const updatedFields = [...customFields];
+    updatedFields.splice(index, 1);
+    setCustomFields(updatedFields);
+  };
 
-    // Optionally trigger validation after removing
-    void trigger("customFields");
+  const handleCustomFieldChange = (index: number, value: string) => {
+    const updatedFields = [...customFields];
+    if (updatedFields[index]) {
+      updatedFields[index].fieldValue = value;
+      setCustomFields(updatedFields);
+      setValue("customFields", updatedFields);
+    }
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button className="max-h-[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
-          {dialogButtonText}
+          {taskCardTriggerText}
         </Button>
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] max-w-[50vw] flex-col overflow-auto rounded-lg bg-gray-900 p-6 text-white">
@@ -276,7 +275,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
         {/* Due Date */}
         <div className="mb4 flex-shrink-0">
           <h3 className="mb2">DUE DATE</h3>
-          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+          <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant={"outline"}
@@ -284,7 +283,6 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                   "w-[280px] justify-start text-left font-normal",
                   !dueDate && "text-muted-foreground",
                 )}
-                onClick={() => setIsCalendarOpen(!isCalendarOpen)}
               >
                 <Image
                   src="/calendar.png"
@@ -293,26 +291,20 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                   height={150}
                   className="mr-2 h-4 w-4"
                 />
-                {dueDate && !isNaN(Date.parse(dueDate)) ? (
-                  format(new Date(dueDate), "PPP") // Display the formatted date if valid
+                {dueDate ? (
+                  format(new Date(dueDate), "PPP")
                 ) : (
-                  <span>Pick a date</span> // Display "Pick a date" if no valid date
+                  <span>Pick a date</span>
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
-                selected={
-                  dueDate && !isNaN(Date.parse(dueDate))
-                    ? new Date(dueDate)
-                    : undefined
-                }
+                selected={dueDate ?? undefined} // Ensure undefined is passed when no date is selected
                 onSelect={(selectedDate) => {
                   if (selectedDate) {
-                    setValue("dueDate", selectedDate.toISOString()); // Store as date string
-                    setIsCalendarOpen(false);
-                    void trigger("dueDate");
+                    setValue("dueDate", selectedDate); // Use the selected date
                   }
                 }}
                 initialFocus
@@ -379,17 +371,18 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
         </div>
 
         {/* Extra Fields */}
-        {fields.length > 0 && (
+        {customFields.length > 0 && (
           <div className="mb-4">
             <h3 className="mb-2">CUSTOM FIELDS</h3>
-            {fields.map((field, index) => (
-              <div key={field.id} className="mb-2 flex items-center gap-2">
+            {customFields.map((field, index) => (
+              <div key={index} className="mb-2 flex items-center gap-2">
                 <span className="w-1/4">{field.fieldName}</span>
                 <Input
                   className="w-full"
-                  {...register(`customFields.${index}.fieldValue`, {
-                    required: "Field value is required",
-                  })}
+                  value={field.fieldValue}
+                  onChange={(e) =>
+                    handleCustomFieldChange(index, e.target.value)
+                  }
                   placeholder={`Enter ${field.fieldName} field value.`}
                 />
                 <button
@@ -430,7 +423,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                 className="w-full rounded-md border border-gray-300 px-2 py-1"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    handleAddCustomField(); // Add custom field on Enter key press
+                    handleAddCustomField(); // Trigger add tag function on Enter key press
                   }
                 }}
               />
@@ -454,7 +447,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
             onClick={handleSubmit(onSubmit)}
             className="bg-zesty-green w-full text-black"
           >
-            {submitButtonText}
+            Submit Task
           </Button>
         </DialogFooter>
       </DialogContent>
