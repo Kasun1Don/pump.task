@@ -29,10 +29,7 @@ export async function login(payload: VerifyLoginPayloadParams) {
       payload: verifiedPayload.payload,
     });
     cookies().set("jwt", jwt);
-    // check if payload.address is alreading in db
-    //if not redirect to newuser
     redirect("/newuser");
-    redirect("/dashboard");
   }
 }
 

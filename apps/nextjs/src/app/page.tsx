@@ -9,7 +9,7 @@ import { isLoggedIn } from "./actions/authFront";
 
 export default async function HomePage() {
   if (await isLoggedIn()) {
-    redirect("/dashboard");
+    redirect("/projects");
   }
   return (
     <HydrateClient>
