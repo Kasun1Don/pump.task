@@ -5,16 +5,14 @@ import { HydrateClient } from "~/trpc/server";
 import { Login } from "./_components/Login";
 import { isLoggedIn } from "./actions/authFront";
 
-// import { CreatePostForm } from "./_components/posts";
-
 export default async function HomePage() {
   if (await isLoggedIn()) {
     redirect("/dashboard");
   }
   return (
     <HydrateClient>
-      <main className="container h-screen max-w-5xl py-16 text-center">
-        <div className="flex flex-col items-center justify-center gap-4">
+      <main className="bg-custom-bg container flex h-screen items-center justify-center bg-cover bg-center py-16 text-center">
+        <div className="flex max-w-5xl flex-col items-center justify-center gap-4">
           <div className="flex gap-3">
             <Image src="/pump.taskLogo.png" alt="Logo" width={50} height={50} />
             <h1 className="text-5xl font-bold tracking-tight">pump.task</h1>
@@ -28,8 +26,6 @@ export default async function HomePage() {
             complete their tasks, combining the traditional efficiency of tools
             like Jira and Trello with the rewarding nature of Web3.
           </p>
-
-          {/* <CreatePostForm /> */}
 
           <Login />
         </div>

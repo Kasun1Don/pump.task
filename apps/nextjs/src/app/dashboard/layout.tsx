@@ -1,10 +1,12 @@
 import Image from "next/image";
+import { ConnectButton } from "thirdweb/react";
 
 import HotKeyEventListeners from "../_components/navbar/HotKeyEventListeners";
 import NavLink from "../_components/navbar/NavLink";
 import NavProjectDropdown from "../_components/navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/navbar/NavUserDropdown";
 import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
+import { client } from "../thirdwebClient";
 
 export default async function GlobalNavbarLayout(props: {
   children: React.ReactNode;
@@ -40,6 +42,8 @@ export default async function GlobalNavbarLayout(props: {
               Web3 Project Tracker
             </h5>
           </div>
+
+          <ConnectButton client={client} />
 
           <div className="flex gap-10 hover:cursor-pointer">
             {/* Project dropdown, I should properly make this conditional in the future so if the user doesn't have any projects it renders a button to create a new project */}

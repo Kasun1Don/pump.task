@@ -1,7 +1,7 @@
 "use client";
 
 // import type { VerifyLoginPayloadParams } from "thirdweb/auth";
-import { ConnectButton, darkTheme } from "thirdweb/react";
+import { ConnectButton, darkTheme, useActiveWallet } from "thirdweb/react";
 
 import {
   generatePayload,
@@ -14,12 +14,16 @@ import { client } from "../thirdwebClient";
 // import { useTheme } from "@acme/ui/theme";
 
 export function Login() {
-  // const activeAccount = useActiveAccount();
-  // const router = useRouter();
+  const wallet = useActiveWallet();
+  console.log(wallet);
 
-  //   const { theme } = useTheme();
-  //   const connectButtonTheme = theme as "dark" | "light" | undefined;
-  // if (activeAccount) router.push("/secure");
+  // useEffect(() => {
+  //   console.log(wallet);
+  //   if (wallet) {
+  //     disconnect(wallet);
+  //   }
+  // }, []);
+
   return (
     <>
       <ConnectButton
