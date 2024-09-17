@@ -39,6 +39,7 @@ export default function HotKeyEventListeners() {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null; // This component doesn't render anything but still needs to return something
