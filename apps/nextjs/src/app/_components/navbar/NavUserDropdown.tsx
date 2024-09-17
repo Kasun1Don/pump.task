@@ -24,7 +24,15 @@ interface NavUserDropdownProps {
   image: string;
 }
 
-// Define the NavUserDropdown component
+/**
+ * @author Benjamin davies
+ *
+ * @description
+ * This component is used to create a User Dropdown component that is used in the Navbar. The User Dropdown component is used to display the user's profile, settings, and logout options. The User Dropdown component is used in the Navbar to allow the user to access their profile, settings, and logout options.
+ *
+ * @param {NavUserDropdownProps} { username, image }
+ * @returns User Dropdown Component including Profile, Settings and Logout buttons / links.
+ */
 export default function NavUserDropdown({
   username,
   image,

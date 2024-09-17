@@ -6,7 +6,7 @@ import { useActiveWallet, useDisconnect } from "thirdweb/react";
 
 /**
  * @author Benjamin Davies
- * @description HotKeyEventListeners component to listen for key presses when the user has signed into there account, additional hotkeys can be added here also has some, At the moment both hotkeys for Mac and Windows are the truthy is dosent matter if the user is on a Mac and presses Ctrl instead of Command it will still work and vise versa.
+ * @description HotKeyEventListeners component to listen for key presses when the user has signed into there account, additional hotkeys can be added here also, At the moment both hotkeys for Mac and Windows are the truthy is dosent matter if the user is on a Mac and presses Ctrl instead of Command it will still work and vise versa.
  *
  * @returns Null because it doesn't render anything
  */
@@ -70,6 +70,7 @@ export default function HotKeyEventListeners() {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null; // This component doesn't render anything but still needs to return something

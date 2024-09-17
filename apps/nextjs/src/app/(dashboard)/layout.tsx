@@ -13,6 +13,15 @@ import NavUserDropdown from "../_components/navbar/NavUserDropdown";
 // Import createServerSideFetch Helper function
 import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
 
+/**
+ * @author Benjamin davies
+ *
+ * @description
+ * This component is used to create the Layout component that is used in the Dashboard. The Layout component is used to create the Navbar. The Layout component is used to wrap the content of the Dashboard and provide a consistent layout for all children routes.
+ *
+ *
+ * @returns The Layout Component including the Navbar and the children components.
+ */
 export default async function Layout({ children }: { children: ReactNode }) {
   // Fetch user data with server-side fetch Helper function
   const caller = await createServerSideFetch();

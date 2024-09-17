@@ -5,7 +5,9 @@ import { User } from "@acme/db";
 import { publicProcedure } from "../trpc";
 
 export const userRouter = {
-  all: publicProcedure.query(async () => {
+  all: publicProcedure.query(async (userContext) => {
+    console.log(userContext);
+
     try {
       // Fetch and lean the data
       const users = await User.find()
@@ -13,7 +15,7 @@ export const userRouter = {
           path: "projects",
           model: "ProjectClass",
         })
-        .lean(); // Lean the data to make it easier to work with
+        .lean();
 
       // Manually convert ObjectId to string because TRPC doesn't like to work with Mongoose ObjectId's :(
       const serializedUsers = users.map((user) => ({
