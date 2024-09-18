@@ -89,7 +89,7 @@ export default function NavUserDropdown({
         <DropdownMenuItem className="flex flex-row justify-between hover:cursor-pointer">
           <div className="flex flex-row gap-4">
             <Image src="/userIcon.png" alt="userIcon" width={20} height={20} />
-            <Link href="/dashboard/profile">
+            <Link href="/profile">
               <h5>My Profile</h5>
             </Link>
           </div>
@@ -104,7 +104,7 @@ export default function NavUserDropdown({
               width={20}
               height={20}
             />
-            <Link href="/dashboard/settings">
+            <Link href="/user-settings">
               <h5>Settings</h5>
             </Link>
           </div>

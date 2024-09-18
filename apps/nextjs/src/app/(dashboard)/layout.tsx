@@ -33,7 +33,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="bg-custom-bg min-h-screen bg-cover bg-center">
       {/* Navbar section lefthand side*/}
-      <div className="flex flex-row justify-between gap-4 px-12 pb-4 pt-8">
+      <div className="flex flex-row justify-between gap-4 bg-zinc-950 px-12 pb-4 pt-8">
         {/* Logo and title */}
         <div className="flex flex-row items-center justify-center gap-8">
           <div className="flex flex-row gap-4 text-xl">
@@ -64,7 +64,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Navigation links */}
-      <div className="flex flex-wrap border-b-2">
+      <div className="flex flex-wrap border-b-2 bg-zinc-950">
         <NavLink href="/projects">Projects</NavLink>
         <NavLink href="/tasks">Tasks</NavLink>
         <NavLink href="/profile">My Profile</NavLink>
