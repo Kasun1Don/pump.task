@@ -45,7 +45,7 @@ export default function AccountSettings() {
 
   return (
     <Form {...languageForm}>
-      <form className="max-w-4/6 w-1/2 min-w-96 space-y-6">
+      <form className="max-w-4/6 w-2/5 min-w-96 space-y-6">
         {/* Language Field */}
         <FormField
           control={languageForm.control}
@@ -102,12 +102,12 @@ export default function AccountSettings() {
               <div className="space-y-0.5">
                 <FormLabel>Theme</FormLabel>
                 <FormDescription>
-                  Choose between light and dark mode
+                  Toggle between light and dark mode
                 </FormDescription>
               </div>
               <FormControl>
                 <Switch
-                  className={field.value ? "bg-lime-700" : "bg-gray-200"}
+                  className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
