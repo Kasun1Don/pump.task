@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 "use client";
 
 import type { z } from "zod";
@@ -61,14 +60,14 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     handleSubmit,
     setValue,
     watch,
+    trigger,
     formState: { errors },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useForm<z.infer<typeof taskCardSchema>, any, any>({
+  } = useForm<z.infer<typeof taskCardSchema>>({
     resolver: zodResolver(taskCardSchema),
     defaultValues: initialValues ?? {
       title: "",
       description: "",
-      dueDate: undefined,
+      dueDate: "",
       status: "To Do",
       assignee: "Un Assigned",
       tags: {
@@ -86,8 +85,8 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
 
   // Toggle tag selection
   const toggleTagSelection = (tag: string) => {
-    const currentDefaultTags = selectedTags.defaultTags ?? [];
-    const currentUserTags = selectedTags.userGeneratedTags ?? [];
+    const currentDefaultTags = selectedTags.defaultTags;
+    const currentUserTags = selectedTags.userGeneratedTags;
 
     const updatedTags = currentDefaultTags.includes(tag)
       ? currentDefaultTags.filter((t) => t !== tag)
@@ -102,14 +101,18 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     } else {
       setValue("tags.userGeneratedTags", updatedUserTags);
     }
+
+    void trigger("tags");
   };
 
   // Add new custom tag
   const handleAddTag = () => {
     if (newTag.trim() && !userTags.includes(newTag)) {
       setUserTags([...userTags, newTag]);
-      setValue("tags.userGeneratedTags", [...userTags, newTag]);
+      toggleTagSelection(newTag);
       setNewTag("");
+      // setValue("tags.userGeneratedTags", [...userTags, newTag]);
+      // setNewTag("");
       setIsTagDialogOpen(false); // Close the add tag dialog when a tag is added
     }
   };
@@ -121,6 +124,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
       "tags.userGeneratedTags",
       userTags.filter((tag) => tag !== tagToRemove),
     );
+    void trigger("tags");
   };
 
   // Handle custom field addition
@@ -145,15 +149,6 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     const updatedFields = [...customFields];
     updatedFields.splice(index, 1);
     setCustomFields(updatedFields);
-  };
-
-  const handleCustomFieldChange = (index: number, value: string) => {
-    const updatedFields = [...customFields];
-    if (updatedFields[index]) {
-      updatedFields[index].fieldValue = value;
-      setCustomFields(updatedFields);
-      setValue("customFields", updatedFields);
-    }
   };
 
   return (
@@ -291,20 +286,24 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                   height={150}
                   className="mr-2 h-4 w-4"
                 />
-                {dueDate ? (
-                  format(new Date(dueDate), "PPP")
+                {dueDate && !isNaN(Date.parse(dueDate)) ? (
+                  format(new Date(dueDate), "PPP") // Display the formatted date if valid
                 ) : (
-                  <span>Pick a date</span>
+                  <span>Pick a date</span> // Display "Pick a date" if no valid date
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
-                selected={dueDate ?? undefined} // Ensure undefined is passed when no date is selected
+                selected={
+                  dueDate && !isNaN(Date.parse(dueDate))
+                    ? new Date(dueDate)
+                    : undefined
+                }
                 onSelect={(selectedDate) => {
                   if (selectedDate) {
-                    setValue("dueDate", selectedDate); // Use the selected date
+                    setValue("dueDate", selectedDate.toISOString()); // Store as string
                   }
                 }}
                 initialFocus
@@ -379,10 +378,9 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                 <span className="w-1/4">{field.fieldName}</span>
                 <Input
                   className="w-full"
-                  value={field.fieldValue}
-                  onChange={(e) =>
-                    handleCustomFieldChange(index, e.target.value)
-                  }
+                  {...register(`customFields.${index}.fieldValue`, {
+                    required: "Field value is required", // Adding validation rule
+                  })}
                   placeholder={`Enter ${field.fieldName} field value.`}
                 />
                 <button

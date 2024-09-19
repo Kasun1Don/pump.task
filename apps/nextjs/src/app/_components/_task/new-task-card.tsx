@@ -8,7 +8,7 @@ import TaskCardDialog from "./task-card-dialog";
 interface TaskCardData {
   title: string;
   description: string;
-  dueDate: Date | null;
+  dueDate: string;
   status: "To Do" | "In Progress" | "In QA" | "Done" | "Approved";
   assignee: string;
   tags: {
@@ -23,18 +23,6 @@ interface TaskCardData {
 
 const NewTaskCard: React.FC = () => {
   const addTaskMutation = api.task.addTask.useMutation(); // Initialize your mutation
-  const initialValues: TaskCardData = {
-    title: "",
-    description: "",
-    dueDate: null,
-    status: "To Do",
-    assignee: "Un Assigned",
-    tags: {
-      defaultTags: [],
-      userGeneratedTags: [],
-    },
-    customFields: [],
-  };
 
   const handleSubmit = async (taskData: TaskCardData) => {
     try {
@@ -45,7 +33,7 @@ const NewTaskCard: React.FC = () => {
       const formattedTaskData = {
         title: taskData.title,
         description: taskData.description,
-        dueDate: taskData.dueDate ? taskData.dueDate.toISOString() : "",
+        dueDate: taskData.dueDate,
         status: taskData.status,
         assignee: taskData.assignee,
         tags: {
@@ -69,7 +57,6 @@ const NewTaskCard: React.FC = () => {
     <div>
       {/* Render the TaskCardDialog to create a new task */}
       <TaskCardDialog
-        initialValues={initialValues}
         onSubmit={handleSubmit}
         taskCardTriggerText="+ New task"
       />
