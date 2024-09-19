@@ -12,6 +12,14 @@ import type { AppRouter } from "@acme/api";
 import { env } from "~/env";
 import { createQueryClient } from "./query-client";
 
+const getCookieValue = (name: string) => {
+  const cookieString = document.cookie;
+  const cookies = cookieString
+    .split("; ")
+    .find((cookie) => cookie.startsWith(`${name}=`));
+  return cookies ? cookies.split("=")[1] : null;
+};
+
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
 const getQueryClient = () => {
   if (typeof window === "undefined") {
@@ -42,6 +50,10 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
           headers() {
             const headers = new Headers();
             headers.set("x-trpc-source", "nextjs-react");
+            const token = getCookieValue("jwt");
+            if (token) {
+              headers.set("Authorization", `Bearer ${token}`);
+            }
             return headers;
           },
         }),

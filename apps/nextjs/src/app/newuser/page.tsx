@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
 import { z } from "zod";
@@ -47,12 +48,10 @@ export default function NewUser() {
   console.log(account);
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
   const address = account?.address!;
-  const { data, error, isLoading } = api.user.byWallet.useQuery({
+  const { data, isLoading } = api.user.byWallet.useQuery({
     walletId: address,
   });
   const router = useRouter();
-
-  console.log(error);
 
   const form = useForm({
     schema: formSchema,
@@ -60,6 +59,11 @@ export default function NewUser() {
       name: "",
     },
   });
+  useEffect(() => {
+    if (data && !data.error) {
+      router.push("/projects");
+    }
+  }, [data, router]);
 
   const createUser = api.user.create.useMutation({
     onSuccess: () => {
@@ -75,11 +79,6 @@ export default function NewUser() {
     },
   });
 
-  if (data && !data.error) {
-    router.push("/projects");
-  }
-
-  console.log("look here", isLoading);
   if (isLoading) {
     return <p>loading...</p>;
   }

@@ -29,6 +29,7 @@ export async function login(payload: VerifyLoginPayloadParams) {
       payload: verifiedPayload.payload,
     });
     cookies().set("jwt", jwt);
+    cookies().set("wallet", verifiedPayload.payload.address);
     redirect("/newuser");
   }
 }

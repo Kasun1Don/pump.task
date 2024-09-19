@@ -5,7 +5,7 @@ import { User } from "@acme/db";
 
 // import { CreateUserSchema } from "@acme/validators";
 
-import { publicProcedure } from "../trpc";
+import { protectedProcedure, publicProcedure } from "../trpc";
 
 const CreateUserSchema = z.object({
   name: z.string(),
@@ -41,7 +41,7 @@ export const userRouter = {
       throw error;
     }
   }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(CreateUserSchema)
     .mutation(async ({ input }) => {
       await User.create(input);
