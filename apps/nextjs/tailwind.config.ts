@@ -10,6 +10,9 @@ export default {
   presets: [baseConfig],
   theme: {
     extend: {
+      fontSize: {
+        xxs: "0.6rem",
+      },
       fontFamily: {
         sans: ["var(--font-geist-sans)", ...fontFamily.sans],
         mono: ["var(--font-geist-mono)", ...fontFamily.mono],
