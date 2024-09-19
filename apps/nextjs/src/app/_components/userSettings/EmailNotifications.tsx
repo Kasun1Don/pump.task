@@ -37,9 +37,8 @@ export default function EmailNotifications() {
     <Form {...emailNotificationForm}>
       <form className="max-w-4/6 w-2/5 min-w-96 items-center justify-between space-y-6 rounded-lg border bg-zinc-950 p-3 shadow-sm">
         <h1>Email Notifications</h1>
-        <ul>
-          <li></li>
-        </ul>
+
+        {/* Change Notification Email */}
         <FormField
           control={emailNotificationForm.control}
           name="changeEmail"
@@ -51,22 +50,24 @@ export default function EmailNotifications() {
                   Change the email address where you receive notifications.
                 </FormDescription>
               </div>
-              <FormControl className="flex flex-row items-center justify-between">
-                <Input
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  className="flex size-4 w-fit flex-row items-center justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm"
-                  placeholder="Enter new email"
-                  readOnly={!isEditMode}
-                />
-              </FormControl>
-              <button
-                type="button"
-                className="ml-4 text-sm text-blue-500"
-                onClick={() => setIsEditMode(!isEditMode)}
-              >
-                {isEditMode ? "Save" : "Edit"}
-              </button>
+              <div className="mr-4 flex flex-row items-center justify-center gap-8">
+                <FormControl>
+                  <Input
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    className="size-4 w-fit rounded-lg border bg-zinc-950 p-3 shadow-sm"
+                    placeholder="Enter new email"
+                    readOnly={!isEditMode}
+                  />
+                </FormControl>
+                <button
+                  type="button"
+                  className="text-zesty-green ml-4 w-7 text-sm"
+                  onClick={() => setIsEditMode(!isEditMode)}
+                >
+                  {isEditMode ? "Save" : "Edit"}
+                </button>
+              </div>
             </FormItem>
           )}
         />

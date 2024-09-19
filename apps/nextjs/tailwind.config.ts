@@ -26,6 +26,9 @@ export default {
       backgroundColor: {
         "zesty-green": "#72D524",
       },
+      maxHeight: {
+        "1/2": "50%",
+      },
     },
   },
 } satisfies Config;
