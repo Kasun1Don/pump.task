@@ -79,7 +79,7 @@ export default function NewUser() {
     },
   });
 
-  if (isLoading) {
+  if (isLoading || (data && !data.error)) {
     return <p>loading...</p>;
   }
 

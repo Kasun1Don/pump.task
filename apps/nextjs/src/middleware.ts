@@ -13,5 +13,5 @@ export async function middleware(request: NextResponse) {
 }
 
 export const config = {
-  matcher: ["/dashboard"],
+  matcher: ["/projects"],
 };
