@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
@@ -54,8 +54,11 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
   const [isTagDialogOpen, setIsTagDialogOpen] = useState<boolean>(false);
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState<boolean>(false);
 
+  const [newFieldName, setNewFieldName] = useState("");
+
   // Setup form with React Hook Form and Zod validation
   const {
+    control,
     register,
     handleSubmit,
     setValue,
@@ -76,6 +79,12 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
       },
       customFields: [],
     },
+  });
+
+  // Use useFieldArray to manage custom fields dynamically
+  const { fields, append, remove } = useFieldArray({
+    control, // control object from useForm
+    name: "customFields", // the field name for custom fields array
   });
 
   // Watch form values
@@ -111,8 +120,6 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
       setUserTags([...userTags, newTag]);
       toggleTagSelection(newTag);
       setNewTag("");
-      // setValue("tags.userGeneratedTags", [...userTags, newTag]);
-      // setNewTag("");
       setIsTagDialogOpen(false); // Close the add tag dialog when a tag is added
     }
   };
@@ -127,28 +134,24 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     void trigger("tags");
   };
 
-  // Handle custom field addition
-  const [customFields, setCustomFields] = useState<
-    { fieldName: string; fieldValue: string }[]
-  >([]);
-  const [newFieldName, setNewFieldName] = useState("");
-
   const handleAddCustomField = () => {
-    if (newFieldName.trim()) {
-      setCustomFields([
-        ...customFields,
-        { fieldName: newFieldName, fieldValue: "" },
-      ]);
-      setNewFieldName("");
-      setIsFieldDialogOpen(false);
-    }
+    // Append a new field with empty value to the form array
+    append({ fieldName: newFieldName, fieldValue: "" });
+
+    // Reset the input field for the custom field name
+    setNewFieldName("");
+
+    // Close the custom field dialog
+    setIsFieldDialogOpen(false);
   };
 
   // Handle removing a custom field
   const handleRemoveCustomField = (index: number) => {
-    const updatedFields = [...customFields];
-    updatedFields.splice(index, 1);
-    setCustomFields(updatedFields);
+    // Remove the specific field from the array
+    remove(index);
+
+    // Optionally trigger validation after removing
+    void trigger("customFields");
   };
 
   return (
@@ -370,16 +373,16 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
         </div>
 
         {/* Extra Fields */}
-        {customFields.length > 0 && (
+        {fields.length > 0 && (
           <div className="mb-4">
             <h3 className="mb-2">CUSTOM FIELDS</h3>
-            {customFields.map((field, index) => (
-              <div key={index} className="mb-2 flex items-center gap-2">
+            {fields.map((field, index) => (
+              <div key={field.id} className="mb-2 flex items-center gap-2">
                 <span className="w-1/4">{field.fieldName}</span>
                 <Input
                   className="w-full"
                   {...register(`customFields.${index}.fieldValue`, {
-                    required: "Field value is required", // Adding validation rule
+                    required: "Field value is required",
                   })}
                   placeholder={`Enter ${field.fieldName} field value.`}
                 />
@@ -421,7 +424,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                 className="w-full rounded-md border border-gray-300 px-2 py-1"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    handleAddCustomField(); // Trigger add tag function on Enter key press
+                    handleAddCustomField(); // Add custom field on Enter key press
                   }
                 }}
               />
