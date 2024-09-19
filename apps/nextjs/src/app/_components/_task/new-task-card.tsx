@@ -58,7 +58,8 @@ const NewTaskCard: React.FC = () => {
       {/* Render the TaskCardDialog to create a new task */}
       <TaskCardDialog
         onSubmit={handleSubmit}
-        taskCardTriggerText="+ New task"
+        dialogButtonText="+ New task"
+        submitButtonText="Create task"
       />
     </div>
   );

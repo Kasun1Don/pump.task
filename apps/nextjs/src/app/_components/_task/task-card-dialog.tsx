@@ -34,13 +34,15 @@ import { taskCardSchema } from "./task-card-schema";
 export interface TaskCardDialogProps {
   initialValues?: z.infer<typeof taskCardSchema>;
   onSubmit: (taskData: z.infer<typeof taskCardSchema>) => void;
-  taskCardTriggerText?: string;
+  dialogButtonText?: string;
+  submitButtonText?: string;
 }
 
 const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
   initialValues,
   onSubmit,
-  taskCardTriggerText = "",
+  dialogButtonText = "Dialog Button",
+  submitButtonText = "Submit Button",
 }) => {
   const defaultTags = [
     "Frontend",
@@ -158,7 +160,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     <Dialog>
       <DialogTrigger asChild>
         <Button className="max-h-[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
-          {taskCardTriggerText}
+          {dialogButtonText}
         </Button>
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] max-w-[50vw] flex-col overflow-auto rounded-lg bg-gray-900 p-6 text-white">
@@ -448,7 +450,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
             onClick={handleSubmit(onSubmit)}
             className="bg-zesty-green w-full text-black"
           >
-            Submit Task
+            {submitButtonText}
           </Button>
         </DialogFooter>
       </DialogContent>
