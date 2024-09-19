@@ -56,10 +56,9 @@ export default function NavUserDropdown({
   async function handleLogout() {
     if (wallet) {
       disconnect(wallet);
-      console.log("disconnecting");
+      await logout();
+      router.push("/");
     }
-    await logout();
-    router.push("/");
   }
 
   return (
