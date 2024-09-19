@@ -13,7 +13,7 @@ export default async function HomePage() {
   }
   return (
     <HydrateClient>
-      <main className="container h-screen max-w-5xl py-16 text-center">
+      <main className="bg-custom-bg container flex h-screen max-w-5xl items-center justify-center bg-cover bg-center py-16 text-center">
         <div className="flex flex-col items-center justify-center gap-4">
           <div className="flex gap-3">
             <Image src="/pump.taskLogo.png" alt="Logo" width={50} height={50} />
