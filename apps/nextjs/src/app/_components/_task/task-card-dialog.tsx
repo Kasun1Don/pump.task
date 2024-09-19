@@ -54,6 +54,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
   const [userTags, setUserTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
   const [isTagDialogOpen, setIsTagDialogOpen] = useState<boolean>(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState<boolean>(false);
 
   const [newFieldName, setNewFieldName] = useState("");
@@ -275,7 +276,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
         {/* Due Date */}
         <div className="mb4 flex-shrink-0">
           <h3 className="mb2">DUE DATE</h3>
-          <Popover>
+          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant={"outline"}
@@ -283,6 +284,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                   "w-[280px] justify-start text-left font-normal",
                   !dueDate && "text-muted-foreground",
                 )}
+                onClick={() => setIsCalendarOpen(!isCalendarOpen)}
               >
                 <Image
                   src="/calendar.png"
@@ -308,7 +310,9 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                 }
                 onSelect={(selectedDate) => {
                   if (selectedDate) {
-                    setValue("dueDate", selectedDate.toISOString()); // Store as string
+                    setValue("dueDate", selectedDate.toISOString()); // Store as date string
+                    setIsCalendarOpen(false);
+                    void trigger("dueDate");
                   }
                 }}
                 initialFocus
