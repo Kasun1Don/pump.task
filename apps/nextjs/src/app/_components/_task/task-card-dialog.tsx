@@ -1,7 +1,7 @@
 "use client";
 
 import type { z } from "zod";
-import { useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -34,6 +34,7 @@ import { taskCardSchema } from "./task-card-schema";
 export interface TaskCardDialogProps {
   initialValues?: z.infer<typeof taskCardSchema>;
   onSubmit: (taskData: z.infer<typeof taskCardSchema>) => void;
+  dialogTrigger?: React.ReactNode;
   dialogButtonText?: string;
   submitButtonText?: string;
 }
@@ -41,6 +42,7 @@ export interface TaskCardDialogProps {
 const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
   initialValues,
   onSubmit,
+  dialogTrigger,
   dialogButtonText = "Dialog Button",
   submitButtonText = "Submit Button",
 }) => {
@@ -160,9 +162,11 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="max-h-[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
-          {dialogButtonText}
-        </Button>
+        {dialogTrigger ?? (
+          <Button className="max-h-[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
+            {dialogButtonText}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] max-w-[50vw] flex-col overflow-auto rounded-lg bg-gray-900 p-6 text-white">
         <DialogHeader>
