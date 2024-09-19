@@ -1,4 +1,4 @@
-import NewTaskModal from "./new-task-modal";
+import NewTaskCard from "./new-task-card";
 import TaskCard from "./task-card";
 
 const TaskStatusColumn = ({ statusTitle }: { statusTitle: string }) => {
@@ -10,7 +10,7 @@ const TaskStatusColumn = ({ statusTitle }: { statusTitle: string }) => {
       <TaskCard />
       <TaskCard />
       <TaskCard />
-      <NewTaskModal />
+      <NewTaskCard />
     </div>
   );
 };

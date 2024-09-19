@@ -3,8 +3,11 @@ import { z } from "zod";
 export const taskCardSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  // dueDate: z.date({ required_error: "Due date is required" }),
-  dueDate: z.date().nullable(),
+  dueDate: z
+    .string({ required_error: "Due date is required" })
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: "Due date is required",
+    }),
   status: z.enum(["To Do", "In Progress", "In QA", "Done", "Approved"]),
   assignee: z.string().min(1, "Assignee is required"),
   tags: z
