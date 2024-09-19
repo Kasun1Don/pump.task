@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -18,7 +18,7 @@ import { Switch } from "@acme/ui/switch";
 
 // Schema for the form fields
 const emailFormSchema = z.object({
-  changeEmail: z.string().default("bendavies600@gmail.com").optional(),
+  changeEmail: z.string().optional(),
   dueDates: z.boolean().default(false).optional(),
   comments: z.boolean().default(false).optional(),
   assignedToCard: z.boolean().default(false).optional(),
@@ -28,10 +28,24 @@ const emailFormSchema = z.object({
 });
 
 export default function EmailNotifications() {
+  const [currentEmail, setCurrentEmail] = useState("Bendavies600@gmail.com");
   const [isEditMode, setIsEditMode] = useState(false);
   const emailNotificationForm = useForm<z.infer<typeof emailFormSchema>>({
     resolver: zodResolver(emailFormSchema),
   });
+
+  useEffect(() => {
+    // Set the initial email value in the form when the component mounts
+    emailNotificationForm.setValue("changeEmail", currentEmail);
+  }, [currentEmail, emailNotificationForm]);
+
+  const handleSave = () => {
+    console.log("Email saved");
+    setCurrentEmail(
+      emailNotificationForm.getValues("changeEmail") ?? "Enter Email",
+    );
+    setIsEditMode(false);
+  };
 
   return (
     <Form {...emailNotificationForm}>
@@ -50,20 +64,31 @@ export default function EmailNotifications() {
                   Change the email address where you receive notifications.
                 </FormDescription>
               </div>
-              <div className="mr-4 flex flex-row items-center justify-center gap-8">
+              <div className="mr-2 flex flex-row items-center justify-center gap-2">
                 <FormControl>
-                  <Input
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    className="size-4 w-fit rounded-lg border bg-zinc-950 p-3 shadow-sm"
-                    placeholder="Enter new email"
-                    readOnly={!isEditMode}
-                  />
+                  {isEditMode ? (
+                    <Input
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      className="size-4 w-fit rounded-lg border bg-zinc-950 p-3 shadow-sm"
+                      placeholder="Enter new email"
+                    />
+                  ) : (
+                    <span className="text-xs">
+                      {field.value ?? "Enter Email"}
+                    </span>
+                  )}
                 </FormControl>
                 <button
                   type="button"
                   className="text-zesty-green ml-4 w-7 text-sm"
-                  onClick={() => setIsEditMode(!isEditMode)}
+                  onClick={() => {
+                    if (isEditMode) {
+                      handleSave();
+                    } else {
+                      setIsEditMode(true);
+                    }
+                  }}
                 >
                   {isEditMode ? "Save" : "Edit"}
                 </button>
@@ -71,6 +96,7 @@ export default function EmailNotifications() {
             </FormItem>
           )}
         />
+
         <h5>Preferences</h5>
 
         {/* Due Dates */}

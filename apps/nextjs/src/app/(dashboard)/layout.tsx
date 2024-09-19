@@ -31,7 +31,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   const userData: UserClass | null = response[0] as UserClass;
 
   return (
-    <div className="bg-custom-bg min-h-screen bg-cover bg-center">
+    <section className="bg-custom-bg min-h-screen bg-cover bg-center">
       {/* Navbar section lefthand side*/}
       <div className="flex flex-row justify-between gap-4 bg-zinc-950 px-12 pb-4 pt-8">
         {/* Logo and title */}
@@ -77,6 +77,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
       {/* Where the page content will be rendered */}
       <main>{children}</main>
-    </div>
+    </section>
   );
 }
