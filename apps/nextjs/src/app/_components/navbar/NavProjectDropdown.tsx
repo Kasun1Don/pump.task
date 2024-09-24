@@ -81,12 +81,12 @@ export default function NavProjectDropdown({
             <DropdownMenuItem
               key={project.name}
               className="flex flex-row items-center gap-4 hover:cursor-pointer"
-              onClick={() => handleProjectChange(project.name ?? "")}
+              onClick={() => handleProjectChange(project.name)}
             >
               <Image
                 className="inline-block h-5 w-5 rounded-full"
                 src={project.image ?? ""}
-                alt={project.name ?? ""}
+                alt={project.name}
                 width={20}
                 height={20}
               />
