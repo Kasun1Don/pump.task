@@ -52,15 +52,15 @@ export default function NavUserDropdown({
   const { disconnect } = useDisconnect();
   const wallet = useActiveWallet();
 
-  useEffect(() => {
-    if (!wallet) {
-      logout()
-        .then(() => {
-          router.push("/");
-        })
-        .catch((err) => console.log(err));
-    }
-  }, [router, wallet]);
+  // useEffect(() => {
+  //   if (!wallet) {
+  //     logout()
+  //       .then(() => {
+  //         router.push("/");
+  //       })
+  //       .catch((err) => console.log(err));
+  //   }
+  // }, [router, wallet]);
 
   // Handle logout function
   async function handleLogout() {
