@@ -50,7 +50,7 @@ export default function EmailNotifications() {
   return (
     <Form {...emailNotificationForm}>
       <form className="max-w-4/6 w-2/5 min-w-96 items-center justify-between space-y-6 rounded-lg border bg-zinc-950 p-3 shadow-sm">
-        <h1>Email Notifications</h1>
+        <h1>Notifications</h1>
 
         {/* Change Notification Email */}
         <FormField

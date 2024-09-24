@@ -60,7 +60,7 @@ export default function NewUser() {
     },
   });
   useEffect(() => {
-    if (data && !data.error) {
+    if (data) {
       router.push("/projects");
     }
   }, [data, router]);
