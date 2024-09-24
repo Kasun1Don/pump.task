@@ -20,7 +20,10 @@ class CustomField {
 }
 
 export class TasksSchema {
-  // Tags
+  /* 
+    Tags - References the 'TagsSchema' while running an additional check
+    to make sure atleast 1 tag is selected (either default or custom tags).
+  */
   @prop({
     required: true,
     _id: false,
@@ -47,7 +50,7 @@ export class TasksSchema {
 
   // Due Date
   @prop({ required: true })
-  public dueDate!: string;
+  public dueDate!: Date;
 
   // Assignee
   @prop({ required: true })
