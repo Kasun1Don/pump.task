@@ -21,9 +21,12 @@ export class UserClass {
   @prop()
   public emailVerified?: boolean;
 
-  // reference projects using ObjectId and a string ref to collection name
-  // @prop({ type: [mongoose.Schema.Types.ObjectId], ref: "Project" })
-  // public projects?: mongoose.Types.ObjectId[];
+  @prop({
+    ref: () => ProjectClass,
+    type: mongoose.Schema.Types.ObjectId,
+    default: [],
+  })
+  public projects?: Ref<ProjectClass>[];
 }
 
 // Create the User model
