@@ -25,6 +25,9 @@ export class ProjectClass {
 
   @prop({ default: Date.now })
   public updatedAt?: Date;
+
+  @prop({ required: false })
+  public templateId?: string; // Change from ObjectId to string
 }
 
 export const Project = getModelForClass(ProjectClass);

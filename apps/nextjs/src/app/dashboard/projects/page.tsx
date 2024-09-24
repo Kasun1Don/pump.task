@@ -11,9 +11,9 @@ const projects = [
 ];
 
 const templates = [
-  { id: 1, name: "DevOps Pipeline Template" },
-  { id: 2, name: "Kanban Template" },
-  { id: 3, name: "Agile Sprint Board Template" },
+  { id: "60d5f484f8d2e30d8c4e4b0a", name: "DevOps Pipeline Template" },
+  { id: "60d5f484f8d2e30d8c4e4b0b", name: "Kanban Template" },
+  { id: "60d5f484f8d2e30d8c4e4b0c", name: "Agile Sprint Board Template" },
 ];
 
 // TODO: card fills with related images + figma UI adjustments
@@ -36,6 +36,9 @@ export default function ProjectsPage() {
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedTemplate("");
+    },
+    onError: (error) => {
+      console.error("Error creating project:", error);
     },
   });
 

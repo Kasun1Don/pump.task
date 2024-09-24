@@ -6,7 +6,7 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
-import { TaskClass } from "./TaskSchema";
+import { TaskClass } from "./TasksSchema";
 
 export class StatusSchema {
   @prop({ required: true })

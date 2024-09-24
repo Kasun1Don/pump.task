@@ -20,28 +20,23 @@ export const projectRouter = {
               role: z.enum(["observer", "admin", "owner"]),
             }),
           )
-          .default([]),
+          .optional(),
         status: z.array(z.string()).default([]),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input }) => {
       try {
-        const currentUserId = ctx.session?.user.id;
-        if (!currentUserId) {
-          throw new Error("User not authenticated");
-        }
+        const members = input.members
+          ? input.members.map((member) => ({
+              ...member,
+              user: new mongoose.Types.ObjectId(member.user),
+            }))
+          : [];
 
-        const members = input.members.map((member) => ({
-          ...member,
-          user:
-            member.user === "currentUser"
-              ? new mongoose.Types.ObjectId(currentUserId)
-              : new mongoose.Types.ObjectId(member.user),
-        }));
-
+        // assign a default owner if no members are provided
         if (members.length === 0) {
           members.push({
-            user: new mongoose.Types.ObjectId(currentUserId),
+            user: new mongoose.Types.ObjectId(), // assign a default or anonymous user ID
             role: "owner",
           });
         }
@@ -49,16 +44,21 @@ export const projectRouter = {
         const newProject = new Project({
           name: input.name,
           isPrivate: input.isPrivate,
+          templateId: input.templateId
+            ? new mongoose.Types.ObjectId(input.templateId)
+            : undefined,
           members: members,
-          status: input.status, // use input status array
+          status: input.status,
         });
 
         const savedProject = await newProject.save();
 
+        console.log("Project Created Successfully:", savedProject);
+
         return savedProject;
       } catch (error) {
         console.error("Error creating project:", error);
-        throw new Error(`Failed to create project`);
+        throw new Error(`Failed to create project: ${(error as Error).message}`);
       }
     }),
 } satisfies TRPCRouterRecord;

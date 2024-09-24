@@ -1,7 +1,6 @@
 import {
   getModelForClass,
   modelOptions,
-  mongoose,
   prop,
 } from "@typegoose/typegoose";
 
@@ -27,8 +26,8 @@ export class UserClass {
   public emailVerified?: boolean;
 
   // reference projects using ObjectId and a string ref to collection name
-  @prop({ type: [mongoose.Schema.Types.ObjectId], ref: "Project" })
-  public projects?: mongoose.Types.ObjectId[];
+  // @prop({ type: [mongoose.Schema.Types.ObjectId], ref: "Project" })
+  // public projects?: mongoose.Types.ObjectId[];
 }
 
 // Create the User model
