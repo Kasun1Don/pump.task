@@ -7,12 +7,10 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
+import { LoginHistoryClass } from "./LoginHistories";
 import { ProjectClass } from "./Projects";
+import { UserSettingsClass } from "./UserSettings";
 
-/**
- * This collection is used by NextAuth to store user information.
- * This must contain the user's name, email, image, and email verification status.
- */
 @modelOptions({ schemaOptions: { collection: "users" } })
 export class UserClass {
   @prop()
@@ -36,6 +34,16 @@ export class UserClass {
     default: [],
   })
   public projects?: Ref<ProjectClass>[];
+
+  @prop({ type: () => UserSettingsClass })
+  public userSettings?: UserSettingsClass;
+
+  @prop({
+    ref: () => LoginHistoryClass,
+    type: mongoose.Schema.Types.ObjectId,
+    default: [],
+  })
+  public loginHistories?: Ref<LoginHistoryClass>[];
 }
 
 // Create the User model

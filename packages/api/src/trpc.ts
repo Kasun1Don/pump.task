@@ -1,3 +1,4 @@
+/* eslint-disable turbo/no-undeclared-env-vars */
 /**
  * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
  * 1. You want to modify request context (see Part 1)
@@ -8,11 +9,32 @@
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { createThirdwebClient } from "thirdweb";
+import { createAuth } from "thirdweb/auth";
+import { privateKeyToAccount } from "thirdweb/wallets";
 import { ZodError } from "zod";
 
 import type { Session } from "@acme/auth";
 import { auth, validateToken } from "@acme/auth";
 import dbConnect from "@acme/db/dbConnect";
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const client_id = process.env.NEXT_PUBLIC_CLIENT_ID!;
+
+export const client = createThirdwebClient({
+  clientId: client_id,
+});
+
+const privateKey = process.env.THIRDWEB_ADMIN_PRIVATE_KEY;
+
+if (!privateKey) {
+  throw new Error("Missing THIRDWEB_ADMIN_PRIVATE_KEY in .env file.");
+}
+
+const thirdwebAuth = createAuth({
+  domain: process.env.NEXT_PUBLIC_THIRDWEB_AUTH_DOMAIN ?? "",
+  adminAccount: privateKeyToAccount({ client, privateKey }),
+});
 
 /**
  * Isomorphic Session getter for API requests
@@ -46,6 +68,7 @@ export const createTRPCContext = async (opts: {
 
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
   console.log(">>> tRPC Request from", source, "by", session?.user);
+  console.log(authToken);
 
   await dbConnect();
 
@@ -108,14 +131,22 @@ export const publicProcedure = t.procedure;
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.session?.user) {
+export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+  if (!ctx.token) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const token = ctx.token.split(" ")[1]!;
+    const verified = await thirdwebAuth.verifyJWT({ jwt: token });
+    console.log("----------------", verified);
+    if (!verified.valid) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
   }
   return next({
     ctx: {
       // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      session: { ...ctx.session },
     },
   });
 });
