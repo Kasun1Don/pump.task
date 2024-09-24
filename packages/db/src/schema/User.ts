@@ -1,8 +1,4 @@
-import {
-  getModelForClass,
-  modelOptions,
-  prop,
-} from "@typegoose/typegoose";
+import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose";
 
 /**
  * This collection is used by NextAuth to store user information.

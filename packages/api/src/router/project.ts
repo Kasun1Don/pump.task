@@ -58,7 +58,9 @@ export const projectRouter = {
         return savedProject;
       } catch (error) {
         console.error("Error creating project:", error);
-        throw new Error(`Failed to create project: ${(error as Error).message}`);
+        throw new Error(
+          `Failed to create project: ${(error as Error).message}`,
+        );
       }
     }),
 } satisfies TRPCRouterRecord;
