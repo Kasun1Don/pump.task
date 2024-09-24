@@ -7,6 +7,7 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
+import { BadgeClass } from "./Badges";
 import { ProjectClass } from "./Projects";
 
 /**
@@ -36,6 +37,13 @@ export class UserClass {
     default: [],
   })
   public projects?: Ref<ProjectClass>[];
+
+  @prop({
+    ref: () => BadgeClass,
+    type: mongoose.Schema.Types.ObjectId,
+    default: [],
+  })
+  public badges?: Ref<BadgeClass>[];
 }
 
 // Create the User model
