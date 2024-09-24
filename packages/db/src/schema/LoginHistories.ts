@@ -13,7 +13,7 @@ export class LoginHistoryClass extends TimeStamps {
   public location?: string;
 
   @prop({ default: "unknown" })
-  public device?: string;
+  public browser?: string;
 
   @prop({ default: "unknown" })
   public operatingSystem?: string;

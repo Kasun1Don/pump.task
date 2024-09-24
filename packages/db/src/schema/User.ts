@@ -13,19 +13,19 @@ import { UserSettingsClass } from "./UserSettings";
 
 @modelOptions({ schemaOptions: { collection: "users" } })
 export class UserClass {
-  @prop()
+  @prop({ required: true, unique: true })
   public walletId?: string;
 
   @prop()
   public name?: string;
 
-  @prop()
+  @prop({ unique: true })
   public email?: string;
 
-  @prop()
+  @prop({ default: "/profileImage1.png" })
   public image?: string;
 
-  @prop()
+  @prop({ default: false })
   public emailVerified?: boolean;
 
   @prop({
