@@ -1,3 +1,4 @@
+import type { Ref } from "@typegoose/typegoose";
 import {
   getModelForClass,
   modelOptions,
@@ -6,6 +7,8 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
+import { Project, ProjectClass } from "./Projects";
+import { StatusClass } from "./StatusSchema";
 import { TagsSchema } from "./TagsSchema";
 
 class CustomField {
@@ -17,6 +20,7 @@ class CustomField {
 }
 
 export class TasksSchema {
+  // Tags
   @prop({
     required: true,
     _id: false,
@@ -33,23 +37,33 @@ export class TasksSchema {
   })
   public tags!: TagsSchema;
 
+  // Title
   @prop({ required: true })
   public title!: string;
 
+  // Description
   @prop({ required: true })
   public description!: string;
 
+  // Due Date
   @prop({ required: true })
   public dueDate!: string;
 
-  @prop({ required: true })
-  public status!: string;
-
+  // Assignee
   @prop({ required: true })
   public assignee!: string;
 
+  // Custom Fields
   @prop({ type: () => [CustomField], required: false })
   public customFields?: CustomField[];
+
+  // Reference to the Status ID
+  @prop({ ref: () => StatusClass, required: true })
+  public status!: Ref<StatusClass>;
+
+  // Reference to the Project ID
+  @prop({ ref: () => Project, required: true })
+  public project!: Ref<ProjectClass>;
 }
 
 @modelOptions({ schemaOptions: { collection: "tasks" } })
