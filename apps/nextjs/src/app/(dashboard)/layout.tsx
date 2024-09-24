@@ -1,5 +1,6 @@
 // Import React and Next.js modules
 import type { ReactNode } from "react";
+import { cookies } from "next/headers";
 import Image from "next/image";
 
 // Import UserClass and ProjectClass from Typegoose models
@@ -25,10 +26,20 @@ import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
 export default async function Layout({ children }: { children: ReactNode }) {
   // Fetch user data with server-side fetch Helper function
   const caller = await createServerSideFetch();
-  const response = await caller.user.all();
+
+  // Get wallet ID from cookies
+  const walletId: string = cookies().get("wallet")?.value ?? "";
+
+  // Log error if wallet ID is not found
+  if (!walletId) {
+    console.error("Wallet ID is undefined or not found in cookies.");
+  }
+
+  // Fetch user data with wallet ID
+  const response = await caller.user.byWallet({ walletId });
 
   // Destructure user data from response
-  const userData: UserClass | null = response[0] as UserClass;
+  const userData: UserClass | null = response as UserClass;
 
   return (
     <div className="bg-custom-bg min-h-screen bg-cover bg-center">
