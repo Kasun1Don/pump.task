@@ -1,9 +1,20 @@
-import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose";
+import {
+  getModelForClass,
+  modelOptions,
+  mongoose,
+  prop,
+  ReturnModelType,
+} from "@typegoose/typegoose";
 
 import { MemberSchema } from "./Member";
 import { StatusSchema } from "./Status";
 
-@modelOptions({ schemaOptions: { collection: "projects" } })
+@modelOptions({ 
+  schemaOptions: { 
+    collection: "projects",
+    timestamps: true,
+  } 
+})
 export class ProjectClass {
   @prop({ required: true })
   public name!: string;
@@ -20,14 +31,11 @@ export class ProjectClass {
   @prop({ type: () => [StatusSchema], default: [] })
   public status!: StatusSchema[];
 
-  @prop({ default: Date.now })
-  public createdAt?: Date;
-
-  @prop({ default: Date.now })
-  public updatedAt?: Date;
-
   @prop({ required: false })
   public templateId?: string; // Change from ObjectId to string
 }
 
-export const Project = getModelForClass(ProjectClass);
+export const Project =
+  (mongoose.models.ProjectClass as
+    | ReturnModelType<typeof ProjectClass>
+    | undefined) ?? getModelForClass(ProjectClass);

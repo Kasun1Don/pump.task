@@ -1,10 +1,11 @@
 import {
   getModelForClass,
   modelOptions,
+  mongoose,
   prop,
   Ref,
+  ReturnModelType,
 } from "@typegoose/typegoose";
-import mongoose from "mongoose";
 
 import { ProjectClass } from "./Projects";
 
@@ -38,4 +39,7 @@ export class UserClass {
 }
 
 // Create the User model
-export const User = getModelForClass(UserClass);
+export const User =
+  (mongoose.models.UserClass as
+    | ReturnModelType<typeof UserClass>
+    | undefined) ?? getModelForClass(UserClass);
