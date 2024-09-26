@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { api } from "~/trpc/react"; // sets up the tRPC client for React components
 
 const projects = [
   { id: 1, name: "Maker DAO", owner: false },
@@ -9,13 +12,14 @@ const projects = [
 ];
 
 const templates = [
-  { id: 1, name: "DevOps Pipeline Template" },
-  { id: 2, name: "Kanban Template" },
-  { id: 3, name: "Agile Sprint Board Template" },
+  { id: "60d5f484f8d2e30d8c4e4b0a", name: "DevOps Pipeline Template" },
+  { id: "60d5f484f8d2e30d8c4e4b0b", name: "Kanban Template" },
+  { id: "60d5f484f8d2e30d8c4e4b0c", name: "Agile Sprint Board Template" },
 ];
 
-// TODO: card fills with related images + UI adjustments
+// TODO: card fills with related images + figma UI adjustments
 export default function ProjectsPage() {
+  const router = useRouter();
   const [showOwnedOnly, setShowOwnedOnly] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -24,6 +28,23 @@ export default function ProjectsPage() {
   const filteredProjects = showOwnedOnly
     ? projects.filter((project) => project.owner)
     : projects;
+
+  const createProject = api.project.create.useMutation({
+    onMutate: (variables) => {
+      console.log("Creating Project with variables:", variables); // log the mutation input before it's sent
+    },
+    onSuccess: (data) => {
+      console.log("Project Created Successfully:", data);
+      setIsModalOpen(false);
+      setNewProjectName("");
+      setSelectedTemplate("");
+      // navigate to the Tasks Page after successful creation
+      router.push(`/tasks?projectId=${data.id}`);
+    },
+    onError: (error) => {
+      console.error("Error creating project:", error);
+    },
+  });
 
   return (
     <>
@@ -133,14 +154,16 @@ export default function ProjectsPage() {
               </button>
               <button
                 onClick={() => {
-                  // TODO: Implement project creation logic
-                  console.log(
-                    "Creating project:",
-                    newProjectName,
-                    "with template:",
-                    selectedTemplate,
-                  );
-                  setIsModalOpen(false);
+                  console.log("Attempting to create project with:", {
+                    name: newProjectName,
+                    isPrivate: false,
+                    templateId: selectedTemplate || undefined,
+                  });
+                  createProject.mutate({
+                    name: newProjectName,
+                    isPrivate: false,
+                    templateId: selectedTemplate || undefined,
+                  });
                 }}
                 className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
               >

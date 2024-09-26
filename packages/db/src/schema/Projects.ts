@@ -6,19 +6,35 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
-@modelOptions({ schemaOptions: { collection: "projects" } })
+import { MemberSchema } from "./Member";
+import { StatusSchema } from "./Status";
+
+@modelOptions({
+  schemaOptions: {
+    collection: "projects",
+    timestamps: true,
+  },
+})
 export class ProjectClass {
-  @prop({ default: "A user" })
-  public user?: string;
+  @prop({ required: true })
+  public name!: string;
 
-  @prop({ default: "New Project" })
-  public name?: string;
-
-  @prop({ default: "New Project" })
+  @prop()
   public image?: string;
+
+  @prop({ required: true })
+  public isPrivate!: boolean;
+
+  @prop({ type: () => [MemberSchema], default: [] })
+  public members!: MemberSchema[];
+
+  @prop({ type: () => [StatusSchema], default: [] })
+  public status!: StatusSchema[];
+
+  @prop({ required: false })
+  public templateId?: string; // Change from ObjectId to string
 }
 
-// Create the Project model
 export const Project =
   (mongoose.models.ProjectClass as
     | ReturnModelType<typeof ProjectClass>
