@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,6 +16,8 @@ import {
 import { Input } from "@acme/ui/input";
 import { Switch } from "@acme/ui/switch";
 
+import { api } from "~/trpc/react";
+
 // Schema for the form fields
 const emailFormSchema = z.object({
   changeEmail: z.string().optional(),
@@ -23,29 +25,81 @@ const emailFormSchema = z.object({
   comments: z.boolean().default(false).optional(),
   assignedToCard: z.boolean().default(false).optional(),
   removedFromCard: z.boolean().default(false).optional(),
-  cardStatusChange: z.boolean().default(false).optional(),
+  changeCardStatus: z.boolean().default(false).optional(),
   newBadge: z.boolean().default(false).optional(),
 });
 
-export default function EmailNotifications() {
-  const [currentEmail, setCurrentEmail] = useState("Bendavies600@gmail.com");
+export default function EmailNotifications({
+  walletId,
+}: {
+  walletId: string;
+}): JSX.Element {
   const [isEditMode, setIsEditMode] = useState(false);
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = api.user.byWallet.useQuery({ walletId });
+
   const emailNotificationForm = useForm<z.infer<typeof emailFormSchema>>({
     resolver: zodResolver(emailFormSchema),
+    defaultValues: {
+      changeEmail: userData?.email,
+      dueDates: userData?.userSettings?.dueDate ?? false,
+      comments: userData?.userSettings?.comments ?? false,
+      assignedToCard: userData?.userSettings?.assignedToCard ?? false,
+      removedFromCard: userData?.userSettings?.removedFromCard ?? false,
+      changeCardStatus: userData?.userSettings?.changeCardStatus ?? false,
+      newBadge: userData?.userSettings?.newBadge ?? false,
+    },
   });
 
-  useEffect(() => {
-    // Set the initial email value in the form when the component mounts
-    emailNotificationForm.setValue("changeEmail", currentEmail);
-  }, [currentEmail, emailNotificationForm]);
+  const ctx = api.useUtils();
 
-  const handleSave = () => {
-    console.log("Email saved");
-    setCurrentEmail(
-      emailNotificationForm.getValues("changeEmail") ?? "Enter Email",
-    );
-    setIsEditMode(false);
+  // Update user settings mutation with onSuccess handler to update cache
+  const updateUserMutation = api.user.update.useMutation({
+    onSuccess: (newData) => {
+      ctx.user.byWallet.setData({ walletId }, (prevData) => ({
+        ...prevData,
+        ...newData,
+        loginHistories: prevData?.loginHistories?.map((history) => ({
+          ...history,
+          _id: history._id.toString(),
+        })),
+      }));
+    },
+    onError: (error) => {
+      console.error("Error updating user:", error);
+    },
+  });
+
+  // Handle user settings update
+  const handleUserSettingsUpdate = () => {
+    const formValues = emailNotificationForm.getValues();
+
+    updateUserMutation.mutate({
+      walletId,
+      email: formValues.changeEmail,
+      userSettings: {
+        dueDate: formValues.dueDates,
+        comments: formValues.comments,
+        assignedToCard: formValues.assignedToCard,
+        removedFromCard: formValues.removedFromCard,
+        changeCardStatus: formValues.changeCardStatus,
+        newBadge: formValues.newBadge,
+      },
+    });
   };
+
+  if (isLoading) {
+    console.log("Loading user data...");
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    console.error("Error fetching user data.");
+    return <div>Error loading user data</div>;
+  }
 
   return (
     <Form {...emailNotificationForm}>
@@ -84,7 +138,7 @@ export default function EmailNotifications() {
                   className="text-zesty-green ml-4 w-7 text-sm"
                   onClick={() => {
                     if (isEditMode) {
-                      handleSave();
+                      handleUserSettingsUpdate();
                     } else {
                       setIsEditMode(true);
                     }
@@ -194,7 +248,7 @@ export default function EmailNotifications() {
         {/* Change in Card Status */}
         <FormField
           control={emailNotificationForm.control}
-          name="cardStatusChange"
+          name="changeCardStatus"
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm">
               <div className="space-y-0.5">

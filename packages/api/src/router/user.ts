@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { LoginHistory, User } from "@acme/db";
 
-import { protectedProcedure, publicProcedure } from "../trpc";
+import { publicProcedure } from "../trpc";
 
 export const userRouter = {
   /*
@@ -124,7 +124,7 @@ export const userRouter = {
    * @RETURNS
    *  The user Object / Document
    */
-  create: protectedProcedure
+  create: publicProcedure
     .input(
       z.object({
         walletId: z.string(),
@@ -189,7 +189,7 @@ export const userRouter = {
    * @RETURNS
    *  The user Object / Document
    */
-  byWallet: protectedProcedure
+  byWallet: publicProcedure
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
       try {
@@ -244,7 +244,7 @@ export const userRouter = {
    *      image: "/profileImage1.png",
    *      userSettings: {
    *          language: "Spanish",
-   *          theme: "light",
+   *          isThemeDark: true,
    *          twoFactorAuth: true,
    *          notificationEmail: "Crypto@labrys.com.au",
    *          dueDate: false,
@@ -259,7 +259,7 @@ export const userRouter = {
    * @RETURNS
    * The updated user Object / Document
    */
-  update: protectedProcedure
+  update: publicProcedure
     .input(
       z.object({
         walletId: z.string(),
@@ -269,7 +269,7 @@ export const userRouter = {
         userSettings: z
           .object({
             language: z.string().optional(),
-            theme: z.string().optional(),
+            isThemeDark: z.boolean().optional(),
             twoFactorAuth: z.boolean().optional(),
             notificationEmail: z.string().email().optional(),
             dueDate: z.boolean().optional(),
@@ -320,6 +320,9 @@ export const userRouter = {
             ...project,
             _id: project._id.toString(),
           })),
+          loginhistories: updatedUser.loginHistories?.map((history) => ({
+            _id: history._id.toString(),
+          })),
         };
 
         return serializedUser;
@@ -347,7 +350,7 @@ export const userRouter = {
    * @RETURNS
    *  A success message or an error message if the user was not found
    */
-  delete: protectedProcedure
+  delete: publicProcedure
     .input(z.object({ walletId: z.string() }))
     .mutation(async ({ input }) => {
       try {

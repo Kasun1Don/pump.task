@@ -7,13 +7,14 @@ import { ConnectButton } from "thirdweb/react";
 // Import UserClass and ProjectClass from Typegoose models
 import type { ProjectClass, UserClass } from "@acme/db";
 
+// Import api for trpc backend calls from a client component
+import { api } from "~/trpc/server";
 // Import Client Components
 import HotKeyEventListeners from "../_components/navbar/HotKeyEventListeners";
 import NavLink from "../_components/navbar/NavLink";
 import NavProjectDropdown from "../_components/navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/navbar/NavUserDropdown";
-// Import createServerSideFetch Helper function
-import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
+// Import for thirdwebClient
 import { client } from "../thirdwebClient";
 
 /**
@@ -26,9 +27,6 @@ import { client } from "../thirdwebClient";
  * @returns The Layout Component including the Navbar and the children components.
  */
 export default async function Layout({ children }: { children: ReactNode }) {
-  // Fetch user data with server-side fetch Helper function
-  const caller = await createServerSideFetch();
-
   // Get wallet ID from cookies
   const walletId: string = cookies().get("wallet")?.value ?? "";
 
@@ -38,7 +36,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   }
 
   // Fetch user data with wallet ID
-  const response = await caller.user.byWallet({ walletId });
+  const response = await api.user.byWallet({ walletId });
 
   // Destructure user data from response
   const userData: UserClass | null = response as UserClass;

@@ -18,12 +18,6 @@ import {
 // Import logout function
 import { logout } from "~/app/actions/authFront";
 
-// Define the Props interface
-interface NavUserDropdownProps {
-  username: string;
-  image: string;
-}
-
 /**
  * @author Benjamin davies
  *
@@ -36,7 +30,10 @@ interface NavUserDropdownProps {
 export default function NavUserDropdown({
   username,
   image,
-}: NavUserDropdownProps) {
+}: {
+  username: string;
+  image: string;
+}) {
   // Set the isMac state
   const [isMac, setIsMac] = useState<boolean>();
 

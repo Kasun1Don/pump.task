@@ -6,9 +6,13 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
+import { Types } from "mongoose";
 
 @modelOptions({ schemaOptions: { collection: "loginHistories" } })
 export class LoginHistoryClass extends TimeStamps {
+  @prop({ type: () => String, auto: true })
+  public _id?: Types.ObjectId;
+
   @prop({ default: "unknown" })
   public location?: string;
 

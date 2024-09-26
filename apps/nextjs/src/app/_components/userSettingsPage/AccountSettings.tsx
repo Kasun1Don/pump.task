@@ -22,26 +22,85 @@ import {
 } from "@acme/ui/select";
 import { Switch } from "@acme/ui/switch";
 
+import { api } from "~/trpc/react";
+
+// Language form zod schema
 const languageFormSchema = z.object({
   language: z
-    .string({
-      required_error: "Please select a language.",
-    })
+    .string({ required_error: "Please select a language." })
     .default("English"),
 });
 
+// Theme form zod schema
 const themeFormSchema = z.object({
-  theme: z.boolean().default(false).optional(),
+  theme: z.boolean().default(true).optional(),
 });
 
-export default function AccountSettings() {
+export default function AccountSettings({
+  walletId,
+}: {
+  walletId: string;
+}): JSX.Element {
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = api.user.byWallet.useQuery({ walletId });
+
+  if (isLoading) {
+    console.log("Loading user data...");
+  }
+
+  if (isError) {
+    console.error("Error fetching user data.");
+  }
+
+  // Language form setup
   const languageForm = useForm<z.infer<typeof languageFormSchema>>({
     resolver: zodResolver(languageFormSchema),
+    defaultValues: { language: userData?.userSettings?.language },
   });
 
+  // Theme form setup
   const themeForm = useForm<z.infer<typeof themeFormSchema>>({
     resolver: zodResolver(themeFormSchema),
+    defaultValues: { theme: userData?.userSettings?.isThemeDark },
   });
+
+  const ctx = api.useUtils();
+
+  // Update user settings mutation with onSuccess handler to update cache
+  const updateUserMutation = api.user.update.useMutation({
+    onSuccess: (newData) => {
+      const updatedData = {
+        ...newData,
+        loginHistories: ctx.user.byWallet
+          .getData({ walletId })
+          ?.loginHistories?.map((history) => ({
+            ...history,
+            _id: history._id.toString(),
+          })),
+      };
+      ctx.user.byWallet.setData({ walletId }, updatedData);
+    },
+    onError: (error) => {
+      console.error("Error updating user:", error);
+    },
+  });
+
+  // Handle user settings update
+  const handleUserSettingsUpdate = () => {
+    const language = languageForm.getValues("language");
+    const isThemeDark = themeForm.getValues("theme");
+
+    updateUserMutation.mutate({
+      walletId,
+      userSettings: {
+        language,
+        isThemeDark,
+      },
+    });
+  };
 
   return (
     <Form {...languageForm}>
@@ -53,7 +112,13 @@ export default function AccountSettings() {
           render={({ field }) => (
             <FormItem className="items-center justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm">
               <FormLabel>Language</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  handleUserSettingsUpdate();
+                }}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue
@@ -62,27 +127,13 @@ export default function AccountSettings() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="hover:cursor-pointer">
-                  <SelectItem className="hover:cursor-pointer" value="English">
-                    English
-                  </SelectItem>
-                  <SelectItem className="hover:cursor-pointer" value="Spanish">
-                    Spanish
-                  </SelectItem>
-                  <SelectItem className="hover:cursor-pointer" value="French">
-                    French
-                  </SelectItem>
-                  <SelectItem className="hover:cursor-pointer" value="German">
-                    German
-                  </SelectItem>
-                  <SelectItem className="hover:cursor-pointer" value="Chinese">
-                    Chinese
-                  </SelectItem>
-                  <SelectItem className="hover:cursor-pointer" value="Russian">
-                    Russian
-                  </SelectItem>
-                  <SelectItem className="hover:cursor-pointer" value="Korean">
-                    Korean
-                  </SelectItem>
+                  <SelectItem value="English">English</SelectItem>
+                  <SelectItem value="Spanish">Spanish</SelectItem>
+                  <SelectItem value="French">French</SelectItem>
+                  <SelectItem value="German">German</SelectItem>
+                  <SelectItem value="Chinese">Chinese</SelectItem>
+                  <SelectItem value="Russian">Russian</SelectItem>
+                  <SelectItem value="Korean">Korean</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>
@@ -109,7 +160,10 @@ export default function AccountSettings() {
                 <Switch
                   className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    handleUserSettingsUpdate();
+                  }}
                 />
               </FormControl>
             </FormItem>

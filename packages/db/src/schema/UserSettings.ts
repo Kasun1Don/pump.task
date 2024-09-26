@@ -1,15 +1,11 @@
 import { prop } from "@typegoose/typegoose";
-import { Types } from "mongoose";
 
 export class UserSettingsClass {
-  @prop({ type: () => String, auto: true })
-  public _id?: Types.ObjectId;
-
   @prop({ default: "English" })
   public language?: string;
 
-  @prop({ default: "dark" })
-  public theme?: string;
+  @prop({ default: true })
+  public isThemeDark?: boolean;
 
   @prop({ default: false })
   public twoFactorAuth?: boolean;
