@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -35,6 +35,7 @@ export default function EmailNotifications({
   walletId: string;
 }): JSX.Element {
   const [isEditMode, setIsEditMode] = useState(false);
+
   const {
     data: userData,
     isLoading,
@@ -44,29 +45,37 @@ export default function EmailNotifications({
   const emailNotificationForm = useForm<z.infer<typeof emailFormSchema>>({
     resolver: zodResolver(emailFormSchema),
     defaultValues: {
-      changeEmail: userData?.email,
-      dueDates: userData?.userSettings?.dueDate ?? false,
-      comments: userData?.userSettings?.comments ?? false,
-      assignedToCard: userData?.userSettings?.assignedToCard ?? false,
-      removedFromCard: userData?.userSettings?.removedFromCard ?? false,
-      changeCardStatus: userData?.userSettings?.changeCardStatus ?? false,
-      newBadge: userData?.userSettings?.newBadge ?? false,
+      changeEmail: "",
+      dueDates: false,
+      comments: false,
+      assignedToCard: false,
+      removedFromCard: false,
+      changeCardStatus: false,
+      newBadge: false,
     },
   });
 
+  useEffect(() => {
+    if (userData) {
+      emailNotificationForm.reset({
+        changeEmail: userData.email,
+        dueDates: userData.userSettings?.dueDate,
+        comments: userData.userSettings?.comments,
+        assignedToCard: userData.userSettings?.assignedToCard,
+        removedFromCard: userData.userSettings?.removedFromCard,
+        changeCardStatus: userData.userSettings?.changeCardStatus,
+        newBadge: userData.userSettings?.newBadge,
+      });
+    }
+  }, [userData, emailNotificationForm]);
+
   const ctx = api.useUtils();
 
-  // Update user settings mutation with onSuccess handler to update cache
+  // Update user settings mutation with onSuccess handler to invalidate cache
   const updateUserMutation = api.user.update.useMutation({
-    onSuccess: (newData) => {
-      ctx.user.byWallet.setData({ walletId }, (prevData) => ({
-        ...prevData,
-        ...newData,
-        loginHistories: prevData?.loginHistories?.map((history) => ({
-          ...history,
-          _id: history._id.toString(),
-        })),
-      }));
+    onSuccess: () => {
+      // Invalidate the cache to trigger a refetch
+      void ctx.user.byWallet.invalidate({ walletId });
     },
     onError: (error) => {
       console.error("Error updating user:", error);
@@ -89,10 +98,11 @@ export default function EmailNotifications({
         newBadge: formValues.newBadge,
       },
     });
+
+    setIsEditMode(false);
   };
 
   if (isLoading) {
-    console.log("Loading user data...");
     return <div>Loading...</div>;
   }
 
@@ -129,7 +139,7 @@ export default function EmailNotifications({
                     />
                   ) : (
                     <span className="text-xs">
-                      {field.value ?? "Enter Email"}
+                      {field.value ?? userData?.email}
                     </span>
                   )}
                 </FormControl>
@@ -169,7 +179,10 @@ export default function EmailNotifications({
                 <Switch
                   className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    handleUserSettingsUpdate();
+                  }}
                 />
               </FormControl>
             </FormItem>
@@ -192,7 +205,10 @@ export default function EmailNotifications({
                 <Switch
                   className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    handleUserSettingsUpdate();
+                  }}
                 />
               </FormControl>
             </FormItem>
@@ -215,7 +231,10 @@ export default function EmailNotifications({
                 <Switch
                   className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    handleUserSettingsUpdate();
+                  }}
                 />
               </FormControl>
             </FormItem>
@@ -238,7 +257,10 @@ export default function EmailNotifications({
                 <Switch
                   className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    handleUserSettingsUpdate();
+                  }}
                 />
               </FormControl>
             </FormItem>
@@ -261,7 +283,10 @@ export default function EmailNotifications({
                 <Switch
                   className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    handleUserSettingsUpdate();
+                  }}
                 />
               </FormControl>
             </FormItem>
@@ -284,7 +309,10 @@ export default function EmailNotifications({
                 <Switch
                   className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    handleUserSettingsUpdate();
+                  }}
                 />
               </FormControl>
             </FormItem>

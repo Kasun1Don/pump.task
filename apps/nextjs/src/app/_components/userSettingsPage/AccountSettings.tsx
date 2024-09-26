@@ -47,14 +47,6 @@ export default function AccountSettings({
     isError,
   } = api.user.byWallet.useQuery({ walletId });
 
-  if (isLoading) {
-    console.log("Loading user data...");
-  }
-
-  if (isError) {
-    console.error("Error fetching user data.");
-  }
-
   // Language form setup
   const languageForm = useForm<z.infer<typeof languageFormSchema>>({
     resolver: zodResolver(languageFormSchema),
@@ -69,19 +61,10 @@ export default function AccountSettings({
 
   const ctx = api.useUtils();
 
-  // Update user settings mutation with onSuccess handler to update cache
+  // Update user settings mutation with onSuccess handler to invalidate cache
   const updateUserMutation = api.user.update.useMutation({
-    onSuccess: (newData) => {
-      const updatedData = {
-        ...newData,
-        loginHistories: ctx.user.byWallet
-          .getData({ walletId })
-          ?.loginHistories?.map((history) => ({
-            ...history,
-            _id: history._id.toString(),
-          })),
-      };
-      ctx.user.byWallet.setData({ walletId }, updatedData);
+    onSuccess: () => {
+      void ctx.user.byWallet.invalidate({ walletId });
     },
     onError: (error) => {
       console.error("Error updating user:", error);
@@ -101,6 +84,14 @@ export default function AccountSettings({
       },
     });
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    console.error("Error fetching user data.");
+  }
 
   return (
     <Form {...languageForm}>

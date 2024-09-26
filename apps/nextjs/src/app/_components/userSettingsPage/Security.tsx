@@ -27,87 +27,52 @@ import {
 } from "@acme/ui/form";
 import { Switch } from "@acme/ui/switch";
 
-// Import Dialog components
+import { api } from "~/trpc/react";
 
+// Define schema for security form
 const securityFormSchema = z.object({
   authentication: z.boolean().default(false).optional(),
   viewLoginHistory: z.boolean().default(false).optional(),
 });
 
-const mockLoginHistory = [
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-  {
-    date: "2021-09-24T07:00:00.000Z",
-    location: "New York, NY",
-    device: "Chrome",
-    os: "Windows",
-  },
-];
-
-export default function Security() {
+export default function Security({
+  walletId,
+}: {
+  walletId: string;
+}): JSX.Element {
   const securityForm = useForm<z.infer<typeof securityFormSchema>>({
     resolver: zodResolver(securityFormSchema),
   });
+
+  const {
+    data: userData,
+    isLoading: isLoading,
+    isError: isError,
+  } = api.loginHistory.loginHistories.useQuery({
+    walletId,
+  });
+
+  // Handle saving the 2FA authentication switch change
+  const handleAuthenticationChange = (checked: boolean) => {
+    // You can add mutation logic here to save the setting if needed
+    console.log("2FA authentication updated:", checked);
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    console.error("Error fetching user data.");
+    return <div>Error loading user data</div>;
+  }
 
   return (
     <Form {...securityForm}>
       <form className="max-w-4/6 w-2/5 min-w-96 items-center justify-between space-y-6 rounded-lg border bg-zinc-950 p-3 shadow-sm">
         <h1>Security</h1>
 
-        {/* Enable 2FA Auth */}
+        {/* Enable 2FA Authentication */}
         <FormField
           control={securityForm.control}
           name="authentication"
@@ -132,7 +97,10 @@ export default function Security() {
                   <Switch
                     className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                     checked={field.value}
-                    onCheckedChange={field.onChange}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked);
+                      handleAuthenticationChange(checked);
+                    }}
                   />
                 </FormControl>
               </div>
@@ -165,30 +133,36 @@ export default function Security() {
                       <DialogTitle>Login History</DialogTitle>
                     </DialogHeader>
                     <Accordion type="single" collapsible>
-                      {mockLoginHistory.map((history, index) => (
+                      {userData?.loginHistories.map((history, index) => (
                         <AccordionItem
                           key={index}
                           value={`item-${index}`}
                           className="mb-4 rounded-lg border bg-zinc-950 p-3 shadow-sm"
                         >
                           <AccordionTrigger>
-                            {history.device} -{" "}
-                            {new Date(history.date).toLocaleString()}
+                            {history.createdAt
+                              ? new Date(history.createdAt).toLocaleString()
+                              : "Date not available"}
                           </AccordionTrigger>
                           <AccordionContent>
                             <div className="space-y-2">
                               <p>
-                                <strong>Date:</strong>{" "}
-                                {new Date(history.date).toLocaleString()}
+                                <strong>Date: </strong>
+                                {history.createdAt
+                                  ? new Date(history.createdAt).toLocaleString()
+                                  : "N/A"}
                               </p>
                               <p>
-                                <strong>Location:</strong> {history.location}
+                                <strong>Location: </strong>
+                                {history.location ?? "unknown"}
                               </p>
                               <p>
-                                <strong>Device:</strong> {history.device}
+                                <strong>Browser: </strong>
+                                {history.browser ?? "unknown"}
                               </p>
                               <p>
-                                <strong>Operating System:</strong> {history.os}
+                                <strong>Operating System: </strong>
+                                {history.operatingSystem ?? "unknown"}
                               </p>
                             </div>
                           </AccordionContent>

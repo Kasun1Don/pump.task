@@ -23,7 +23,7 @@ export default function Page() {
       <EmailNotifications walletId={walletId} />
 
       {/* Security */}
-      <Security />
+      <Security walletId={walletId} />
 
       {/* Delete Account */}
       <DeleteAccount />
