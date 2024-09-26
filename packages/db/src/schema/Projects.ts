@@ -9,11 +9,11 @@ import {
 import { MemberSchema } from "./Member";
 import { StatusSchema } from "./Status";
 
-@modelOptions({ 
-  schemaOptions: { 
+@modelOptions({
+  schemaOptions: {
     collection: "projects",
     timestamps: true,
-  } 
+  },
 })
 export class ProjectClass {
   @prop({ required: true })

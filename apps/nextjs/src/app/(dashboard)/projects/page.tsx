@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
+
 import { api } from "~/trpc/react"; // sets up the tRPC client for React components
 
 const projects = [
@@ -18,7 +19,7 @@ const templates = [
 
 // TODO: card fills with related images + figma UI adjustments
 export default function ProjectsPage() {
-  const router = useRouter(); 
+  const router = useRouter();
   const [showOwnedOnly, setShowOwnedOnly] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -38,7 +39,7 @@ export default function ProjectsPage() {
       setNewProjectName("");
       setSelectedTemplate("");
       // navigate to the Tasks Page after successful creation
-      router.push(`/tasks?projectId=${data.id}`); 
+      router.push(`/tasks?projectId=${data.id}`);
     },
     onError: (error) => {
       console.error("Error creating project:", error);
