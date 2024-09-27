@@ -24,13 +24,17 @@ import {
   FormLabel,
 } from "@acme/ui/form";
 
-// Ensure you have this import
-
 const deleteAccountFormSchema = z.object({
   deleteAccount: z.boolean().default(false).optional(),
 });
 
-export default function DeleteAccount() {
+export default function DeleteAccount({
+  walletId,
+}: {
+  walletId: string;
+}): JSX.Element {
+  console.log(walletId);
+
   const deleteAccountForm = useForm<z.infer<typeof deleteAccountFormSchema>>({
     resolver: zodResolver(deleteAccountFormSchema),
   });

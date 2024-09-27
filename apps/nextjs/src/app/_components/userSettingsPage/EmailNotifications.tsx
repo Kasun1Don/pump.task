@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,100 +16,79 @@ import {
 import { Input } from "@acme/ui/input";
 import { Switch } from "@acme/ui/switch";
 
-import { api } from "~/trpc/react";
+import { updateUserSettings } from "~/app/actions/handleUserSettingsUpdate";
 
 // Schema for the form fields
 const emailFormSchema = z.object({
   changeEmail: z.string().optional(),
-  dueDates: z.boolean().default(false).optional(),
-  comments: z.boolean().default(false).optional(),
-  assignedToCard: z.boolean().default(false).optional(),
-  removedFromCard: z.boolean().default(false).optional(),
-  changeCardStatus: z.boolean().default(false).optional(),
-  newBadge: z.boolean().default(false).optional(),
+  dueDates: z.boolean().optional(),
+  comments: z.boolean().optional(),
+  assignToCard: z.boolean().optional(),
+  removedFromCard: z.boolean().optional(),
+  changeCardStatus: z.boolean().optional(),
+  newBadge: z.boolean().optional(),
 });
 
 export default function EmailNotifications({
+  email,
+  dueDate,
+  comments,
+  assignToCard,
+  removeFromCard,
+  changeCardStatus,
+  newBadge,
   walletId,
 }: {
+  email: string | undefined;
+  dueDate: boolean | undefined;
+  comments: boolean | undefined;
+  assignToCard: boolean | undefined;
+  removeFromCard: boolean | undefined;
+  changeCardStatus: boolean | undefined;
+  newBadge: boolean | undefined;
   walletId: string;
 }): JSX.Element {
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const {
-    data: userData,
-    isLoading,
-    isError,
-  } = api.user.byWallet.useQuery({ walletId });
-
   const emailNotificationForm = useForm<z.infer<typeof emailFormSchema>>({
     resolver: zodResolver(emailFormSchema),
     defaultValues: {
-      changeEmail: "",
-      dueDates: false,
-      comments: false,
-      assignedToCard: false,
-      removedFromCard: false,
-      changeCardStatus: false,
-      newBadge: false,
-    },
-  });
-
-  useEffect(() => {
-    if (userData) {
-      emailNotificationForm.reset({
-        changeEmail: userData.email,
-        dueDates: userData.userSettings?.dueDate,
-        comments: userData.userSettings?.comments,
-        assignedToCard: userData.userSettings?.assignedToCard,
-        removedFromCard: userData.userSettings?.removedFromCard,
-        changeCardStatus: userData.userSettings?.changeCardStatus,
-        newBadge: userData.userSettings?.newBadge,
-      });
-    }
-  }, [userData, emailNotificationForm]);
-
-  const ctx = api.useUtils();
-
-  // Update user settings mutation with onSuccess handler to invalidate cache
-  const updateUserMutation = api.user.update.useMutation({
-    onSuccess: () => {
-      // Invalidate the cache to trigger a refetch
-      void ctx.user.byWallet.invalidate({ walletId });
-    },
-    onError: (error) => {
-      console.error("Error updating user:", error);
+      changeEmail: email,
+      dueDates: dueDate,
+      comments: comments,
+      assignToCard: assignToCard,
+      removedFromCard: removeFromCard,
+      changeCardStatus: changeCardStatus,
+      newBadge: newBadge,
     },
   });
 
   // Handle user settings update
-  const handleUserSettingsUpdate = () => {
-    const formValues = emailNotificationForm.getValues();
+  const handleUserSettingsUpdate = async () => {
+    const email = emailNotificationForm.getValues("changeEmail");
+    const dueDates = emailNotificationForm.getValues("dueDates");
+    const comments = emailNotificationForm.getValues("comments");
+    const assignedToCard = emailNotificationForm.getValues("assignToCard");
+    const removedFromCard = emailNotificationForm.getValues("removedFromCard");
+    const changeCardStatus =
+      emailNotificationForm.getValues("changeCardStatus");
+    const newBadge = emailNotificationForm.getValues("newBadge");
 
-    updateUserMutation.mutate({
+    const settingsToUpdate = {
       walletId,
-      email: formValues.changeEmail,
-      userSettings: {
-        dueDate: formValues.dueDates,
-        comments: formValues.comments,
-        assignedToCard: formValues.assignedToCard,
-        removedFromCard: formValues.removedFromCard,
-        changeCardStatus: formValues.changeCardStatus,
-        newBadge: formValues.newBadge,
-      },
-    });
+      email: email,
+      dueDate: dueDates,
+      comments: comments,
+      assignedToCard: assignedToCard,
+      removedFromCard: removedFromCard,
+      changeCardStatus: changeCardStatus,
+      newBadge: newBadge,
+    };
+
+    await updateUserSettings(settingsToUpdate);
 
     setIsEditMode(false);
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (isError) {
-    console.error("Error fetching user data.");
-    return <div>Error loading user data</div>;
-  }
 
   return (
     <Form {...emailNotificationForm}>
@@ -125,22 +104,20 @@ export default function EmailNotifications({
               <div className="space-y-0.5">
                 <FormLabel>Change Notification Email</FormLabel>
                 <FormDescription>
-                  Change the email address where you receive notifications.
+                  Change where you receive notifications.
                 </FormDescription>
               </div>
-              <div className="mr-2 flex flex-row items-center justify-center gap-2">
+              <div className="mr-2 flex w-fit flex-row items-center justify-center gap-4 px-6 py-4">
                 <FormControl>
                   {isEditMode ? (
                     <Input
-                      value={field.value ?? ""}
+                      value={field.value}
                       onChange={field.onChange}
-                      className="size-4 w-fit rounded-lg border bg-zinc-950 p-3 shadow-sm"
+                      className="mx-4 w-fit rounded-lg border bg-zinc-950 px-6 py-4 text-xs shadow-sm"
                       placeholder="Enter new email"
                     />
                   ) : (
-                    <span className="text-xs">
-                      {field.value ?? userData?.email}
-                    </span>
+                    <span className="text-xs">{field.value}</span>
                   )}
                 </FormControl>
                 <button
@@ -148,7 +125,7 @@ export default function EmailNotifications({
                   className="text-zesty-green ml-4 w-7 text-sm"
                   onClick={() => {
                     if (isEditMode) {
-                      handleUserSettingsUpdate();
+                      void handleUserSettingsUpdate();
                     } else {
                       setIsEditMode(true);
                     }
@@ -181,7 +158,7 @@ export default function EmailNotifications({
                   checked={field.value}
                   onCheckedChange={(checked) => {
                     field.onChange(checked);
-                    handleUserSettingsUpdate();
+                    void handleUserSettingsUpdate();
                   }}
                 />
               </FormControl>
@@ -207,7 +184,7 @@ export default function EmailNotifications({
                   checked={field.value}
                   onCheckedChange={(checked) => {
                     field.onChange(checked);
-                    handleUserSettingsUpdate();
+                    void handleUserSettingsUpdate();
                   }}
                 />
               </FormControl>
@@ -218,7 +195,7 @@ export default function EmailNotifications({
         {/* Assigned to a Card */}
         <FormField
           control={emailNotificationForm.control}
-          name="assignedToCard"
+          name="assignToCard"
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm">
               <div className="space-y-0.5">
@@ -233,7 +210,7 @@ export default function EmailNotifications({
                   checked={field.value}
                   onCheckedChange={(checked) => {
                     field.onChange(checked);
-                    handleUserSettingsUpdate();
+                    void handleUserSettingsUpdate();
                   }}
                 />
               </FormControl>
@@ -259,7 +236,7 @@ export default function EmailNotifications({
                   checked={field.value}
                   onCheckedChange={(checked) => {
                     field.onChange(checked);
-                    handleUserSettingsUpdate();
+                    void handleUserSettingsUpdate();
                   }}
                 />
               </FormControl>
@@ -285,7 +262,7 @@ export default function EmailNotifications({
                   checked={field.value}
                   onCheckedChange={(checked) => {
                     field.onChange(checked);
-                    handleUserSettingsUpdate();
+                    void handleUserSettingsUpdate();
                   }}
                 />
               </FormControl>
@@ -311,7 +288,7 @@ export default function EmailNotifications({
                   checked={field.value}
                   onCheckedChange={(checked) => {
                     field.onChange(checked);
-                    handleUserSettingsUpdate();
+                    void handleUserSettingsUpdate();
                   }}
                 />
               </FormControl>

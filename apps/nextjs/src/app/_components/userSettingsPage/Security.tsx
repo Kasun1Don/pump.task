@@ -36,13 +36,41 @@ const securityFormSchema = z.object({
 });
 
 export default function Security({
+  emailVerified,
+  authentication,
   walletId,
 }: {
+  emailVerified: boolean | undefined;
+  authentication: boolean | undefined;
   walletId: string;
 }): JSX.Element {
+  if (emailVerified) {
+    authentication = true;
+  }
+
   const securityForm = useForm<z.infer<typeof securityFormSchema>>({
     resolver: zodResolver(securityFormSchema),
+    defaultValues: {
+      authentication: authentication,
+    },
   });
+
+  /* 
+
+  If the emailVerifed is false, then the user should be able to enable 2FA
+
+  If the authencation is true, but the emailVerified is false, then the verify now button should be enabled
+  If the authencation is true and the emailVerified is true, then a verified text should be diabled
+
+ 
+
+  1. check 
+
+*/
+
+  // If the emailVerified is true, then the user should be able to disable 2FA
+
+  // If the user disables 2FA
 
   const {
     data: userData,
@@ -52,10 +80,13 @@ export default function Security({
     walletId,
   });
 
-  // Handle saving the 2FA authentication switch change
   const handleAuthenticationChange = (checked: boolean) => {
-    // You can add mutation logic here to save the setting if needed
-    console.log("2FA authentication updated:", checked);
+    if (checked) {
+      console.log("2FA authentication enabled");
+      return;
+    } else {
+      console.log("2FA authentication disabled");
+    }
   };
 
   if (isLoading) {
@@ -85,14 +116,18 @@ export default function Security({
                 </FormDescription>
               </div>
               <div className="flex items-center justify-center gap-6">
-                {field.value && (
-                  <button
-                    type="button"
-                    className="text-zesty-green ml-4 text-sm"
-                  >
-                    Verify Now
-                  </button>
-                )}
+                {field.value ? (
+                  !emailVerified ? (
+                    <button
+                      type="button"
+                      className="text-zesty-green ml-4 text-sm"
+                    >
+                      Verify Now
+                    </button>
+                  ) : (
+                    <p className="text-zesty-green">Verified</p>
+                  )
+                ) : null}
                 <FormControl>
                   <Switch
                     className={field.value ? "bg-zesty-green" : "bg-gray-200"}

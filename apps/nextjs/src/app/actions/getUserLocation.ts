@@ -27,10 +27,10 @@ export async function getUserLocation() {
   const reqHeaders = headers();
   const ip = reqHeaders.get("x-forwarded-for") ?? "unknown";
 
+  const API_KEY = process.env.IPINFO_API_KEY;
+
   // Fetch location details from an external API
-  const response = await fetch(
-    `https://ipinfo.io/${ip}/json?token=82e35d002b181d`,
-  );
+  const response = await fetch(`https://ipinfo.io/${ip}/json?token=${API_KEY}`);
   if (!response.ok) {
     throw new Error("Failed to fetch location");
   }

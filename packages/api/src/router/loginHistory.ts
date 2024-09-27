@@ -10,7 +10,7 @@ export const loginHistoryRouter = {
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
       try {
-        const user = await User.findOne({ walletId: input.walletId });
+        const user = await User.findOne({ walletId: input.walletId }).lean();
 
         if (!user) {
           throw new Error("User not found");
@@ -18,9 +18,14 @@ export const loginHistoryRouter = {
 
         const loginHistories = await LoginHistory.find({
           _id: { $in: user.loginHistories },
-        });
+        })
+          .sort({ createdAt: -1 })
+          .limit(20)
+          .lean();
 
         const serializedUser = {
+          ...user,
+          _id: user._id.toString(),
           loginHistories: loginHistories.map((history) => ({
             ...history,
             _id: history._id.toString(),

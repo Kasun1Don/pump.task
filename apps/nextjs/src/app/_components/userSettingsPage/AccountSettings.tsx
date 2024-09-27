@@ -22,76 +22,48 @@ import {
 } from "@acme/ui/select";
 import { Switch } from "@acme/ui/switch";
 
-import { api } from "~/trpc/react";
+import { updateUserSettings } from "~/app/actions/handleUserSettingsUpdate";
 
 // Language form zod schema
 const languageFormSchema = z.object({
-  language: z
-    .string({ required_error: "Please select a language." })
-    .default("English"),
+  language: z.string(),
 });
 
-// Theme form zod schema
 const themeFormSchema = z.object({
-  theme: z.boolean().default(true).optional(),
+  theme: z.boolean().optional(),
 });
 
 export default function AccountSettings({
+  language,
+  theme,
   walletId,
 }: {
+  language: string | undefined;
+  theme: boolean | undefined;
   walletId: string;
-}): JSX.Element {
-  const {
-    data: userData,
-    isLoading,
-    isError,
-  } = api.user.byWallet.useQuery({ walletId });
-
-  // Language form setup
-  const languageForm = useForm<z.infer<typeof languageFormSchema>>({
+}) {
+  const languageForm = useForm({
     resolver: zodResolver(languageFormSchema),
-    defaultValues: { language: userData?.userSettings?.language },
+    defaultValues: { language: language },
   });
 
-  // Theme form setup
-  const themeForm = useForm<z.infer<typeof themeFormSchema>>({
+  const themeForm = useForm({
     resolver: zodResolver(themeFormSchema),
-    defaultValues: { theme: userData?.userSettings?.isThemeDark },
+    defaultValues: { theme: theme },
   });
 
-  const ctx = api.useUtils();
-
-  // Update user settings mutation with onSuccess handler to invalidate cache
-  const updateUserMutation = api.user.update.useMutation({
-    onSuccess: () => {
-      void ctx.user.byWallet.invalidate({ walletId });
-    },
-    onError: (error) => {
-      console.error("Error updating user:", error);
-    },
-  });
-
-  // Handle user settings update
-  const handleUserSettingsUpdate = () => {
+  const handleUserSettingsUpdate = async () => {
     const language = languageForm.getValues("language");
     const isThemeDark = themeForm.getValues("theme");
 
-    updateUserMutation.mutate({
+    const settingsToUpdate = {
       walletId,
-      userSettings: {
-        language,
-        isThemeDark,
-      },
-    });
+      language: language,
+      isThemeDark: isThemeDark,
+    };
+
+    await updateUserSettings(settingsToUpdate);
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (isError) {
-    console.error("Error fetching user data.");
-  }
 
   return (
     <Form {...languageForm}>
@@ -106,15 +78,13 @@ export default function AccountSettings({
               <Select
                 onValueChange={(value) => {
                   field.onChange(value);
-                  handleUserSettingsUpdate();
+                  void handleUserSettingsUpdate();
                 }}
                 value={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue
-                      placeholder={field.value || "Select language"}
-                    />
+                    <SelectValue placeholder={field.value} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="hover:cursor-pointer">
@@ -153,7 +123,7 @@ export default function AccountSettings({
                   checked={field.value}
                   onCheckedChange={(checked) => {
                     field.onChange(checked);
-                    handleUserSettingsUpdate();
+                    void handleUserSettingsUpdate();
                   }}
                 />
               </FormControl>
