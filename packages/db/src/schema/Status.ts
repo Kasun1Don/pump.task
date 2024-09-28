@@ -6,14 +6,14 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
-import { TaskClass } from "./TasksSchema";
+import { TasksSchema } from "./TasksSchema";
 
 export class StatusSchema {
   @prop({ required: true })
   public name!: string;
 
-  @prop({ type: () => [TaskClass], default: [] })
-  public tasks!: TaskClass[];
+  @prop({ type: () => [TasksSchema], default: [] })
+  public tasks!: TasksSchema[];
 }
 
 @modelOptions({ schemaOptions: { collection: "status" } }) // specify collection name for mongoose
