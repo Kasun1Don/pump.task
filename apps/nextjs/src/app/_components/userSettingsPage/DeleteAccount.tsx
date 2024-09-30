@@ -59,9 +59,7 @@ export default function DeleteAccount({
               <div className="flex items-center justify-center gap-6">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button className="bg-zesty-green hover:bg-zesty-green">
-                      Remove Account
-                    </Button>
+                    <Button className="bg-zesty-green">Remove Account</Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
@@ -76,7 +74,7 @@ export default function DeleteAccount({
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        className="bg-zesty-green hover:bg-zesty-green"
+                        className="bg-zesty-green"
                         onClick={onDeleteConfirm}
                       >
                         Continue

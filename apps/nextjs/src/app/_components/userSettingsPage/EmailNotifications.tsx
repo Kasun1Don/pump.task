@@ -20,7 +20,7 @@ import { updateUserSettings } from "~/app/actions/handleUserSettingsUpdate";
 
 // Schema for the form fields
 const emailFormSchema = z.object({
-  changeEmail: z.string().optional(),
+  changeEmail: z.string().email({ message: "Invalid email address" }),
   dueDates: z.boolean().optional(),
   comments: z.boolean().optional(),
   assignToCard: z.boolean().optional(),
@@ -99,33 +99,43 @@ export default function EmailNotifications({
         <FormField
           control={emailNotificationForm.control}
           name="changeEmail"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm">
-              <div className="space-y-0.5">
-                <FormLabel>Change Notification Email</FormLabel>
+              <div className="max-w-60 space-y-0.5">
+                <FormLabel>Email</FormLabel>
                 <FormDescription>
-                  Change where you receive notifications.
+                  Change your email for notifications & 2FA Authentication.
                 </FormDescription>
               </div>
-              <div className="mr-2 flex w-fit flex-row items-center justify-center gap-4 px-6 py-4">
+              <div className="flex w-fit flex-row items-center justify-center gap-8 px-6 py-4">
                 <FormControl>
                   {isEditMode ? (
-                    <Input
-                      value={field.value}
-                      onChange={field.onChange}
-                      className="mx-4 w-fit rounded-lg border bg-zinc-950 px-6 py-4 text-xs shadow-sm"
-                      placeholder="Enter new email"
-                    />
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="mx-4 w-auto min-w-[200px] rounded-lg border bg-zinc-950 px-6 py-4 text-xs shadow-sm"
+                        placeholder="Enter new email"
+                      />
+                      {fieldState.error && (
+                        <span className="text-xs text-red-500">
+                          {fieldState.error.message}
+                        </span>
+                      )}
+                    </div>
                   ) : (
                     <span className="text-xs">{field.value}</span>
                   )}
                 </FormControl>
                 <button
                   type="button"
-                  className="text-zesty-green ml-4 w-7 text-sm"
+                  className="text-zesty-green w-7 text-sm"
                   onClick={() => {
                     if (isEditMode) {
-                      void handleUserSettingsUpdate();
+                      void emailNotificationForm.handleSubmit(async () => {
+                        await handleUserSettingsUpdate();
+                        setIsEditMode(false);
+                      })();
                     } else {
                       setIsEditMode(true);
                     }

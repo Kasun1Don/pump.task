@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,9 +11,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@acme/ui/accordion";
+import { Button } from "@acme/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -25,6 +29,8 @@ import {
   FormItem,
   FormLabel,
 } from "@acme/ui/form";
+import { Input } from "@acme/ui/input";
+import { Label } from "@acme/ui/label";
 import { Switch } from "@acme/ui/switch";
 
 import { api } from "~/trpc/react";
@@ -39,14 +45,15 @@ export default function Security({
   emailVerified,
   authentication,
   walletId,
+  email,
 }: {
   emailVerified: boolean | undefined;
   authentication: boolean | undefined;
   walletId: string;
+  email: string | undefined;
 }): JSX.Element {
-  if (emailVerified) {
-    authentication = true;
-  }
+  console.log(email);
+  const [emailCodeSent, setEmailCodeSent] = useState(false);
 
   const securityForm = useForm<z.infer<typeof securityFormSchema>>({
     resolver: zodResolver(securityFormSchema),
@@ -89,15 +96,6 @@ export default function Security({
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (isError) {
-    console.error("Error fetching user data.");
-    return <div>Error loading user data</div>;
-  }
-
   return (
     <Form {...securityForm}>
       <form className="max-w-4/6 w-2/5 min-w-96 items-center justify-between space-y-6 rounded-lg border bg-zinc-950 p-3 shadow-sm">
@@ -116,17 +114,81 @@ export default function Security({
                 </FormDescription>
               </div>
               <div className="flex items-center justify-center gap-6">
-                {field.value ? (
-                  !emailVerified ? (
-                    <button
-                      type="button"
-                      className="text-zesty-green ml-4 text-sm"
-                    >
-                      Verify Now
-                    </button>
-                  ) : (
-                    <p className="text-zesty-green">Verified</p>
-                  )
+                {field.value && !emailVerified ? (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button
+                        type="button"
+                        className="text-zesty-green ml-4 text-sm"
+                      >
+                        Verify Now
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Secure your account</DialogTitle>
+                        <DialogDescription>
+                          Enter your email address to receive a verification
+                          code.
+                        </DialogDescription>
+                      </DialogHeader>
+                      {!emailCodeSent ? (
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="email" className="text-right">
+                              Email
+                            </Label>
+                            <Input
+                              id="email"
+                              defaultValue={userData?.email ?? ""}
+                              className="col-span-3"
+                              disabled={true}
+                            />
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              className="sm\:justify-center bg-zesty-green"
+                              type="submit"
+                              onClick={() => setEmailCodeSent(!emailCodeSent)}
+                            >
+                              Send Code
+                            </Button>
+                          </DialogFooter>
+                        </div>
+                      ) : (
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="email" className="text-right">
+                              Email
+                            </Label>
+                            <Input
+                              id="email"
+                              value={userData?.email ?? ""}
+                              className="col-span-3"
+                              disabled={true}
+                            />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="code" className="text-right">
+                              Code
+                            </Label>
+                            <Input id="code" className="col-span-3" />
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              className="sm\:justify-center bg-zesty-green"
+                              type="submit"
+                              onClick={() => setEmailCodeSent(!emailCodeSent)}
+                            >
+                              Submit
+                            </Button>
+                          </DialogFooter>
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
+                ) : field.value && emailVerified ? (
+                  <p className="text-zesty-green">Verified</p>
                 ) : null}
                 <FormControl>
                   <Switch
@@ -156,10 +218,7 @@ export default function Security({
               <FormControl>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button
-                      type="button"
-                      className="text-zesty-green ml-6 text-sm"
-                    >
+                    <button type="button" className="text-zesty-green text-sm">
                       Show History
                     </button>
                   </DialogTrigger>
@@ -168,41 +227,51 @@ export default function Security({
                       <DialogTitle>Login History</DialogTitle>
                     </DialogHeader>
                     <Accordion type="single" collapsible>
-                      {userData?.loginHistories.map((history, index) => (
-                        <AccordionItem
-                          key={index}
-                          value={`item-${index}`}
-                          className="mb-4 rounded-lg border bg-zinc-950 p-3 shadow-sm"
-                        >
-                          <AccordionTrigger>
-                            {history.createdAt
-                              ? new Date(history.createdAt).toLocaleString()
-                              : "Date not available"}
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <div className="space-y-2">
-                              <p>
-                                <strong>Date: </strong>
-                                {history.createdAt
-                                  ? new Date(history.createdAt).toLocaleString()
-                                  : "N/A"}
-                              </p>
-                              <p>
-                                <strong>Location: </strong>
-                                {history.location ?? "unknown"}
-                              </p>
-                              <p>
-                                <strong>Browser: </strong>
-                                {history.browser ?? "unknown"}
-                              </p>
-                              <p>
-                                <strong>Operating System: </strong>
-                                {history.operatingSystem ?? "unknown"}
-                              </p>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
+                      {isLoading ? (
+                        <p>Loading...</p>
+                      ) : isError ? (
+                        <p>Error loading login history.</p>
+                      ) : userData?.loginHistories ? (
+                        userData.loginHistories.map((history, index) => (
+                          <AccordionItem
+                            key={index}
+                            value={`item-${index}`}
+                            className="mb-4 rounded-lg border bg-zinc-950 p-3 shadow-sm"
+                          >
+                            <AccordionTrigger>
+                              {history.createdAt
+                                ? new Date(history.createdAt).toLocaleString()
+                                : "Date not available"}
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <div className="space-y-2">
+                                <p>
+                                  <strong>Date: </strong>
+                                  {history.createdAt
+                                    ? new Date(
+                                        history.createdAt,
+                                      ).toLocaleString()
+                                    : "N/A"}
+                                </p>
+                                <p>
+                                  <strong>Location: </strong>
+                                  {history.location ?? "unknown"}
+                                </p>
+                                <p>
+                                  <strong>Browser: </strong>
+                                  {history.browser ?? "unknown"}
+                                </p>
+                                <p>
+                                  <strong>Operating System: </strong>
+                                  {history.operatingSystem ?? "unknown"}
+                                </p>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))
+                      ) : (
+                        <p>No login history available.</p>
+                      )}
                     </Accordion>
                   </DialogContent>
                 </Dialog>

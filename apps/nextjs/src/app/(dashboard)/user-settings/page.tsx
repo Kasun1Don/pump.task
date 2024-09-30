@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import type { LoginHistoryClass, UserClass } from "@acme/db";
+import type { UserClass } from "@acme/db";
 
 import AccountSettings from "~/app/_components/userSettingsPage/AccountSettings";
 import DeleteAccount from "~/app/_components/userSettingsPage/DeleteAccount";
@@ -16,9 +16,10 @@ export default async function Page() {
     return <div>Error: Wallet ID not found.</div>;
   }
 
-  const response = await api.loginHistory.loginHistories({ walletId });
+  const response = await api.user.byWallet({ walletId });
 
-  const userData: UserClass | null = response as LoginHistoryClass as UserClass;
+  // Destructure user data from response
+  const userData: UserClass | null = response as UserClass;
 
   return (
     <section className="my-8 flex flex-col items-center justify-center gap-4 pb-48">
@@ -41,6 +42,7 @@ export default async function Page() {
         emailVerified={userData.emailVerified}
         authentication={userData.userSettings?.twoFactorAuth}
         walletId={walletId}
+        email={userData.email}
       />
       <DeleteAccount walletId={walletId} />
     </section>

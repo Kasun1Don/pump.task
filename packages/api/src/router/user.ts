@@ -271,7 +271,6 @@ export const userRouter = {
             language: z.string().optional(),
             isThemeDark: z.boolean().optional(),
             twoFactorAuth: z.boolean().optional(),
-            notificationEmail: z.string().email().optional(),
             dueDate: z.boolean().optional(),
             comments: z.boolean().optional(),
             assignedToCard: z.boolean().optional(),
@@ -284,48 +283,53 @@ export const userRouter = {
     )
     .mutation(async ({ input }) => {
       try {
-        // Find user by wallet ID
-        const user = await User.findOne({ walletId: input.walletId });
+        const user = await User.findOne({ walletId: input.walletId }).lean();
 
         if (!user) {
           throw new Error("User not found");
         }
 
-        // Update the user details
+        const updatedData = {
+          name: input.name ?? user.name,
+          email: input.email ?? user.email,
+          image: input.image ?? user.image,
+          userSettings: {
+            language:
+              input.userSettings?.language ?? user.userSettings?.language,
+            isThemeDark:
+              input.userSettings?.isThemeDark ?? user.userSettings?.isThemeDark,
+            twoFactorAuth:
+              input.userSettings?.twoFactorAuth ??
+              user.userSettings?.twoFactorAuth,
+            dueDate: input.userSettings?.dueDate ?? user.userSettings?.dueDate,
+            comments:
+              input.userSettings?.comments ?? user.userSettings?.comments,
+            assignedToCard:
+              input.userSettings?.assignedToCard ??
+              user.userSettings?.assignedToCard,
+            removedFromCard:
+              input.userSettings?.removedFromCard ??
+              user.userSettings?.removedFromCard,
+            changeCardStatus:
+              input.userSettings?.changeCardStatus ??
+              user.userSettings?.changeCardStatus,
+            newBadge:
+              input.userSettings?.newBadge ?? user.userSettings?.newBadge,
+          },
+        };
+
+        // Update the user with the merged data
         const updatedUser = await User.findByIdAndUpdate(
           user._id,
-          {
-            ...(input.name && { name: input.name }),
-            ...(input.email && { email: input.email }),
-            ...(input.image && { image: input.image }),
-            ...(input.userSettings && { userSettings: input.userSettings }),
-          },
+          updatedData,
           { new: true },
-        )
-          .populate({
-            path: "projects",
-            model: "ProjectClass",
-          })
-          .lean();
+        );
 
         if (!updatedUser) {
           throw new Error("Failed to update user details");
         }
 
-        // Convert ObjectIds to strings
-        const serializedUser = {
-          ...updatedUser,
-          _id: updatedUser._id.toString(),
-          projects: updatedUser.projects?.map((project) => ({
-            ...project,
-            _id: project._id.toString(),
-          })),
-          loginhistories: updatedUser.loginHistories?.map((history) => ({
-            _id: history._id.toString(),
-          })),
-        };
-
-        return serializedUser;
+        return updatedUser;
       } catch (error) {
         console.error("Error updating user details:", error);
         throw new Error("Failed to update user details");
