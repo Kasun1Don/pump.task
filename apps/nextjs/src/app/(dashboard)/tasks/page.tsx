@@ -1,9 +1,14 @@
-import Task from "../../_components/TaskExample";
+import TaskStatusColumn from "~/app/_components/_task/task-status-column";
 
-export default function Page() {
+export default function TasksPage() {
   return (
     <div>
-      <Task />
+      <h1 className="flex justify-center">Tasks Page</h1>
+      <div className="flex flex-row gap-3 p-6">
+        <TaskStatusColumn statusTitle="To Do" />
+        <TaskStatusColumn statusTitle="In Progress" />
+        <TaskStatusColumn statusTitle="Done" />
+      </div>
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveWallet, useDisconnect } from "thirdweb/react";
 
+import { logout } from "~/app/actions/authFront";
+
 /**
  * @author Benjamin Davies
  * @description HotKeyEventListeners component to listen for key presses when the user has signed into there account, additional hotkeys can be added here also, At the moment both hotkeys for Mac and Windows are the truthy is dosent matter if the user is on a Mac and presses Ctrl instead of Command it will still work and vise versa.
@@ -18,16 +20,13 @@ export default function HotKeyEventListeners() {
   // Function to handle logout and disconnect wallet
   const handleLogout = () => {
     if (wallet) {
-      // Disconnect the wallet
       disconnect(wallet);
+      logout()
+        .then(() => {
+          router.push("/");
+        })
+        .catch((err) => console.log(err));
     }
-
-    // Delete JWT cookie (client-side cookie deletion is handled via document.cookie as next/headers doesn't is not supported in client components)
-    // Set the cookie to randomly expire in the past      The path is set to root to ensure the cookie is deleted from all paths
-    document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-
-    // Navigate to home page
-    router.push("/");
   };
 
   // Function to handle key presses

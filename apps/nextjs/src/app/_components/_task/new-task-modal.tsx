@@ -25,8 +25,10 @@ import {
   SelectValue,
 } from "@acme/ui/select";
 
+import { api } from "~/trpc/react";
+
 const NewTaskModal = () => {
-  const presetTags = [
+  const defaultTags = [
     "Frontend",
     "Backend",
     "Design",
@@ -34,15 +36,25 @@ const NewTaskModal = () => {
     "Integration",
   ];
 
+  // Define the type for task status
+  type TaskStatus = "To Do" | "In Progress" | "In QA" | "Done" | "Approved";
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState<TaskStatus>("To Do");
+  const [assignee, setAssignee] = useState<string>("Un Assigned");
+
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [userTags, setUserTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
-  const [date, setDate] = useState<Date>();
+  const [dueDate, setDueDate] = useState<Date>();
 
-  const [extraFields, setExtraFields] = useState<
+  const [customFields, setCustomFields] = useState<
     { fieldName: string; fieldValue: string }[]
   >([]);
   const [newFieldName, setNewFieldName] = useState<string>("");
+
+  const addTaskMutation = api.task.addTask.useMutation();
 
   const toggleTagSelection = (tag: string) => {
     setSelectedTags((prevSelectedTags) =>
@@ -55,7 +67,7 @@ const NewTaskModal = () => {
   const handleAddTag = () => {
     if (
       newTag.trim() &&
-      !presetTags.includes(newTag) &&
+      !defaultTags.includes(newTag) &&
       !userTags.includes(newTag)
     ) {
       setUserTags([...userTags, newTag]);
@@ -71,7 +83,7 @@ const NewTaskModal = () => {
   // Handle adding new custom field
   const handleAddField = () => {
     if (newFieldName.trim()) {
-      setExtraFields((prevFields) => [
+      setCustomFields((prevFields) => [
         ...prevFields,
         { fieldName: newFieldName, fieldValue: "" },
       ]);
@@ -81,24 +93,61 @@ const NewTaskModal = () => {
 
   // Handle removing a custom field
   const handleRemoveField = (index: number) => {
-    const updatedFields = [...extraFields];
+    const updatedFields = [...customFields];
     updatedFields.splice(index, 1);
-    setExtraFields(updatedFields);
+    setCustomFields(updatedFields);
   };
 
   // Handle field value change
   const handleFieldChange = (index: number, value: string) => {
-    const updatedFields = [...extraFields];
+    const updatedFields = [...customFields];
     if (updatedFields[index]) {
       updatedFields[index].fieldValue = value;
-      setExtraFields(updatedFields);
+      setCustomFields(updatedFields);
+    }
+  };
+
+  // Handle form submission to add a new task
+  const handleCreateTask = async () => {
+    try {
+      const selectedDefaultTags = selectedTags.filter((tag) =>
+        defaultTags.includes(tag),
+      );
+
+      const selectedUserTags = selectedTags.filter((tag) =>
+        userTags.includes(tag),
+      );
+
+      // Prepare the data to be sent to the server
+      const taskData = {
+        title, // You would collect the actual title from the form
+        description, // You would collect the actual description from the form
+        dueDate: dueDate ? dueDate.toISOString() : "", //date?.toISOString() || "" Ensure the date is formatted correctly
+        status,
+        assignee,
+        tags: {
+          defaultTags: selectedDefaultTags,
+          userGeneratedTags: selectedUserTags,
+        },
+        customFields: customFields,
+      };
+
+      // Send the task data to the tRPC mutation
+      await addTaskMutation.mutateAsync(taskData);
+
+      // Handle success (you can display a success message or close the dialog)
+      console.log("Task created successfully");
+    } catch (error) {
+      console.error("Error creating task:", error);
     }
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-zesty-green text-black">+ New task</Button>
+        <Button className="max-h=[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
+          + New task
+        </Button>
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] max-w-[50vw] flex-col overflow-auto rounded-lg bg-gray-900 p-6 text-white">
         <DialogHeader>
@@ -110,7 +159,7 @@ const NewTaskModal = () => {
           <h3 className="mb-2">TAGS</h3>
           <div className="flex flex-wrap gap-2">
             {/* Preset Tags (Cannot be deleted) */}
-            {presetTags.map((tag) => (
+            {defaultTags.map((tag) => (
               <div key={tag} className="flex items-center">
                 <Button
                   onClick={() => toggleTagSelection(tag)}
@@ -180,7 +229,12 @@ const NewTaskModal = () => {
         {/* Title */}
         <div className="mb-4 flex-grow">
           <h3 className="mb-2">TITLE</h3>
-          <Input placeholder="Enter short task title." className="h-24"></Input>
+          <Input
+            placeholder="Enter short task title."
+            className="h-24"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          ></Input>
         </div>
 
         {/* Description */}
@@ -189,6 +243,8 @@ const NewTaskModal = () => {
           <Input
             placeholder="Enter detailed task description."
             className="h-24 flex-wrap"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           ></Input>
         </div>
 
@@ -201,7 +257,7 @@ const NewTaskModal = () => {
                 variant={"outline"}
                 className={cn(
                   "w-[280px] justify-start text-left font-normal",
-                  !date && "text-muted-foreground",
+                  !dueDate && "text-muted-foreground",
                 )}
               >
                 <Image
@@ -211,14 +267,14 @@ const NewTaskModal = () => {
                   height={150}
                   className="mr-2 h-4 w-4"
                 />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
+                {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
-                selected={date}
-                onSelect={setDate}
+                selected={dueDate}
+                onSelect={setDueDate}
                 initialFocus
               />
             </PopoverContent>
@@ -229,39 +285,42 @@ const NewTaskModal = () => {
         <div className="mb-6 flex flex-shrink-0 gap-4">
           <div className="w-1/2">
             <h3 className="mb-2">STATUS</h3>
-            <Select defaultValue="to do">
+            <Select
+              defaultValue="To Do"
+              onValueChange={(value) => setStatus(value as TaskStatus)}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="to do">To Do</SelectItem>
-                <SelectItem value="in progress">In Progress</SelectItem>
-                <SelectItem value="in qa">In QA</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="To Do">To Do</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="In QA">In QA</SelectItem>
+                <SelectItem value="Done">Done</SelectItem>
+                <SelectItem value="Approved">Approved</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="w-1/2">
             <h3 className="mb-2">ASSIGNEE</h3>
-            <Select defaultValue="un assigned">
+            <Select defaultValue="Un Assigned" onValueChange={setAssignee}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="assign to me">Assign To Me</SelectItem>
-                <SelectItem value="un assigned">Un Assigned</SelectItem>
+                <SelectItem value="Assign To Me">Assign To Me</SelectItem>
+                <SelectItem value="Un Assigned">Un Assigned</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
         {/* Extra Fields */}
-        {extraFields.length > 0 && (
+        {customFields.length > 0 && (
           <div className="mb-4">
             <h3 className="mb-2">CUSTOM FIELDS</h3>
-            {extraFields.map((field, index) => (
+            {customFields.map((field, index) => (
               <div key={index} className="mb-2 flex items-center gap-2">
                 <span className="w-1/4">{field.fieldName}</span>
                 <Input
@@ -313,7 +372,10 @@ const NewTaskModal = () => {
         </div>
 
         {/* Submit Button */}
-        <Button className="bg-zesty-green w-full text-black">
+        <Button
+          onClick={handleCreateTask}
+          className="bg-zesty-green w-full text-black"
+        >
           Create task
         </Button>
       </DialogContent>
