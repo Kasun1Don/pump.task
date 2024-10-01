@@ -37,7 +37,7 @@ export default function NewUser() {
   console.log(account);
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
   const address = account?.address!;
-  const { data, isLoading } = api.user.byWallet.useQuery({
+  const { data } = api.user.byWallet.useQuery({
     walletId: address,
   });
   const router = useRouter();
@@ -68,9 +68,9 @@ export default function NewUser() {
   //   },
   // });
 
-  if (isLoading || (data && !data.error)) {
-    return <p>loading...</p>;
-  }
+  // if (isLoading || (data && !data.error)) {
+  //   return <p>loading...</p>;
+  // }
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     console.log(data);

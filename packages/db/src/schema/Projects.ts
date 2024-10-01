@@ -5,12 +5,9 @@ import {
   prop,
   ReturnModelType,
 } from "@typegoose/typegoose";
-import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
-
 
 import { MemberSchema } from "./Member";
 import { StatusSchema } from "./Status";
-
 
 @modelOptions({
   schemaOptions: {
