@@ -1,11 +1,12 @@
- 
- 
- 
+/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
+
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
+import type { BadgeClass } from "@acme/db";
 import { LoginHistory, User } from "@acme/db";
 
+import { Skill } from "../../../db/src/schema/Badges";
 import { publicProcedure } from "../trpc";
 
 export const userRouter = {
@@ -372,5 +373,91 @@ export const userRouter = {
         console.error("Error deleting user:", error);
         throw new Error("Failed to delete user");
       }
+    }),
+
+  overview: publicProcedure
+    .input(z.object({ walletId: z.string() }))
+    .query(async ({ input }) => {
+      const user = await User.findOne({ walletId: input.walletId })
+        .populate("projects")
+        .populate("badges")
+        .lean();
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const serializedUser = {
+        ...user,
+        _id: user._id.toString(),
+        projects: user.projects?.map((project) => ({
+          ...project,
+          _id: project._id.toString(),
+        })),
+        badges: user.badges?.map((badge) => ({
+          ...badge,
+          _id: badge._id.toString(),
+        })),
+      };
+
+      const activeProjects = serializedUser.projects?.length ?? 0;
+      const totalBadges = serializedUser.badges?.length ?? 0;
+
+      const isBadgeClass = (badge: unknown): badge is BadgeClass => {
+        if (typeof badge !== "object" || badge === null) {
+          return false;
+        }
+
+        const badgeObj = badge as Record<string, unknown>;
+
+        return (
+          "receivedDate" in badgeObj &&
+          "skill" in badgeObj &&
+          (badgeObj.receivedDate instanceof Date ||
+            !isNaN(Date.parse(badgeObj.receivedDate as string)))
+        );
+      };
+
+      const badgesInLast30Days =
+        serializedUser.badges?.filter(
+          (badge) =>
+            isBadgeClass(badge) &&
+            new Date(badge.receivedDate) >=
+              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        ).length ?? 0;
+
+      const daysSinceLastBadge =
+        serializedUser.badges &&
+        serializedUser.badges.length > 0 &&
+        isBadgeClass(serializedUser.badges[0])
+          ? Math.floor(
+              (Date.now() -
+                new Date(serializedUser.badges[0].receivedDate).getTime()) /
+                (1000 * 3600 * 24),
+            )
+          : 0;
+
+      const frontendBadgesCount =
+        serializedUser.badges?.filter(
+          (badge) => isBadgeClass(badge) && badge.skill === Skill.Frontend,
+        ).length ?? 0;
+      const backendBadgesCount =
+        serializedUser.badges?.filter(
+          (badge) => isBadgeClass(badge) && badge.skill === Skill.Backend,
+        ).length ?? 0;
+
+      let topSkill = "N/A"; // Default if no badges found
+      if (frontendBadgesCount > backendBadgesCount) {
+        topSkill = "Frontend";
+      } else if (backendBadgesCount > frontendBadgesCount) {
+        topSkill = "Backend";
+      }
+      return {
+        activeProjects,
+        totalBadges,
+        badgesInLast30Days,
+        daysSinceLastBadge,
+        topSkill,
+      };
     }),
 } satisfies TRPCRouterRecord;

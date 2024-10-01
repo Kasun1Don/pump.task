@@ -1,4 +1,3 @@
- 
 "use server";
 
 import type { VerifyLoginPayloadParams } from "thirdweb/auth";

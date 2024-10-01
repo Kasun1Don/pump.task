@@ -6,7 +6,7 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
-enum Skill {
+export enum Skill {
   Backend = "backend",
   Frontend = "frontend",
 }
@@ -34,5 +34,3 @@ export const Badge =
   (mongoose.models.BadgeClass as
     | ReturnModelType<typeof BadgeClass>
     | undefined) ?? getModelForClass(BadgeClass);
-
-export default Skill;
