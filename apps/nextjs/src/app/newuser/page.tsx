@@ -16,21 +16,10 @@ import {
   useForm,
 } from "@acme/ui/form";
 import { Input } from "@acme/ui/input";
-import { toast } from "@acme/ui/toast";
+
+// import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/react";
-
-// export default function NewUser() {
-//   const router = useRouter();
-//   return (
-//     <div className="container flex h-screen max-w-5xl flex-col items-center gap-5 py-16 text-center">
-//       <h1>Welcome</h1>
-//       <h2>What should we call you?</h2>
-//       <Input className="w-64 text-center" />
-//       <Button onClick={() => router.push("/dashboard")}>Submit</Button>
-//     </div>
-//   );
-// }
 
 const formSchema = z.object({
   name: z
@@ -48,7 +37,7 @@ export default function NewUser() {
   console.log(account);
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
   const address = account?.address!;
-  const { data, isLoading } = api.user.byWallet.useQuery({
+  const { data } = api.user.byWallet.useQuery({
     walletId: address,
   });
   const router = useRouter();
@@ -60,36 +49,40 @@ export default function NewUser() {
     },
   });
   useEffect(() => {
-    if (data && !data.error) {
+    if (data) {
       router.push("/projects");
     }
   }, [data, router]);
 
-  const createUser = api.user.create.useMutation({
-    onSuccess: () => {
-      console.log("success");
-      router.push("/projects");
-    },
-    onError: (err) => {
-      toast.error(
-        err.data?.code === "UNAUTHORIZED"
-          ? "You must be logged in to post"
-          : "Failed to create post",
-      );
-    },
-  });
+  // const createUser = api.user.create.useMutation({
+  //   onSuccess: () => {
+  //     console.log("success");
+  //     router.push("/projects");
+  //   },
+  //   onError: (err) => {
+  //     toast.error(
+  //       err.data?.code === "UNAUTHORIZED"
+  //         ? "You must be logged in to post"
+  //         : "Failed to create post",
+  //     );
+  //   },
+  // });
 
-  if (isLoading) {
-    return <p>loading...</p>;
-  }
+  // if (isLoading || (data && !data.error)) {
+  //   return <p>loading...</p>;
+  // }
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    createUser.mutate({ ...data, walletId: address });
+    console.log(data);
+    // createUser.mutate({ ...data, walletId: address });
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="container flex h-screen max-w-5xl flex-col items-center gap-5 py-16 text-center"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -97,7 +90,7 @@ export default function NewUser() {
             <FormItem>
               <FormLabel>What should we call you?</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input className="w-64 text-center" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

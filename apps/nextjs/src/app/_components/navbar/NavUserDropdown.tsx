@@ -18,12 +18,6 @@ import {
 // Import logout function
 import { logout } from "~/app/actions/authFront";
 
-// Define the Props interface
-interface NavUserDropdownProps {
-  username: string;
-  image: string;
-}
-
 /**
  * @author Benjamin davies
  *
@@ -36,7 +30,10 @@ interface NavUserDropdownProps {
 export default function NavUserDropdown({
   username,
   image,
-}: NavUserDropdownProps) {
+}: {
+  username: string;
+  image: string;
+}) {
   // Set the isMac state
   const [isMac, setIsMac] = useState<boolean>();
 
@@ -51,6 +48,16 @@ export default function NavUserDropdown({
   const router = useRouter();
   const { disconnect } = useDisconnect();
   const wallet = useActiveWallet();
+
+  useEffect(() => {
+    if (!wallet) {
+      logout()
+        .then(() => {
+          router.push("/");
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [router, wallet]);
 
   // Handle logout function
   async function handleLogout() {
@@ -88,7 +95,7 @@ export default function NavUserDropdown({
         <DropdownMenuItem className="flex flex-row justify-between hover:cursor-pointer">
           <div className="flex flex-row gap-4">
             <Image src="/userIcon.png" alt="userIcon" width={20} height={20} />
-            <Link href="/dashboard/profile">
+            <Link href="/profile">
               <h5>My Profile</h5>
             </Link>
           </div>
@@ -103,7 +110,7 @@ export default function NavUserDropdown({
               width={20}
               height={20}
             />
-            <Link href="/dashboard/settings">
+            <Link href="/user-settings">
               <h5>Settings</h5>
             </Link>
           </div>

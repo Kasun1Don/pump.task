@@ -13,8 +13,8 @@ export default async function HomePage() {
   }
   return (
     <HydrateClient>
-      <main className="bg-custom-bg container flex h-screen max-w-5xl items-center justify-center bg-cover bg-center py-16 text-center">
-        <div className="flex flex-col items-center justify-center gap-4">
+      <main className="bg-custom-bg container flex h-screen items-center justify-center bg-cover bg-center py-16 text-center">
+        <div className="flex max-w-5xl flex-col items-center justify-center gap-4">
           <div className="flex gap-3">
             <Image src="/pump.taskLogo.png" alt="Logo" width={50} height={50} />
             <h1 className="text-5xl font-bold tracking-tight">pump.task</h1>
@@ -28,10 +28,45 @@ export default async function HomePage() {
             complete their tasks, combining the traditional efficiency of tools
             like Jira and Trello with the rewarding nature of Web3.
           </p>
-
-          {/* <CreatePostForm /> */}
+          <div className="mb-8 flex items-center gap-3 rounded-full bg-black p-4">
+            4 Networks{" "}
+            <Image
+              src="/networks.png"
+              alt="networks logos"
+              width={100}
+              height={50}
+            />
+          </div>
 
           <Login />
+
+          <p className="mt-8">Trusted by industry leaders.</p>
+          <div className="flex gap-7">
+            <Image
+              src="/leaders1.png"
+              alt="leaders logos"
+              width={60}
+              height={60}
+            />
+            <Image
+              src="/leaders2.png"
+              alt="leaders logos"
+              width={60}
+              height={60}
+            />
+            <Image
+              src="/leaders3.png"
+              alt="leaders logos"
+              width={60}
+              height={60}
+            />
+            <Image
+              src="/leaders4.png"
+              alt="leaders logos"
+              width={60}
+              height={60}
+            />
+          </div>
         </div>
       </main>
     </HydrateClient>

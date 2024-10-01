@@ -1,18 +1,20 @@
 // Import React and Next.js modules
 import type { ReactNode } from "react";
+import { cookies } from "next/headers";
 import Image from "next/image";
 import { ConnectButton } from "thirdweb/react";
 
 // Import UserClass and ProjectClass from Typegoose models
 import type { ProjectClass, UserClass } from "@acme/db";
 
+// Import api for trpc backend calls from a client component
+import { api } from "~/trpc/server";
 // Import Client Components
 import HotKeyEventListeners from "../_components/navbar/HotKeyEventListeners";
 import NavLink from "../_components/navbar/NavLink";
 import NavProjectDropdown from "../_components/navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/navbar/NavUserDropdown";
-// Import createServerSideFetch Helper function
-import { createServerSideFetch } from "../actions/createServerSideFetchHelper";
+// Import for thirdwebClient
 import { client } from "../thirdwebClient";
 
 /**
@@ -25,17 +27,24 @@ import { client } from "../thirdwebClient";
  * @returns The Layout Component including the Navbar and the children components.
  */
 export default async function Layout({ children }: { children: ReactNode }) {
-  // Fetch user data with server-side fetch Helper function
-  const caller = await createServerSideFetch();
-  const response = await caller.user.all();
+  // Get wallet ID from cookies
+  const walletId: string = cookies().get("wallet")?.value ?? "";
+
+  // Log error if wallet ID is not found
+  if (!walletId) {
+    console.error("Wallet ID is undefined or not found in cookies.");
+  }
+
+  // Fetch user data with wallet ID
+  const response = await api.user.byWallet({ walletId });
 
   // Destructure user data from response
-  const userData: UserClass | null = response[0] as UserClass;
+  const userData: UserClass | null = response as UserClass;
 
   return (
-    <div className="bg-custom-bg min-h-screen bg-cover bg-center">
+    <section className="bg-custom-bg min-h-screen bg-cover bg-center">
       {/* Navbar section lefthand side*/}
-      <div className="flex flex-row justify-between gap-4 px-12 pb-4 pt-8">
+      <div className="flex flex-row justify-between gap-4 bg-zinc-950 px-12 pb-4 pt-8">
         {/* Logo and title */}
         <div className="flex flex-row items-center justify-center gap-8">
           <div className="flex flex-row gap-4 text-xl">
@@ -68,7 +77,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Navigation links */}
-      <div className="flex flex-wrap border-b-2">
+      <div className="flex flex-wrap border-b-2 bg-zinc-950">
         <NavLink href="/projects">Projects</NavLink>
         <NavLink href="/tasks">Tasks</NavLink>
         <NavLink href="/profile">My Profile</NavLink>
@@ -81,6 +90,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
       {/* Where the page content will be rendered */}
       <main>{children}</main>
-    </div>
+    </section>
   );
 }

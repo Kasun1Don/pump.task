@@ -7,6 +7,7 @@
     },
     "build": {
       "dependsOn": ["^build"],
+      "env": ["NEXT_PUBLIC_THIRDWEB_AUTH_DOMAIN"],
       "outputs": [
         ".next/**",
         "!.next/cache/**",
@@ -61,7 +62,12 @@
     "AUTH_REDIRECT_PROXY_URL",
     "NEXT_PUBLIC_DEPLOYMENT_ENVIRONMENT",
     "AUTH_SECRET",
-    "PORT"
+    "PORT",
+
+    "IPINFO_API_KEY",
+    "THIRDWEB_ADMIN_PRIVATE_KEY",
+    "THIRDWEB_AUTH_DOMAIN",
+    "NEXT_PUBLIC_CLIENT_ID"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

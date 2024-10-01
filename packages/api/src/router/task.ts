@@ -42,6 +42,8 @@ export const taskRouter = {
 
         const savedTask = await newTask.save();
 
+        console.log("Saved task:", savedTask);
+
         return savedTask;
       } catch (error) {
         console.error("Error adding task:", error);

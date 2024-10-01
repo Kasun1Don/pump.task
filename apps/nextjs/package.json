@@ -30,6 +30,7 @@
     "ethers": "5",
     "geist": "^1.3.0",
     "next": "^14.2.4",
+    "pino-pretty": "^11.2.2",
     "react": "catalog:react18",
     "react-dom": "catalog:react18",
     "superjson": "2.2.1",
