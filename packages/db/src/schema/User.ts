@@ -29,6 +29,9 @@ export class UserClass {
   @prop({ default: false })
   public emailVerified?: boolean;
 
+  @prop({ default: true })
+  public bio?: string;
+
   @prop({
     ref: () => ProjectClass,
     type: mongoose.Schema.Types.ObjectId,

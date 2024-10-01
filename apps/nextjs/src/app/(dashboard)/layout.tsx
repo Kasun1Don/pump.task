@@ -39,7 +39,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   const response = await api.user.byWallet({ walletId });
 
   // Destructure user data from response
-  const userData: UserClass | null = response as UserClass;
+  const userData: UserClass | null = response as unknown as UserClass;
 
   return (
     <section className="bg-custom-bg min-h-screen bg-cover bg-center">
