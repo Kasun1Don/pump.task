@@ -6,6 +6,12 @@ export class MemberSchema {
 
   @prop({ required: true, enum: ["observer", "admin", "owner"] })
   public role!: "observer" | "admin" | "owner";
+
+  @prop()
+  public walletId?: string;
+
+  @prop()
+  public name?: string;
 }
 
 //Since MemberSchema is used as a subdocument, it doesn’t require a separate model.

@@ -2,7 +2,7 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import mongoose from "mongoose";
 import { z } from "zod";
 
-import { Project } from "@acme/db";
+import { Project, User } from "@acme/db";
 
 import { publicProcedure } from "../trpc";
 
@@ -62,5 +62,52 @@ export const projectRouter = {
           `Failed to create project: ${(error as Error).message}`,
         );
       }
+    }),
+  byId: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const project = await Project.findById(input.id);
+      if (project === null) {
+        return { error: " not found" };
+      }
+      console.log("--------inside route-------------", project);
+
+      return project;
+    }),
+  editMembers: publicProcedure
+    .input(
+      z.object({
+        walletId: z.string(),
+        projectId: z.string(),
+        role: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const user = await User.findOne({ walletId: input.walletId });
+      if (user === null) {
+        return { error: "User not found" };
+      }
+
+      console.log("---------", user);
+
+      const newMember = {
+        user: new mongoose.Types.ObjectId(),
+        role: input.role,
+        walletId: user.walletId,
+        name: user.name,
+      };
+
+      await Project.updateOne(
+        { _id: input.projectId },
+        { $push: { members: newMember } },
+      );
+    }),
+  removeMember: publicProcedure
+    .input(z.object({ walletId: z.string(), projectId: z.string() }))
+    .mutation(async ({ input }) => {
+      await Project.updateOne(
+        { _id: input.projectId },
+        { $pull: { members: { walletId: input.walletId } } },
+      );
     }),
 } satisfies TRPCRouterRecord;

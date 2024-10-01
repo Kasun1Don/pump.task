@@ -72,7 +72,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
         <NavLink href="/projects">Projects</NavLink>
         <NavLink href="/tasks">Tasks</NavLink>
         <NavLink href="/profile">My Profile</NavLink>
-        <NavLink href="/users">Users</NavLink>
+        <NavLink href="/users/66f4b13552fd7e29dde99777">Users</NavLink>
         <NavLink href="/settings">Settings</NavLink>
       </div>
 
