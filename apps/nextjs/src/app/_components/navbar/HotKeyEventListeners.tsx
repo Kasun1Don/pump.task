@@ -38,13 +38,13 @@ export default function HotKeyEventListeners() {
       event.key.toLowerCase() === "p"
     ) {
       event.preventDefault();
-      router.push("/dashboard/profile");
+      router.push("/profile");
     }
 
     // Check for Command + S (for Settings)
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
       event.preventDefault();
-      router.push("/dashboard/settings");
+      router.push("/user-settings");
     }
 
     // Logout for Shift + Q

@@ -7,6 +7,7 @@
     },
     "build": {
       "dependsOn": ["^build"],
+      "env": ["NEXT_PUBLIC_THIRDWEB_AUTH_DOMAIN"],
       "outputs": [
         ".next/**",
         "!.next/cache/**",
@@ -62,6 +63,8 @@
     "NEXT_PUBLIC_DEPLOYMENT_ENVIRONMENT",
     "AUTH_SECRET",
     "PORT",
+
+    "IPINFO_API_KEY",
     "THIRDWEB_ADMIN_PRIVATE_KEY",
     "THIRDWEB_AUTH_DOMAIN",
     "NEXT_PUBLIC_CLIENT_ID"

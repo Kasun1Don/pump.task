@@ -1,4 +1,4 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
+ 
 "use server";
 
 import type { VerifyLoginPayloadParams } from "thirdweb/auth";

@@ -16,7 +16,8 @@ import {
   useForm,
 } from "@acme/ui/form";
 import { Input } from "@acme/ui/input";
-import { toast } from "@acme/ui/toast";
+
+// import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/react";
 
@@ -36,7 +37,7 @@ export default function NewUser() {
   console.log(account);
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
   const address = account?.address!;
-  const { data, isLoading } = api.user.byWallet.useQuery({
+  const { data } = api.user.byWallet.useQuery({
     walletId: address,
   });
   const router = useRouter();
@@ -48,31 +49,32 @@ export default function NewUser() {
     },
   });
   useEffect(() => {
-    if (data && !data.error) {
+    if (data) {
       router.push("/projects");
     }
   }, [data, router]);
 
-  const createUser = api.user.create.useMutation({
-    onSuccess: () => {
-      console.log("success");
-      router.push("/projects");
-    },
-    onError: (err) => {
-      toast.error(
-        err.data?.code === "UNAUTHORIZED"
-          ? "You must be logged in to post"
-          : "Failed to create post",
-      );
-    },
-  });
+  // const createUser = api.user.create.useMutation({
+  //   onSuccess: () => {
+  //     console.log("success");
+  //     router.push("/projects");
+  //   },
+  //   onError: (err) => {
+  //     toast.error(
+  //       err.data?.code === "UNAUTHORIZED"
+  //         ? "You must be logged in to post"
+  //         : "Failed to create post",
+  //     );
+  //   },
+  // });
 
-  if (isLoading || (data && !data.error)) {
-    return <p>loading...</p>;
-  }
+  // if (isLoading || (data && !data.error)) {
+  //   return <p>loading...</p>;
+  // }
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    createUser.mutate({ ...data, walletId: address });
+    console.log(data);
+    // createUser.mutate({ ...data, walletId: address });
   }
 
   return (

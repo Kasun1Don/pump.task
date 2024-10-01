@@ -38,7 +38,7 @@ export default function NavProjectDropdown({
 
   // Set the current project to the first project in the on component mount
   useEffect(() => {
-    setCurrentProject(projects[0]?.name ?? "");
+    setCurrentProject(projects[0]?.name ?? currentProject);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
