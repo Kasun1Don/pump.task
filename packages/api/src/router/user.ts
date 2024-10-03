@@ -136,6 +136,7 @@ export const userRouter = {
         location: z.string().optional(),
         browser: z.string().optional(),
         operatingSystem: z.string().optional(),
+        bio: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -151,6 +152,7 @@ export const userRouter = {
           name: input.name,
           email: input.email,
           image: input.image,
+          bio: input.image,
           userSettings: {},
           loginHistories: [newLogin._id],
         });
