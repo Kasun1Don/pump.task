@@ -19,7 +19,11 @@ const thirdwebAuth = createAuth({
   adminAccount: privateKeyToAccount({ client, privateKey }),
 });
 
-export const generatePayload = thirdwebAuth.generatePayload;
+export const generatePayload = async (
+  ...args: Parameters<typeof thirdwebAuth.generatePayload>
+) => {
+  return thirdwebAuth.generatePayload(...args);
+};
 
 export async function login(payload: VerifyLoginPayloadParams) {
   const verifiedPayload = await thirdwebAuth.verifyPayload(payload);
@@ -29,7 +33,7 @@ export async function login(payload: VerifyLoginPayloadParams) {
     });
     cookies().set("jwt", jwt);
     cookies().set("wallet", verifiedPayload.payload.address);
-    redirect("/newuser");
+    redirect("/auth");
   }
 }
 

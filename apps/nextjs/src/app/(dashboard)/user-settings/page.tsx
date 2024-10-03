@@ -2,10 +2,10 @@ import { cookies } from "next/headers";
 
 import type { UserClass } from "@acme/db";
 
-import AccountSettings from "~/app/_components/userSettingsPage/AccountSettings";
-import DeleteAccount from "~/app/_components/userSettingsPage/DeleteAccount";
-import EmailNotifications from "~/app/_components/userSettingsPage/EmailNotifications";
-import Security from "~/app/_components/userSettingsPage/Security";
+import AccountSettings from "~/app/_components/_userSettingsPage/AccountSettings";
+import DeleteAccount from "~/app/_components/_userSettingsPage/DeleteAccount";
+import EmailNotifications from "~/app/_components/_userSettingsPage/EmailNotifications";
+import Security from "~/app/_components/_userSettingsPage/Security";
 import { api } from "~/trpc/server";
 
 export default async function Page() {

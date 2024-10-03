@@ -10,10 +10,10 @@ import type { ProjectClass, UserClass } from "@acme/db";
 // Import api for trpc backend calls from a client component
 import { api } from "~/trpc/server";
 // Import Client Components
-import HotKeyEventListeners from "../_components/navbar/HotKeyEventListeners";
-import NavLink from "../_components/navbar/NavLink";
-import NavProjectDropdown from "../_components/navbar/NavProjectDropdown";
-import NavUserDropdown from "../_components/navbar/NavUserDropdown";
+import HotKeyEventListeners from "../_components/_navbar/HotKeyEventListeners";
+import NavLink from "../_components/_navbar/NavLink";
+import NavProjectDropdown from "../_components/_navbar/NavProjectDropdown";
+import NavUserDropdown from "../_components/_navbar/NavUserDropdown";
 // Import for thirdwebClient
 import { client } from "../thirdwebClient";
 
