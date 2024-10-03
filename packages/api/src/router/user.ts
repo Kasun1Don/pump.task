@@ -5,7 +5,7 @@ import type { BadgeClass } from "@acme/db";
 import { LoginHistory, User } from "@acme/db";
 
 import { Skill } from "../../../db/src/schema/Badges";
-import { publicProcedure } from "../trpc";
+import { protectedProcedure } from "../trpc";
 
 export const userRouter = {
   /*
@@ -33,7 +33,7 @@ export const userRouter = {
    * @RETURNS
    *  The user Object / Document
    */
-  login: publicProcedure
+  login: protectedProcedure
     .input(
       z.object({
         walletId: z.string(),
@@ -126,13 +126,13 @@ export const userRouter = {
    * @RETURNS
    *  The user Object / Document
    */
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         walletId: z.string(),
         name: z.string(),
         email: z.string().email(),
-        image: z.string(),
+        image: z.string().optional(),
         location: z.string().optional(),
         browser: z.string().optional(),
         operatingSystem: z.string().optional(),
@@ -191,7 +191,7 @@ export const userRouter = {
    * @RETURNS
    *  The user Object / Document
    */
-  byWallet: publicProcedure
+  byWallet: protectedProcedure
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
       try {
@@ -261,7 +261,7 @@ export const userRouter = {
    * @RETURNS
    * The updated user Object / Document
    */
-  update: publicProcedure
+  update: protectedProcedure
     .input(
       z.object({
         walletId: z.string(),
@@ -338,7 +338,7 @@ export const userRouter = {
         throw new Error("Failed to update user details");
       }
     }),
-  overview: publicProcedure
+  overview: protectedProcedure
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
       const user = await User.findOne({ walletId: input.walletId })

@@ -34,7 +34,7 @@ export default async function UserProfile() {
       ></section>
       <div className="relative mx-52">
         <Image
-          src="/labrysGreenSphere.png"
+          src={userData.image ?? "/labrysGreenSphere.png"}
           alt="User Profile Icon"
           width={120}
           height={120}

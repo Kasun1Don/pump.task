@@ -1,53 +1,47 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 "use client";
 
 import React, { useState } from "react";
 import Image from "next/image";
 
-import { api } from "~/trpc/react";
+import { updateUserSettings } from "~/app/actions/handleUserUpdate";
 
 export default function UpdateBio({
-  bio,
+  bio: initialBio,
   walletId,
 }: {
   bio: string | undefined;
   walletId: string;
 }) {
+  const [bio, setBio] = useState(initialBio ?? "");
   const [isEditing, setIsEditing] = useState(false);
-  const [newBio, setNewBio] = useState(bio);
 
-  console.log("Check if the code is updating:");
-
-  const { mutate, isLoading } = (api.user as any).updateBio.useMutation();
+  const handleBioChange = (newBio: string) => {
+    setBio(newBio);
+  };
 
   const handleSave = async () => {
-    if (isLoading) return;
     try {
-      await mutate({
-        walletId: walletId,
-        bio: newBio,
-      });
+      await updateUserSettings({ walletId, bio });
+      setIsEditing(false);
     } catch (error) {
-      console.error("Error updating bio:", error);
+      console.error("Error updating user settings:", error);
     }
-    setIsEditing(false);
   };
+
+  console.log("Check if the code is updating:");
 
   return (
     <div className="text-sm text-gray-400">
       {isEditing ? (
         <input
           type="text"
-          value={newBio}
-          onChange={(e) => setNewBio(e.target.value)}
+          value={bio}
+          onChange={(e) => handleBioChange(e.target.value)}
           className="rounded border p-1 text-sm text-gray-600"
         />
       ) : (
         <p onClick={() => setIsEditing(true)} className="text-sm text-gray-400">
-          {newBio ?? "Add your bio"}
+          {bio}
         </p>
       )}
 
