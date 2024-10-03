@@ -1,16 +1,9 @@
 import Image from "next/image";
-import { redirect } from "next/navigation";
 
 import { HydrateClient } from "~/trpc/server";
-import { Login } from "./_components/Login";
-import { isLoggedIn } from "./actions/authFront";
+import { Login } from "./_components/HomePage";
 
-// import { CreatePostForm } from "./_components/posts";
-
-export default async function HomePage() {
-  if (await isLoggedIn()) {
-    redirect("/projects");
-  }
+export default function HomePage() {
   return (
     <HydrateClient>
       <main className="bg-custom-bg container flex h-screen items-center justify-center bg-cover bg-center py-16 text-center">
