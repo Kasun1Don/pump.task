@@ -1,5 +1,5 @@
-import NewTaskCard from "./new-task-card";
-import TaskCard from "./task-card";
+// import NewTaskCard from "./new-task-card";
+// import TaskCard from "./task-card";
 
 const TaskStatusColumn = ({ statusTitle }: { statusTitle: string }) => {
   return (
@@ -7,10 +7,10 @@ const TaskStatusColumn = ({ statusTitle }: { statusTitle: string }) => {
       <h2 className="flex justify-center text-lg font-extrabold">
         {statusTitle}
       </h2>
+      {/* <TaskCard />
       <TaskCard />
       <TaskCard />
-      <TaskCard />
-      <NewTaskCard />
+      <NewTaskCard /> */}
     </div>
   );
 };

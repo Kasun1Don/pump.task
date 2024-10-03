@@ -7,7 +7,8 @@ import {
 } from "@typegoose/typegoose";
 
 import { MemberSchema } from "./Member";
-import { StatusSchema } from "./Status";
+
+// import { StatusSchema } from "./Status";
 
 @modelOptions({
   schemaOptions: {
@@ -28,8 +29,18 @@ export class ProjectClass {
   @prop({ type: () => [MemberSchema], default: [] })
   public members!: MemberSchema[];
 
-  @prop({ type: () => [StatusSchema], default: [] })
-  public status!: StatusSchema[];
+  // We dont want to have status as a subdocument, we only want to reference the Id's
+  // @prop({ type: () => [StatusClass], required: true, default: [] })
+  // public status!: StatusClass[];
+
+  // an array containing the status ID's that belong to the current project
+  // @prop({
+  //   type: () => [mongoose.Schema.Types.ObjectId],
+  //   ref: () => StatusClass,
+  //   required: true,
+  //   default: [],
+  // })
+  // public status!: Ref<StatusClass>[];
 
   @prop({ required: false })
   public templateId?: string; // Change from ObjectId to string

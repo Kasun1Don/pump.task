@@ -1,15 +1,15 @@
-import type { Ref } from "@typegoose/typegoose";
+import type { Ref, ReturnModelType } from "@typegoose/typegoose";
 import {
   getModelForClass,
   modelOptions,
   mongoose,
   prop,
-  ReturnModelType,
 } from "@typegoose/typegoose";
 
 import { Project, ProjectClass } from "./Projects";
-import { StatusClass } from "./StatusSchema";
-import { TagsSchema } from "./TagsSchema";
+import { StatusClass } from "./Status";
+import { TagClass } from "./Tag";
+import { UserClass } from "./User";
 
 // Custom field name & values (Used when user adds a custom field to the task form)
 class CustomField {
@@ -26,13 +26,13 @@ class CustomField {
     timestamps: true, // Enables automatic createdAt and updatedAt fields
   },
 })
-export class TasksSchema {
+export class TaskClass {
   // Tags for categorizing tasks (includes default and user-generated)
   @prop({
     required: true,
     _id: false,
     validate: {
-      validator: function (value: TagsSchema) {
+      validator: function (value: TagClass) {
         return (
           value.defaultTags.length > 0 ||
           (value.userGeneratedTags?.length ?? 0) > 0
@@ -42,7 +42,7 @@ export class TasksSchema {
         "At least one tag (either default or user-generated) is required.",
     },
   })
-  public tags!: TagsSchema;
+  public tags!: TagClass;
 
   // Title of the task
   @prop({ required: true })
@@ -57,8 +57,8 @@ export class TasksSchema {
   public dueDate!: Date;
 
   // Assignee (User assigned to the task)
-  @prop({ required: true })
-  public assignee!: string;
+  @prop({ ref: () => UserClass })
+  public assigneeId?: Ref<UserClass>;
 
   // Custom Fields for additional information
   @prop({ type: () => [CustomField], required: false })
@@ -66,11 +66,11 @@ export class TasksSchema {
 
   // Reference to the Status the task belongs to
   @prop({ ref: () => StatusClass, required: true })
-  public status!: Ref<StatusClass>;
+  public statusId!: Ref<StatusClass>;
 
   // Reference to the Project the task belongs to
   @prop({ ref: () => Project, required: true })
-  public project!: Ref<ProjectClass>;
+  public projectId!: Ref<ProjectClass>;
 
   // Order of the task within column (Used to arrange location of task within status column)
   @prop({ required: true })
@@ -79,5 +79,5 @@ export class TasksSchema {
 
 export const Task =
   (mongoose.models.TaskClass as
-    | ReturnModelType<typeof TasksSchema>
-    | undefined) ?? getModelForClass(TasksSchema);
+    | ReturnModelType<typeof TaskClass>
+    | undefined) ?? getModelForClass(TaskClass);
