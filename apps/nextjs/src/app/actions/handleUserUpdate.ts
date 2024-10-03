@@ -16,6 +16,7 @@ export async function updateUserSettings({
   changeCardStatus,
   newBadge,
   image,
+  bio,
 }: {
   walletId: string;
   language?: string;
@@ -28,11 +29,13 @@ export async function updateUserSettings({
   changeCardStatus?: boolean;
   newBadge?: boolean;
   image?: string;
+  bio?: string;
 }) {
   await api.user.update({
     walletId,
     email,
     image,
+    bio,
     userSettings: {
       isThemeDark,
       language,
@@ -46,4 +49,5 @@ export async function updateUserSettings({
   });
 
   revalidatePath("/user-settings", "page");
+  revalidatePath("/proilfe", "page");
 }

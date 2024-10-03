@@ -268,6 +268,7 @@ export const userRouter = {
         name: z.string().optional(),
         email: z.string().email().optional(),
         image: z.string().optional(),
+        bio: z.string().optional(),
         userSettings: z
           .object({
             language: z.string().optional(),
@@ -295,6 +296,7 @@ export const userRouter = {
           name: input.name ?? user.name,
           email: input.email ?? user.email,
           image: input.image ?? user.image,
+          bio: input.bio ?? user.bio,
           userSettings: {
             language:
               input.userSettings?.language ?? user.userSettings?.language,
@@ -320,7 +322,6 @@ export const userRouter = {
           },
         };
 
-        // Update the user with the merged data
         const updatedUser = await User.findByIdAndUpdate(
           user._id,
           updatedData,
@@ -337,42 +338,6 @@ export const userRouter = {
         throw new Error("Failed to update user details");
       }
     }),
-
-  /*
-   * @ROUTE -- DELETE USER
-   * Delete the user by wallet ID
-   *
-   * @PARAMS:
-   *   walletId - The wallet ID of the user to be deleted
-   *
-   * @USAGE
-   *  Used in client or server components when a user needs to delete their account.
-   *
-   * @EXAMPLE
-   *   const response = await mutation.mutateAsync({
-   *      walletId: wallet,
-   *   });
-   *
-   * @RETURNS
-   *  A success message or an error message if the user was not found
-   */
-  delete: publicProcedure
-    .input(z.object({ walletId: z.string() }))
-    .mutation(async ({ input }) => {
-      try {
-        const user = await User.findOneAndDelete({ walletId: input.walletId });
-
-        if (!user) {
-          throw new Error("User not found");
-        }
-
-        return { message: "User deleted successfully" };
-      } catch (error) {
-        console.error("Error deleting user:", error);
-        throw new Error("Failed to delete user");
-      }
-    }),
-
   overview: publicProcedure
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
@@ -464,24 +429,5 @@ export const userRouter = {
         daysSinceLastBadge,
         topSkill,
       };
-    }),
-
-  updateBio: publicProcedure
-    .input(z.object({ walletId: z.string(), bio: z.string() }))
-    .mutation(async ({ input }) => {
-      try {
-        const user = await User.findOneAndUpdate(
-          { walletId: input.walletId },
-          { $set: { bio: input.bio } },
-          { new: true },
-        );
-        if (!user) {
-          throw new Error("User not found");
-        }
-        return { message: "Bio updated successfully" };
-      } catch (error) {
-        console.error("Error updating user bio:", error);
-        throw new Error("Failed to update user bio");
-      }
     }),
 } satisfies TRPCRouterRecord;
