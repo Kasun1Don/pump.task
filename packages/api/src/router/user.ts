@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
@@ -437,21 +435,28 @@ export const userRouter = {
             )
           : 0;
 
-      const frontendBadgesCount =
-        serializedUser.badges?.filter(
-          (badge) => isBadgeClass(badge) && badge.skill === Skill.Frontend,
-        ).length ?? 0;
-      const backendBadgesCount =
-        serializedUser.badges?.filter(
-          (badge) => isBadgeClass(badge) && badge.skill === Skill.Backend,
-        ).length ?? 0;
+      const badgeCounts: { [key in Skill]: number } = {
+        [Skill.Backend]: 0,
+        [Skill.Frontend]: 0,
+        [Skill.Design]: 0,
+        [Skill.SmartContracts]: 0,
+        [Skill.Integration]: 0,
+      };
+
+      serializedUser.badges?.forEach((badge) => {
+        if (isBadgeClass(badge)) {
+          badgeCounts[badge.skill]++;
+        }
+      });
 
       let topSkill = "N/A"; // Default if no badges found
-      if (frontendBadgesCount > backendBadgesCount) {
-        topSkill = "Frontend";
-      } else if (backendBadgesCount > frontendBadgesCount) {
-        topSkill = "Backend";
-      }
+      let maxCount = 0;
+      Object.keys(badgeCounts).forEach((skill) => {
+        if (badgeCounts[skill as Skill] > maxCount) {
+          maxCount = badgeCounts[skill as Skill];
+          topSkill = skill;
+        }
+      });
       return {
         activeProjects,
         totalBadges,
@@ -459,5 +464,24 @@ export const userRouter = {
         daysSinceLastBadge,
         topSkill,
       };
+    }),
+
+  updateBio: publicProcedure
+    .input(z.object({ walletId: z.string(), bio: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        const user = await User.findOneAndUpdate(
+          { walletId: input.walletId },
+          { $set: { bio: input.bio } },
+          { new: true },
+        );
+        if (!user) {
+          throw new Error("User not found");
+        }
+        return { message: "Bio updated successfully" };
+      } catch (error) {
+        console.error("Error updating user bio:", error);
+        throw new Error("Failed to update user bio");
+      }
     }),
 } satisfies TRPCRouterRecord;

@@ -7,8 +7,11 @@ import {
 } from "@typegoose/typegoose";
 
 export enum Skill {
-  Backend = "backend",
-  Frontend = "frontend",
+  Backend = "Backend",
+  Frontend = "Frontend",
+  Design = "Design",
+  SmartContracts = "Smart Contracts",
+  Integration = "Integration",
 }
 
 @modelOptions({ schemaOptions: { collection: "badges" } })

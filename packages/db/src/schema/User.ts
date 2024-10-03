@@ -29,7 +29,7 @@ export class UserClass {
   @prop({ default: false })
   public emailVerified?: boolean;
 
-  @prop({ default: true })
+  @prop()
   public bio?: string;
 
   @prop({
