@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { LoginHistory, User } from "@acme/db";
 
-import { publicProcedure } from "../trpc";
+import { protectedProcedure } from "../trpc";
 
 export const userRouter = {
   /*
@@ -31,7 +31,7 @@ export const userRouter = {
    * @RETURNS
    *  The user Object / Document
    */
-  login: publicProcedure
+  login: protectedProcedure
     .input(
       z.object({
         walletId: z.string(),
@@ -124,7 +124,7 @@ export const userRouter = {
    * @RETURNS
    *  The user Object / Document
    */
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         walletId: z.string(),
@@ -190,7 +190,7 @@ export const userRouter = {
    * @RETURNS
    *  The user Object / Document
    */
-  byWallet: publicProcedure
+  byWallet: protectedProcedure
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
       try {
@@ -260,7 +260,7 @@ export const userRouter = {
    * @RETURNS
    * The updated user Object / Document
    */
-  update: publicProcedure
+  update: protectedProcedure
     .input(
       z.object({
         walletId: z.string(),
@@ -355,7 +355,7 @@ export const userRouter = {
    * @RETURNS
    *  A success message or an error message if the user was not found
    */
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(z.object({ walletId: z.string() }))
     .mutation(async ({ input }) => {
       try {

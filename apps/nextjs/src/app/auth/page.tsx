@@ -38,7 +38,7 @@ export default async function AuthPage() {
   const userData: UserClass | null = response as UserClass;
 
   // Redirect if user does not have a name
-  if (userData.name) {
+  if (!userData.name) {
     redirect("/newuser");
   }
 
