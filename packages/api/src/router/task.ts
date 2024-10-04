@@ -3,7 +3,11 @@ import mongoose from "mongoose";
 import { z } from "zod";
 
 import { Status, Task } from "@acme/db";
-import { ObjectIdString, TaskCardSchema } from "@acme/validators";
+import {
+  objectIdStringSchema,
+  TaskCardSchema,
+  validateObjectIdString,
+} from "@acme/validators";
 
 import { publicProcedure } from "../trpc";
 
@@ -45,13 +49,13 @@ export const taskRouter = {
   getStatusesByProjectId: publicProcedure
     .input(
       z.object({
-        projectId: ObjectIdString("projectId"),
+        projectId: objectIdStringSchema("projectId"),
       }),
     )
     .query(async ({ input }) => {
       try {
         console.log(
-          "Attempting to find status columns with projectID:",
+          "Attempting to find status columns with projectId:",
           input.projectId,
         );
         // Query the database for all the status objects related to the given projectId
@@ -65,15 +69,18 @@ export const taskRouter = {
           return [];
         }
 
-        // Convert ObjectID fields to strings
-        const statusesWithStringId = statuses.map((status) => ({
+        // Convert ObjectID fields to strings and apply ObjectIdString branding
+        const statusesWithObjectIdStrings = statuses.map((status) => ({
           ...status,
-          _id: status._id.toString(),
-          projectId: String(status.projectId),
+          _id: validateObjectIdString(status._id.toString(), "statusId"),
+          projectId: validateObjectIdString(
+            String(status.projectId),
+            "projectId",
+          ),
         }));
 
         // Return an array of all statuses with matching projectId
-        return statusesWithStringId;
+        return statusesWithObjectIdStrings;
       } catch (error) {
         console.error("Error fetching statuses: ", error);
         throw new Error("Failed to fetch statuses");
@@ -84,7 +91,7 @@ export const taskRouter = {
     .input(
       z.object({
         name: z.string().min(1, "Status name is required"),
-        projectId: z.string().min(1, "Project ID is required"),
+        projectId: objectIdStringSchema("Project ID"),
         order: z.number().default(0),
       }),
     )
@@ -93,13 +100,14 @@ export const taskRouter = {
         // Log the incoming input to see if it's correctly passed
         console.log("Received input:", input);
 
-        // Check if the projectId is a valid objectId
-        if (!mongoose.Types.ObjectId.isValid(input.projectId)) {
-          throw new Error("Invalid projectId");
-        }
+        // Validate the projectId is a valid ObjectIdString
+        const validatedProjectId = validateObjectIdString(
+          input.projectId,
+          "Project ID",
+        );
 
         // Convert projectId from a string to a mongoose object id
-        const projectId = new mongoose.Types.ObjectId(input.projectId);
+        const projectId = new mongoose.Types.ObjectId(validatedProjectId);
 
         const newStatus = new Status({
           name: input.name,
@@ -118,8 +126,11 @@ export const taskRouter = {
 
         return {
           ...statusObject,
-          _id: statusObject._id.toString(),
-          projectId: String(statusObject.projectId),
+          _id: validateObjectIdString(statusObject._id.toString(), "statusId"),
+          projectId: validateObjectIdString(
+            String(statusObject.projectId),
+            "projectId",
+          ),
         };
       } catch (error) {
         console.error("Error creating status:", error);
