@@ -46,6 +46,53 @@ export const taskRouter = {
       }
     }),
 
+  getTaskByStatusId: publicProcedure
+    .input(
+      z.object({
+        statusId: objectIdStringSchema("statusId"),
+      }),
+    )
+    .query(async ({ input }) => {
+      try {
+        console.log(
+          "Attempting to retrieve tasks by statusId:",
+          input.statusId,
+        );
+
+        // Query the database for all the task objects related to the given statusId
+        const tasks = await Task.find({ statusId: input.statusId })
+          .lean()
+          .exec();
+
+        // Return empty array if no task found
+        if (tasks.length === 0) {
+          console.log("No tasks found");
+          return [];
+        }
+
+        // Convert ObjectID fields to strings and apply ObjectIdStrings branding
+        const tasksWithObjectIdStrings = tasks.map((task) => ({
+          ...task,
+          _id: validateObjectIdString(task._id.toString(), "taskId"),
+          assigneeId: validateObjectIdString(
+            task.assigneeId?.toString(),
+            "assigneeId",
+          ),
+          projectId: validateObjectIdString(
+            String(task.projectId),
+            "projectId",
+          ),
+          statusId: validateObjectIdString(String(task.statusId), "statusId"),
+        }));
+
+        // Return an array of all tasks with matching statusId
+        return tasksWithObjectIdStrings;
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+        throw new Error("Failed to fetch tasks");
+      }
+    }),
+
   getStatusesByProjectId: publicProcedure
     .input(
       z.object({
