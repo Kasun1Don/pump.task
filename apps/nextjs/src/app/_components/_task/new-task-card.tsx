@@ -3,14 +3,22 @@
 import type { z } from "zod";
 import React from "react";
 
-import type { taskCardSchema } from "./task-card-schema";
+import type { ObjectIdString, TaskCardSchema } from "@acme/validators";
+
+// import type { taskCardSchema } from "./task-card-schema";
 import { api } from "~/trpc/react"; // Ensure you import your API hook
 import TaskCardDialog from "./task-card-dialog";
 
-const NewTaskCard: React.FC = () => {
-  const addTaskMutation = api.task.addTask.useMutation(); // Initialize your mutation
+interface NewTaskCardProps {
+  projectId: ObjectIdString;
+  statusId: ObjectIdString;
+}
 
-  const handleSubmit = async (taskData: z.infer<typeof taskCardSchema>) => {
+const NewTaskCard = ({ projectId, statusId }: NewTaskCardProps) => {
+  const addTaskMutation = api.task.addTask.useMutation(); // Initialize your mutation
+  console.log("new-task-card: statusId:", statusId);
+
+  const handleSubmit = async (taskData: z.infer<typeof TaskCardSchema>) => {
     try {
       // Send the task data (validated in TaskCardDialog) to the tRPC mutation
       await addTaskMutation.mutateAsync(taskData);
@@ -29,6 +37,8 @@ const NewTaskCard: React.FC = () => {
         onSubmit={handleSubmit}
         dialogButtonText="+ New task"
         submitButtonText="Create task"
+        projectId={projectId}
+        statusId={statusId}
       />
     </div>
   );

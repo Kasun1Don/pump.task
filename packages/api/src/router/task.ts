@@ -56,11 +56,11 @@ export const taskRouter = {
       try {
         console.log(
           "Attempting to retrieve tasks by statusId:",
-          input.statusId,
+          String(input.statusId),
         );
 
         // Query the database for all the task objects related to the given statusId
-        const tasks = await Task.find({ statusId: input.statusId })
+        const tasks = await Task.find({ statusId: String(input.statusId) })
           .lean()
           .exec();
 
@@ -74,10 +74,9 @@ export const taskRouter = {
         const tasksWithObjectIdStrings = tasks.map((task) => ({
           ...task,
           _id: validateObjectIdString(task._id.toString(), "taskId"),
-          assigneeId: validateObjectIdString(
-            task.assigneeId?.toString(),
-            "assigneeId",
-          ),
+          assigneeId: task.assigneeId
+            ? validateObjectIdString(String(task.assigneeId), "assigneeId")
+            : undefined,
           projectId: validateObjectIdString(
             String(task.projectId),
             "projectId",

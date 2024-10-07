@@ -3,6 +3,7 @@
 import type { z } from "zod";
 import React, { useState } from "react";
 
+import type { ObjectIdString } from "@acme/validators";
 import { Button } from "@acme/ui/button"; // Assuming this is part of the ChadCN UI lib
 
 import {
@@ -22,7 +23,7 @@ import { api } from "~/trpc/react";
 type StatusType = z.infer<typeof statusSchema>;
 
 interface NewStatusColumnProps {
-  projectId: string;
+  projectId: ObjectIdString;
   onStatusCreated: (newStatus: StatusType) => void;
 }
 
