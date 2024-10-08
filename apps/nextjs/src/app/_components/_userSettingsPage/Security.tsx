@@ -1,9 +1,9 @@
 "use client";
 
+import type { z } from "zod";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import {
   Accordion,
@@ -32,14 +32,9 @@ import {
 import { Input } from "@acme/ui/input";
 import { Label } from "@acme/ui/label";
 import { Switch } from "@acme/ui/switch";
+import { securityFormSchema } from "@acme/validators";
 
 import { api } from "~/trpc/react";
-
-// Define schema for security form
-const securityFormSchema = z.object({
-  authentication: z.boolean().default(false).optional(),
-  viewLoginHistory: z.boolean().default(false).optional(),
-});
 
 export default function Security({
   emailVerified,
@@ -52,7 +47,7 @@ export default function Security({
   walletId: string;
   email: string | undefined;
 }): JSX.Element {
-  console.log(email);
+  console.log("Console loggin to not throw unused variable lint error", email);
   const [emailCodeSent, setEmailCodeSent] = useState(false);
 
   const securityForm = useForm<z.infer<typeof securityFormSchema>>({
@@ -61,23 +56,6 @@ export default function Security({
       authentication: authentication,
     },
   });
-
-  /* 
-
-  If the emailVerifed is false, then the user should be able to enable 2FA
-
-  If the authencation is true, but the emailVerified is false, then the verify now button should be enabled
-  If the authencation is true and the emailVerified is true, then a verified text should be diabled
-
- 
-
-  1. check 
-
-*/
-
-  // If the emailVerified is true, then the user should be able to disable 2FA
-
-  // If the user disables 2FA
 
   const {
     data: userData,

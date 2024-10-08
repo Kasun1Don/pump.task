@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import {
   Form,
@@ -21,17 +20,10 @@ import {
   SelectValue,
 } from "@acme/ui/select";
 import { Switch } from "@acme/ui/switch";
+import { toast } from "@acme/ui/toast";
+import { languageFormSchema, themeFormSchema } from "@acme/validators";
 
 import { updateUserSettings } from "~/app/actions/handleUserUpdate";
-
-// Language form zod schema
-const languageFormSchema = z.object({
-  language: z.string(),
-});
-
-const themeFormSchema = z.object({
-  theme: z.boolean().optional(),
-});
 
 export default function AccountSettings({
   language,
@@ -53,16 +45,28 @@ export default function AccountSettings({
   });
 
   const handleUserSettingsUpdate = async () => {
-    const language = languageForm.getValues("language");
-    const isThemeDark = themeForm.getValues("theme");
+    try {
+      const language = languageForm.getValues("language");
+      const isThemeDark = themeForm.getValues("theme");
 
-    const settingsToUpdate = {
-      walletId,
-      language: language,
-      isThemeDark: isThemeDark,
-    };
+      const settingsToUpdate = {
+        walletId,
+        language,
+        isThemeDark,
+      };
 
-    await updateUserSettings(settingsToUpdate);
+      const response = await updateUserSettings(settingsToUpdate);
+
+      if (response instanceof Error) {
+        throw response;
+      }
+    } catch (err) {
+      toast.error("Failed to update user settings. Please try again.");
+      console.error("Error updating user settings:", err);
+
+      languageForm.reset();
+      themeForm.reset();
+    }
   };
 
   return (

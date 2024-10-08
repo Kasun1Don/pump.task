@@ -16,13 +16,13 @@ import { StatusSchema } from "./Status";
   },
 })
 export class ProjectClass {
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public name!: string;
 
-  @prop()
+  @prop({ type: String })
   public image?: string;
 
-  @prop({ required: true })
+  @prop({ type: Boolean, required: true })
   public isPrivate!: boolean;
 
   @prop({ type: () => [MemberSchema], default: [] })
@@ -31,8 +31,8 @@ export class ProjectClass {
   @prop({ type: () => [StatusSchema], default: [] })
   public status!: StatusSchema[];
 
-  @prop({ required: false })
-  public templateId?: string; // Change from ObjectId to string
+  @prop({ type: String, required: false })
+  public templateId?: string;
 }
 
 export const Project =
