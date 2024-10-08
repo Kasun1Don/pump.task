@@ -22,7 +22,7 @@ export class BadgeClass {
   @prop({ required: true, default: () => new mongoose.Types.ObjectId() })
   public id: mongoose.Types.ObjectId;
 
-  @prop({ required: true })
+  @prop({ type: Date, required: true })
   public receivedDate: Date;
 
   constructor(skill: Skill, receivedDate: Date) {
