@@ -1,5 +1,6 @@
 // Import React and Next.js modules
 import type { ReactNode } from "react";
+import { cookies } from "next/headers";
 import Image from "next/image";
 import { ConnectButton } from "thirdweb/react";
 
@@ -28,6 +29,8 @@ export default async function Layout({ children }: { children: ReactNode }) {
   // Fetch user data with server-side fetch Helper function
   const caller = await createServerSideFetch();
   const response = await caller.user.all();
+  const projectIdCookie = cookies().get("projectId");
+  const projectId = projectIdCookie?.value;
 
   // Destructure user data from response
   const userData: UserClass | null = response[0] as UserClass;
@@ -72,7 +75,10 @@ export default async function Layout({ children }: { children: ReactNode }) {
         <NavLink href="/projects">Projects</NavLink>
         <NavLink href="/tasks">Tasks</NavLink>
         <NavLink href="/profile">My Profile</NavLink>
-        <NavLink href="/users/66f4b13552fd7e29dde99777">Users</NavLink>
+        <NavLink href={projectId ? `/users/${projectId}` : "/missingproject"}>
+          Users
+        </NavLink>
+        {/* <NavLink href={`/users/66fdf1c172285f6bc485b20c`}>{projectId}</NavLink> */}
         <NavLink href="/settings">Settings</NavLink>
       </div>
 

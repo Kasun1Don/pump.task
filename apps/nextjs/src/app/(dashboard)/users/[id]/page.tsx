@@ -15,15 +15,17 @@ export default async function UsersPage({
   const projectData: ProjectClass | null = response as ProjectClass;
 
   return (
-    <div className="flex flex-col">
+    <div className="mx-20 mt-3 flex flex-col gap-3">
       <AddMember projectId={params.id} />
-      <div className="grid grid-cols-6 gap-3">
-        <span className="font-bold">Name</span>
-        <span className="font-bold">Email</span>
-        <span className="col-span-2 font-bold">Wallet</span>
-        <span className="font-bold">Role</span>
-        <span></span>
-        {projectData.members.map((member) => (
+      <div className="grid grid-cols-6 gap-3 rounded border-2 p-5">
+        <div className="col-span-6 grid grid-cols-6 border-b-2 font-bold">
+          <span>Name</span>
+          <span>Email</span>
+          <span>Wallet</span>
+          <span>Role</span>
+          <span></span>
+        </div>
+        {projectData.members.map((member, index) => (
           <>
             <span>{member.name ? member.name : "not available"}</span>
             <span>test</span>
@@ -31,10 +33,14 @@ export default async function UsersPage({
               {member.walletId ? member.walletId : "not available"}
             </span>
             <span>{member.role}</span>
-            <EditMember
-              walletId={member.walletId ?? ""}
-              projectId={params.id}
-            />
+            {index ? (
+              <EditMember
+                walletId={member.walletId ?? ""}
+                projectId={params.id}
+              />
+            ) : (
+              <span></span>
+            )}
           </>
         ))}
       </div>

@@ -9,6 +9,7 @@ import {
 } from "@acme/ui/dropdown-menu";
 import { toast } from "@acme/ui/toast";
 
+import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
 export function EditMember({
@@ -18,10 +19,9 @@ export function EditMember({
   projectId: string;
   walletId: string;
 }) {
-  const utils = api.useUtils();
   const removeMember = api.project.removeMember.useMutation({
     onSuccess: async () => {
-      await utils.project.invalidate();
+      await revalidate(`/users/${projectId}`);
     },
     onError: (err) => {
       toast.error(

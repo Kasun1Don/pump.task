@@ -19,6 +19,7 @@ import { Input } from "@acme/ui/input";
 import { Label } from "@acme/ui/label";
 import { toast } from "@acme/ui/toast";
 
+import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
 export const AddMemberSchema = z.object({
@@ -32,16 +33,15 @@ export function AddMember({ projectId }: { projectId: string }) {
     schema: AddMemberSchema,
     defaultValues: {
       walletId: "",
-      role: "observer",
+      // role: "observer",
       projectId,
     },
   });
 
-  const utils = api.useUtils();
   const updateMembers = api.project.editMembers.useMutation({
     onSuccess: async () => {
-      form.reset();
-      await utils.project.invalidate();
+      await revalidate(`/users/${projectId}`);
+      setIsOpen(false);
     },
     onError: (err) => {
       toast.error(
@@ -57,8 +57,8 @@ export function AddMember({ projectId }: { projectId: string }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="max-h-[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
-          Add Member
+        <Button className="flex items-center justify-center self-end rounded-lg border border-gray-700 bg-[#72D524] p-1 font-bold hover:bg-[#5CAB1D]">
+          + Add Member
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -67,7 +67,6 @@ export function AddMember({ projectId }: { projectId: string }) {
             className="flex w-full max-w-2xl flex-col gap-4"
             onSubmit={form.handleSubmit((data) => {
               updateMembers.mutate(data);
-              setIsOpen(false);
             })}
           >
             <FormField

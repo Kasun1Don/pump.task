@@ -55,7 +55,6 @@ export default function NewUser() {
 
   const createUser = api.user.create.useMutation({
     onSuccess: () => {
-      console.log("success");
       router.push("/projects");
     },
     onError: (err) => {

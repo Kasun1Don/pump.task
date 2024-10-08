@@ -41,7 +41,7 @@ export async function createServerSideFetch(): Promise<
   // Create headers and add the JWT if it exists
   const headers = new Headers();
   if (jwt) {
-    headers.set("Authorization", jwt);
+    headers.set("Authorization", `Bearer ${jwt}`);
   }
 
   // Create the tRPC context (grabs the authenticated user session, allows setting headers if needed)

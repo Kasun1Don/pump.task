@@ -1,10 +1,11 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 import mongoose from "mongoose";
 import { z } from "zod";
 
 import { Project, User } from "@acme/db";
 
-import { publicProcedure } from "../trpc";
+import { adminProcedure, publicProcedure } from "../trpc";
 
 export const projectRouter = {
   create: publicProcedure
@@ -17,7 +18,8 @@ export const projectRouter = {
           .array(
             z.object({
               user: z.string(),
-              role: z.enum(["observer", "admin", "owner"]),
+              role: z.enum(["Observer", "Admin", "Owner"]),
+              walletId: z.string(),
             }),
           )
           .optional(),
@@ -37,7 +39,8 @@ export const projectRouter = {
         if (members.length === 0) {
           members.push({
             user: new mongoose.Types.ObjectId(), // assign a default or anonymous user ID
-            role: "owner",
+            role: "Owner",
+            walletId: "0x8De7B458D1e666006c8b993a70Df214E9C32015E",
           });
         }
 
@@ -54,8 +57,9 @@ export const projectRouter = {
         const savedProject = await newProject.save();
 
         console.log("Project Created Successfully:", savedProject);
-
-        return savedProject;
+        return {
+          id: savedProject._id.toString(),
+        };
       } catch (error) {
         console.error("Error creating project:", error);
         throw new Error(
@@ -70,11 +74,10 @@ export const projectRouter = {
       if (project === null) {
         return { error: " not found" };
       }
-      console.log("--------inside route-------------", project);
 
       return project;
     }),
-  editMembers: publicProcedure
+  editMembers: adminProcedure
     .input(
       z.object({
         walletId: z.string(),
@@ -85,29 +88,44 @@ export const projectRouter = {
     .mutation(async ({ input }) => {
       const user = await User.findOne({ walletId: input.walletId });
       if (user === null) {
-        return { error: "User not found" };
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      console.log("---------", user);
+      await User.updateOne(
+        { walletId: input.walletId },
+        { $push: { projects: input.projectId } },
+      );
 
       const newMember = {
-        user: new mongoose.Types.ObjectId(),
+        // user: new mongoose.Types.ObjectId(),
         role: input.role,
         walletId: user.walletId,
         name: user.name,
       };
+
+      const project = await Project.findById(input.projectId);
+      const member = project?.members.find(
+        (obj) => obj.walletId === input.walletId,
+      );
+      if (member) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "test" });
+      }
 
       await Project.updateOne(
         { _id: input.projectId },
         { $push: { members: newMember } },
       );
     }),
-  removeMember: publicProcedure
+  removeMember: adminProcedure
     .input(z.object({ walletId: z.string(), projectId: z.string() }))
     .mutation(async ({ input }) => {
       await Project.updateOne(
         { _id: input.projectId },
         { $pull: { members: { walletId: input.walletId } } },
+      );
+      await User.updateOne(
+        { walletId: input.walletId },
+        { $pull: { projects: input.projectId } },
       );
     }),
 } satisfies TRPCRouterRecord;
