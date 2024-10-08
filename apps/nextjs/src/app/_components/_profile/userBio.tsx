@@ -28,32 +28,40 @@ export default function UpdateBio({
     }
   };
 
-  console.log("Check if the code is updating:");
-
   return (
-    <div className="text-sm text-gray-400">
+    <div className="flex justify-between text-sm text-gray-400">
       {isEditing ? (
-        <input
-          type="text"
+        <textarea
           value={bio}
           onChange={(e) => handleBioChange(e.target.value)}
-          className="rounded border p-1 text-sm text-gray-600"
+          className="h-32 w-80 resize rounded border bg-white p-1 text-black"
         />
       ) : (
-        <p onClick={() => setIsEditing(true)} className="text-sm text-gray-400">
-          {bio}
-        </p>
+        <p className="flex-1 p-1">{bio}</p>
       )}
-
-      <button onClick={() => setIsEditing(!isEditing)} className="p-1">
-        <Image src="/edit.png" alt="Copy text button" width={40} height={40} />
+      <button
+        onClick={async () => {
+          if (isEditing) {
+            await handleSave();
+          } else {
+            setIsEditing(true);
+          }
+        }}
+        className="ml-2 p-1"
+      >
+        {isEditing ? (
+          <span className="ml-2 rounded border bg-green-600 p-1 text-sm text-white">
+            Save
+          </span>
+        ) : (
+          <Image
+            src="/profile/edit.png"
+            alt="Copy text button"
+            width={25}
+            height={25}
+          />
+        )}
       </button>
-
-      {isEditing && (
-        <button onClick={handleSave} className="text-sm text-blue-500">
-          Save
-        </button>
-      )}
     </div>
   );
 }

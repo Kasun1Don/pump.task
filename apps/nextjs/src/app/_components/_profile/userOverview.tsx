@@ -19,8 +19,7 @@ export default async function UserOverview() {
     return <div>Error: Wallet ID is required.</div>;
   }
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-    const userData: UserOverviewData = await (api.user as any).overview({
+    const userData: UserOverviewData = await api.user.overview({
       walletId,
     });
 

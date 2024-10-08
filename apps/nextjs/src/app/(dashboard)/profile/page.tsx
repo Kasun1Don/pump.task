@@ -41,15 +41,12 @@ export default async function UserProfile() {
           className="mb-4 mt-36"
         />
 
-        <div className="mb-4 flex justify-between pb-6">
-          <div className="w-7/10" style={{ maxWidth: "70%" }}>
+        <div className="relative mb-4 flex h-auto justify-between">
+          <div className="w-7/10 justify-start" style={{ maxWidth: "70%" }}>
             <h1 className="text-2xl font-bold">{userData.name}</h1>
             <UpdateBio bio={userData.bio} walletId={walletId} />
           </div>
-          <div
-            className="py-1flex items-center rounded-lg border bg-gray-800 px-3 text-sm"
-            style={{ maxWidth: "fit-content" }}
-          >
+          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-7 text-sm sm:w-auto">
             <p>pump.task/{userData.name}</p>
             <CopyButton textToCopy={`pump.task/${userData.name}`} />
           </div>
