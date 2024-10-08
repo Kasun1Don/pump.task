@@ -34,10 +34,10 @@ export default function UpdateBio({
         <textarea
           value={bio}
           onChange={(e) => handleBioChange(e.target.value)}
-          className="h-32 w-80 resize rounded border bg-white p-1 text-black"
+          className="h-32 w-96 resize rounded border bg-white p-1 text-black"
         />
       ) : (
-        <p className="flex-1 p-1">{bio}</p>
+        <p className="w-96 flex-1 p-1">{bio}</p>
       )}
       <button
         onClick={async () => {
@@ -47,7 +47,7 @@ export default function UpdateBio({
             setIsEditing(true);
           }
         }}
-        className="ml-2 p-1"
+        className="ml-0.5 p-1"
       >
         {isEditing ? (
           <span className="ml-2 rounded border bg-green-600 p-1 text-sm text-white">
@@ -56,7 +56,7 @@ export default function UpdateBio({
         ) : (
           <Image
             src="/profile/edit.png"
-            alt="Copy text button"
+            alt="Edit button"
             width={25}
             height={25}
           />
