@@ -29,21 +29,26 @@ export async function updateUserSettings({
   newBadge?: boolean;
   image?: string;
 }) {
-  await api.user.update({
-    walletId,
-    email,
-    image,
-    userSettings: {
-      isThemeDark,
-      language,
-      dueDate,
-      comments,
-      assignedToCard,
-      removedFromCard,
-      changeCardStatus,
-      newBadge,
-    },
-  });
-
-  revalidatePath("/user-settings", "page");
+  try {
+    await api.user.update({
+      walletId,
+      email,
+      image,
+      userSettings: {
+        isThemeDark,
+        language,
+        dueDate,
+        comments,
+        assignedToCard,
+        removedFromCard,
+        changeCardStatus,
+        newBadge,
+      },
+    });
+    revalidatePath("/user-settings", "page");
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user settings:", error);
+    return new Error("An error occurred while updating user settings.");
+  }
 }

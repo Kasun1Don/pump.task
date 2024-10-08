@@ -4,7 +4,7 @@ export class MemberSchema {
   @prop({ type: mongoose.Schema.Types.ObjectId, ref: "User" })
   public user!: mongoose.Types.ObjectId;
 
-  @prop({ required: true, enum: ["observer", "admin", "owner"] })
+  @prop({ type: String, required: true, enum: ["observer", "admin", "owner"] })
   public role!: "observer" | "admin" | "owner";
 }
 

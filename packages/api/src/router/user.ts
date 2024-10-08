@@ -6,31 +6,6 @@ import { LoginHistory, User } from "@acme/db";
 import { protectedProcedure } from "../trpc";
 
 export const userRouter = {
-  /*
-   * @ROUTE -- LOGIN
-   *  Login a user with wallet ID and create a new login history
-   *
-   * @PARAMS:
-   *   walletId - The wallet ID of the user  MUST BE UNIQUE
-   *   location - The location of the user (General to a City not exact)  (OPTIONAL)
-   *   browser - The browser of the user  (OPTIONAL)
-   *   operatingSystem - The operating system of the user  (OPTIONAL)
-   *
-   * @USAGE
-   *  Generally used in client components as the users browser and OS are inputs to the function. Can be used in server side code as well but will need to pass the users *  browser and OS as inputs for complete Login Histories. (If left empty, the route won't throw error but will just specific the browser and OS as unknown)
-   *
-   *
-   * @EXAMPLE
-   *   const Login = await mutation.mutateAsync({
-   *      walletId: wallet,
-   *      browser: "Chromium",
-   *      operatingSystem: "Windows 10",
-   *      location: "Brisbane, Australia",
-   *    });
-   *
-   * @RETURNS
-   *  The user Object / Document
-   */
   login: protectedProcedure
     .input(
       z.object({
@@ -92,38 +67,6 @@ export const userRouter = {
         throw new Error("Failed to log in user");
       }
     }),
-
-  /*
-   * @ROUTE -- CREATE
-   *  Create a new user with wallet ID and create a new login history
-   *
-   * @PARAMS:
-   *   walletId - The wallet ID of the user MUST BE UNIQUE
-   *   name - The name of the user (Can be Duplicate)
-   *   email - The email of the user MUST BE UNIQUE
-   *   image - The image of the user / Profile Icon
-   *   location - The location of the user (OPTIONAL)
-   *   browser - The browser of the user (OPTIONAL)
-   *   operatingSystem - The operating system of the user (OPTIONAL)
-   *
-   * @USAGE
-   *  Used in client a component as the users browser and OS are inputs to the function, This is the route that a user will post to when they login and they don't have a *  name or are login in for the first time. (If LoginHistoy Inputs left empty, the route won't throw error but will just specific the browser and OS as unknown)
-   *
-   *
-   * @EXAMPLE
-   *   const Login = await mutation.mutateAsync({
-   *      walletId: wallet,
-   *      name: "Labrys Inc",
-   *      email: "Crypto@Labrys.com.au"
-   *      image: "/profileImage1.png",
-   *      browser: "Chromium",
-   *      operatingSystem: "Windows 10",
-   *      location: "Brisbane, Australia",
-   *    });
-   *
-   * @RETURNS
-   *  The user Object / Document
-   */
   create: protectedProcedure
     .input(
       z.object({
@@ -170,26 +113,6 @@ export const userRouter = {
         throw new Error("Failed to create user");
       }
     }),
-
-  /*
-   * @ROUTE -- BY WALLET
-   *  Get the user data by wallet ID
-   *
-   * @PARAMS
-   *   walletId - The wallet ID of the user
-   *
-   * @USAGE
-   *  Used in client and server components to fetch a user by their wallet ID. This is the route that a user fetch when they login or require their user data.
-   *
-   *
-   * @EXAMPLE
-   *   const Login = await api.user.byWallet.useQuery({
-   *      walletId: wallet,
-   *    });
-   *
-   * @RETURNS
-   *  The user Object / Document
-   */
   byWallet: protectedProcedure
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
@@ -224,42 +147,6 @@ export const userRouter = {
         throw new Error("Failed to fetch user");
       }
     }),
-
-  /*
-   * @ROUTE -- UPDATE
-   * Update the user details by wallet ID
-   *
-   * @PARAMS:
-   *   walletId - The wallet ID of the user
-   *   ALL OTHER INPUTS ARE OPTIONAL
-   *
-   * @USAGE
-   *  Used in client and server components to update a user by their wallet ID.
-   * This is the route that a user fetch when they need to update their user data.
-   *
-   * @EXAMPLE
-   *   const updatedUser = await mutation.mutateAsync({
-   *      walletId: wallet,
-   *      name: "Labrys Inc",
-   *      email: "Crypto@Labrys.com.au",
-   *      image: "/profileImage1.png",
-   *      userSettings: {
-   *          language: "Spanish",
-   *          isThemeDark: true,
-   *          twoFactorAuth: true,
-   *          notificationEmail: "Crypto@labrys.com.au",
-   *          dueDate: false,
-   *          comments: true,
-   *          assignedToCard: false,
-   *          removedFromCard: false,
-   *          changeCardStatus: true,
-   *          newBadge: true,
-   *      },
-   *   });
-   *
-   * @RETURNS
-   * The updated user Object / Document
-   */
   update: protectedProcedure
     .input(
       z.object({
@@ -336,25 +223,6 @@ export const userRouter = {
         throw new Error("Failed to update user details");
       }
     }),
-
-  /*
-   * @ROUTE -- DELETE USER
-   * Delete the user by wallet ID
-   *
-   * @PARAMS:
-   *   walletId - The wallet ID of the user to be deleted
-   *
-   * @USAGE
-   *  Used in client or server components when a user needs to delete their account.
-   *
-   * @EXAMPLE
-   *   const response = await mutation.mutateAsync({
-   *      walletId: wallet,
-   *   });
-   *
-   * @RETURNS
-   *  A success message or an error message if the user was not found
-   */
   delete: protectedProcedure
     .input(z.object({ walletId: z.string() }))
     .mutation(async ({ input }) => {
