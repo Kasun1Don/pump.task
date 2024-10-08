@@ -1,8 +1,10 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
+import type { BadgeClass } from "@acme/db";
 import { LoginHistory, User } from "@acme/db";
 
+import { Skill } from "../../../db/src/schema/Badges";
 import { protectedProcedure } from "../trpc";
 
 export const userRouter = {
@@ -131,10 +133,10 @@ export const userRouter = {
         name: z.string(),
         email: z.string().email(),
         image: z.string().optional(),
-        bio: z.string().optional(),
         location: z.string().optional(),
         browser: z.string().optional(),
         operatingSystem: z.string().optional(),
+        bio: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -150,6 +152,7 @@ export const userRouter = {
           name: input.name,
           email: input.email,
           image: input.image,
+          bio: input.image,
           userSettings: {},
           loginHistories: [newLogin._id],
         });
@@ -267,6 +270,7 @@ export const userRouter = {
         name: z.string().optional(),
         email: z.string().email().optional(),
         image: z.string().optional(),
+        bio: z.string().optional(),
         userSettings: z
           .object({
             language: z.string().optional(),
@@ -294,6 +298,7 @@ export const userRouter = {
           name: input.name ?? user.name,
           email: input.email ?? user.email,
           image: input.image ?? user.image,
+          bio: input.bio ?? user.bio,
           userSettings: {
             language:
               input.userSettings?.language ?? user.userSettings?.language,
@@ -319,7 +324,6 @@ export const userRouter = {
           },
         };
 
-        // Update the user with the merged data
         const updatedUser = await User.findByIdAndUpdate(
           user._id,
           updatedData,
@@ -336,39 +340,96 @@ export const userRouter = {
         throw new Error("Failed to update user details");
       }
     }),
-
-  /*
-   * @ROUTE -- DELETE USER
-   * Delete the user by wallet ID
-   *
-   * @PARAMS:
-   *   walletId - The wallet ID of the user to be deleted
-   *
-   * @USAGE
-   *  Used in client or server components when a user needs to delete their account.
-   *
-   * @EXAMPLE
-   *   const response = await mutation.mutateAsync({
-   *      walletId: wallet,
-   *   });
-   *
-   * @RETURNS
-   *  A success message or an error message if the user was not found
-   */
-  delete: protectedProcedure
+  overview: protectedProcedure
     .input(z.object({ walletId: z.string() }))
-    .mutation(async ({ input }) => {
-      try {
-        const user = await User.findOneAndDelete({ walletId: input.walletId });
+    .query(async ({ input }) => {
+      const user = await User.findOne({ walletId: input.walletId })
+        .populate("projects")
+        .populate("badges")
+        .lean();
 
-        if (!user) {
-          throw new Error("User not found");
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const serializedUser = {
+        ...user,
+        _id: user._id.toString(),
+        projects: user.projects?.map((project) => ({
+          ...project,
+          _id: project._id.toString(),
+        })),
+        badges: user.badges?.map((badge) => ({
+          ...badge,
+          _id: badge._id.toString(),
+        })),
+      };
+
+      const activeProjects = serializedUser.projects?.length ?? 0;
+      const totalBadges = serializedUser.badges?.length ?? 0;
+
+      const isBadgeClass = (badge: unknown): badge is BadgeClass => {
+        if (typeof badge !== "object" || badge === null) {
+          return false;
         }
 
-        return { message: "User deleted successfully" };
-      } catch (error) {
-        console.error("Error deleting user:", error);
-        throw new Error("Failed to delete user");
-      }
+        const badgeObj = badge as Record<string, unknown>;
+
+        return (
+          "receivedDate" in badgeObj &&
+          "skill" in badgeObj &&
+          (badgeObj.receivedDate instanceof Date ||
+            !isNaN(Date.parse(badgeObj.receivedDate as string)))
+        );
+      };
+
+      const badgesInLast30Days =
+        serializedUser.badges?.filter(
+          (badge) =>
+            isBadgeClass(badge) &&
+            new Date(badge.receivedDate) >=
+              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        ).length ?? 0;
+
+      const daysSinceLastBadge =
+        serializedUser.badges &&
+        serializedUser.badges.length > 0 &&
+        isBadgeClass(serializedUser.badges[0])
+          ? Math.floor(
+              (Date.now() -
+                new Date(serializedUser.badges[0].receivedDate).getTime()) /
+                (1000 * 3600 * 24),
+            )
+          : 0;
+
+      const badgeCounts: { [key in Skill]: number } = {
+        [Skill.Backend]: 0,
+        [Skill.Frontend]: 0,
+        [Skill.Design]: 0,
+        [Skill.SmartContracts]: 0,
+        [Skill.Integration]: 0,
+      };
+
+      serializedUser.badges?.forEach((badge) => {
+        if (isBadgeClass(badge)) {
+          badgeCounts[badge.skill]++;
+        }
+      });
+
+      let topSkill = "N/A"; // Default if no badges found
+      let maxCount = 0;
+      Object.keys(badgeCounts).forEach((skill) => {
+        if (badgeCounts[skill as Skill] > maxCount) {
+          maxCount = badgeCounts[skill as Skill];
+          topSkill = skill;
+        }
+      });
+      return {
+        activeProjects,
+        totalBadges,
+        badgesInLast30Days,
+        daysSinceLastBadge,
+        topSkill,
+      };
     }),
 } satisfies TRPCRouterRecord;

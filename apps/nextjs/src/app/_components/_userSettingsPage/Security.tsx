@@ -194,7 +194,7 @@ export default function Security({
                   <Switch
                     className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                     checked={field.value}
-                    onCheckedChange={(checked) => {
+                    onCheckedChange={(checked: boolean) => {
                       field.onChange(checked);
                       handleAuthenticationChange(checked);
                     }}

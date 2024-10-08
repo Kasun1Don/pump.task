@@ -7,6 +7,7 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
+import { BadgeClass } from "./Badges";
 import { LoginHistoryClass } from "./LoginHistories";
 import { ProjectClass } from "./Projects";
 import { UserSettingsClass } from "./UserSettings";
@@ -28,12 +29,22 @@ export class UserClass {
   @prop({ default: false })
   public emailVerified?: boolean;
 
+  @prop({ type: String })
+  public bio?: string;
+
   @prop({
     ref: () => ProjectClass,
     type: mongoose.Schema.Types.ObjectId,
     default: [],
   })
   public projects?: Ref<ProjectClass>[];
+
+  @prop({
+    ref: () => BadgeClass,
+    type: mongoose.Schema.Types.ObjectId,
+    default: [],
+  })
+  public badges?: Ref<BadgeClass>[];
 
   @prop({ type: () => UserSettingsClass })
   public userSettings?: UserSettingsClass;
