@@ -47,14 +47,14 @@ export default async function UserProfile() {
             <UpdateBio bio={userData.bio} walletId={walletId} />
           </div>
           <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-7 text-sm sm:w-auto">
-            <p>Copy {userData.name}'s wallet ID to share.</p>
+            <p>Copy your wallet ID to share.</p>
             <CopyButton textToCopy={`${userData.walletId}`} />
           </div>
         </div>
 
         <div className="flex gap-4">
           <div className="w-3/5 self-start rounded-lg border border-gray-700 p-5">
-            <UserOverview />
+            <UserOverview walletId={walletId} />
           </div>
           <div className="w-4/5 rounded-lg border border-gray-700 p-5">
             <BadgeSection />

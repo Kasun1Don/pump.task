@@ -5,7 +5,7 @@ import type { BadgeClass } from "@acme/db";
 import { LoginHistory, User } from "@acme/db";
 
 import { Skill } from "../../../db/src/schema/Badges";
-import { protectedProcedure } from "../trpc";
+import { protectedProcedure, publicProcedure } from "../trpc";
 
 export const userRouter = {
   /*
@@ -340,7 +340,7 @@ export const userRouter = {
         throw new Error("Failed to update user details");
       }
     }),
-  overview: protectedProcedure
+  overview: publicProcedure
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
       const user = await User.findOne({ walletId: input.walletId })
