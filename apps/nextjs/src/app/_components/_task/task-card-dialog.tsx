@@ -2,14 +2,13 @@
 
 // Current testing URL for project board
 // http://localhost:3000/tasks?projectId=66fefc58ae1f45bac2056575
-import type { z } from "zod";
 import React, { useState } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useFieldArray, useForm } from "react-hook-form";
 
-import type { ObjectIdString } from "@acme/validators";
+import type { NewTaskCard, ObjectIdString } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
 import { Calendar } from "@acme/ui/calendar";
@@ -30,14 +29,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@acme/ui/select";
-import { TaskCardSchema } from "@acme/validators";
+import { NewTaskCardSchema } from "@acme/validators";
 
 import { api } from "~/trpc/react";
 
 // TaskDialogProps updated to accept Zod form inputs
 export interface TaskCardDialogProps {
-  initialValues?: z.infer<typeof TaskCardSchema>;
-  onSubmit: (taskData: z.infer<typeof TaskCardSchema>) => void;
+  initialValues?: NewTaskCard; //z.infer<typeof TaskCardSchema>;
+  onSubmit: (taskData: NewTaskCard) => void;
+  // onSubmit: (taskData: z.infer<typeof TaskCardSchema>) => void;
   dialogTrigger?: React.ReactNode;
   dialogButtonText?: string;
   submitButtonText?: string;
@@ -78,8 +78,9 @@ const TaskCardDialog = ({
     watch,
     trigger,
     formState: { errors },
-  } = useForm<z.infer<typeof TaskCardSchema>>({
-    resolver: zodResolver(TaskCardSchema),
+  } = useForm<NewTaskCard>({
+    //<z.infer<typeof TaskCardSchema>>({
+    resolver: zodResolver(NewTaskCardSchema), //TaskCardSchema),
     defaultValues: initialValues ?? {
       title: "",
       description: "",
@@ -96,7 +97,7 @@ const TaskCardDialog = ({
     },
   });
 
-  console.log(initialValues);
+  if (initialValues) console.log(initialValues);
   console.log("statusId prop:", statusId);
 
   // Fetch statuses based on projectId
@@ -155,15 +156,6 @@ const TaskCardDialog = ({
   };
 
   // Remove user-generated tag
-  // const handleRemoveTag = (tagToRemove: string) => {
-  //   setUserTags(userTags.filter((tag) => tag !== tagToRemove));
-  //   setValue(
-  //     "tags.userGeneratedTags",
-  //     userTags.filter((tag) => tag !== tagToRemove),
-  //   );
-  //   void trigger("tags");
-  // };
-
   const handleRemoveTag = (tagToRemove: string) => {
     setValue(
       "tags.userGeneratedTags",
@@ -188,7 +180,7 @@ const TaskCardDialog = ({
     // Remove the specific field from the array
     remove(index);
 
-    // Optionally trigger validation after removing
+    // Trigger validation after removing
     void trigger("customFields");
   };
 
@@ -224,28 +216,6 @@ const TaskCardDialog = ({
                 {tag}
               </Button>
             ))}
-
-            {/* User-added Tags
-            {userTags.map((tag) => (
-              <div key={tag} className="flex items-center">
-                <Button
-                  onClick={() => toggleTagSelection(tag)}
-                  className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
-                    selectedTags.userGeneratedTags.includes(tag)
-                      ? "bg-zesty-green text-black"
-                      : "bg-gray-700 text-white"
-                  }`}
-                >
-                  {tag}
-                </Button>
-                <button
-                  onClick={() => handleRemoveTag(tag)}
-                  className="ml-2 text-red-500"
-                >
-                  &times;
-                </button>
-              </div>
-            ))} */}
 
             {/* User-added Tags */}
             {selectedTags.userGeneratedTags.map((tag) => (
@@ -402,7 +372,6 @@ const TaskCardDialog = ({
                     <SelectItem
                       // key={status._id}
                       value={status._id}
-                      // textValue={status.name}
                     >
                       {status.name}
                     </SelectItem>
@@ -433,7 +402,7 @@ const TaskCardDialog = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="unassigned">Unassigned</SelectItem>
-                {/* Add options for available assignees if needed */}
+                {/* Add options for available assignees */}
               </SelectContent>
             </Select>
             {errors.assigneeId?.message && (
@@ -517,7 +486,10 @@ const TaskCardDialog = ({
         {/* Submit Button */}
         <DialogFooter>
           <Button
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit((taskData) => {
+              console.log("Attempting to submit a task:", taskData); // This will now log the form data
+              onSubmit(taskData); // Pass the form data to the onSubmit function
+            })}
             className="bg-zesty-green w-full text-black"
           >
             {submitButtonText}

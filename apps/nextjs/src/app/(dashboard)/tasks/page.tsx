@@ -97,7 +97,6 @@ export default function TasksPage() {
         {statusColumns.map((status) => (
           <TaskStatusColumn
             key={status._id}
-            // task={task}
             statusName={status.name || "Unnamed"}
             projectId={projectId}
             statusId={status._id}

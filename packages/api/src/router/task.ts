@@ -2,10 +2,11 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import mongoose from "mongoose";
 import { z } from "zod";
 
+import type { NewTaskCard, ObjectIdString, TaskCard } from "@acme/validators";
 import { Status, Task } from "@acme/db";
 import {
+  NewTaskCardSchema,
   objectIdStringSchema,
-  TaskCardSchema,
   validateObjectIdString,
 } from "@acme/validators";
 
@@ -13,8 +14,8 @@ import { publicProcedure } from "../trpc";
 
 export const taskRouter = {
   addTask: publicProcedure
-    .input(TaskCardSchema)
-    .mutation(async ({ input }: { input: z.infer<typeof TaskCardSchema> }) => {
+    .input(NewTaskCardSchema)
+    .mutation(async ({ input }: { input: NewTaskCard }): Promise<TaskCard> => {
       try {
         // Convert string IDs to ObjectId instances
         const statusObjectId = new mongoose.Types.ObjectId(input.statusId);
@@ -35,7 +36,10 @@ export const taskRouter = {
           customFields: input.customFields,
         });
 
-        const savedTask = await newTask.save();
+        // Save the task, remove versionKey and convert it to type TaskCard
+        const savedTask = (await newTask.save()).toObject({
+          versionKey: false,
+        }) as TaskCard;
 
         console.log("Saved task:", savedTask);
 
@@ -43,6 +47,34 @@ export const taskRouter = {
       } catch (error) {
         console.error("Error adding task:", error);
         throw new Error("Failed to add task");
+      }
+    }),
+
+  deleteTask: publicProcedure
+    .input(
+      z.object({
+        taskId: objectIdStringSchema("taskId"),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const taskId: ObjectIdString = input.taskId;
+
+        console.log("Attempting to delete task:", taskId);
+
+        const deletedTask = await Task.findOneAndDelete({
+          _id: new mongoose.Types.ObjectId(taskId),
+        });
+
+        if (!deletedTask) {
+          throw new Error("Task not found");
+        }
+
+        console.log("Successfully deleted task:", deletedTask._id);
+        return { msg: "Successfully deleted task", task: deletedTask };
+      } catch (error) {
+        console.error(error);
+        throw new Error("Failed to delete task");
       }
     }),
 
@@ -183,4 +215,45 @@ export const taskRouter = {
         throw new Error("Failed to create status");
       }
     }),
+
+  deleteStatusColumn: publicProcedure
+    .input(
+      z.object({
+        statusId: objectIdStringSchema("statusId"),
+      }),
+    )
+    .mutation(
+      async ({ input }): Promise<{ msg: string; statusId: ObjectIdString }> => {
+        try {
+          const statusId: ObjectIdString = input.statusId;
+
+          console.log("Attempting to delete status column:", statusId);
+
+          // Delete all tasks related to this status column
+          const deletedTasks = await Task.deleteMany({
+            statusId: new mongoose.Types.ObjectId(statusId),
+          });
+
+          // Now delete the status column
+          const deletedStatus = await Status.findOneAndDelete({
+            _id: new mongoose.Types.ObjectId(statusId),
+          });
+
+          if (!deletedStatus) {
+            throw new Error("Status column not found");
+          }
+
+          console.log(
+            `Successfully deleted status column: ${input.statusId} and ${deletedTasks.deletedCount} tasks.`,
+          );
+          return {
+            msg: "Successfully deleted status column",
+            statusId: validateObjectIdString(deletedStatus._id.toString()),
+          };
+        } catch (error) {
+          console.error(error);
+          throw new Error("Failed to delete status column");
+        }
+      },
+    ),
 } satisfies TRPCRouterRecord;
