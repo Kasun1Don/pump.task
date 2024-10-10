@@ -5,7 +5,7 @@ import type { BadgeClass } from "@acme/db";
 import { LoginHistory, User } from "@acme/db";
 
 import { Skill } from "../../../db/src/schema/Badges";
-import { protectedProcedure } from "../trpc";
+import { protectedProcedure, publicProcedure } from "../trpc";
 
 export const userRouter = {
   login: protectedProcedure
@@ -243,8 +243,7 @@ export const userRouter = {
         throw new Error("Failed to delete user");
       }
     }),
-  overview: protectedProcedure
-
+  overview: publicProcedure
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
       const user = await User.findOne({ walletId: input.walletId })
@@ -304,7 +303,7 @@ export const userRouter = {
                 new Date(serializedUser.badges[0].receivedDate).getTime()) /
                 (1000 * 3600 * 24),
             )
-          : 0;
+          : "N/A"; // Default if no badges found
 
       const badgeCounts: { [key in Skill]: number } = {
         [Skill.Backend]: 0,

@@ -136,7 +136,6 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const token = ctx.token.split(" ")[1]!;
     const verified = await thirdwebAuth.verifyJWT({ jwt: token });
-    console.log("----------------", verified);
     if (!verified.valid) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }

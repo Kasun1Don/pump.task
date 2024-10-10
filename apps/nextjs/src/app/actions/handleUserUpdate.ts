@@ -17,6 +17,7 @@ export async function updateUserSettings({
   newBadge,
   image,
   bio,
+  name,
 }: {
   walletId: string;
   language?: string;
@@ -30,6 +31,7 @@ export async function updateUserSettings({
   newBadge?: boolean;
   image?: string;
   bio?: string;
+  name?: string;
 }) {
   try {
     await api.user.update({
@@ -37,6 +39,7 @@ export async function updateUserSettings({
       email,
       image,
       bio,
+      name,
       userSettings: {
         isThemeDark,
         language,
@@ -48,8 +51,9 @@ export async function updateUserSettings({
         newBadge,
       },
     });
+
     revalidatePath("/user-settings", "page");
-    revalidatePath("/proilfe", "page");
+    revalidatePath("/profile", "page");
     return { success: true };
   } catch (error) {
     console.error("Error updating user settings:", error);
