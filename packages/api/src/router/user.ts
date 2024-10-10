@@ -400,7 +400,7 @@ export const userRouter = {
                 new Date(serializedUser.badges[0].receivedDate).getTime()) /
                 (1000 * 3600 * 24),
             )
-          : 0;
+          : "N/A"; // Default if no badges found
 
       const badgeCounts: { [key in Skill]: number } = {
         [Skill.Backend]: 0,

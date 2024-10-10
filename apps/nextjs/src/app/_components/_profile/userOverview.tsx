@@ -5,7 +5,7 @@ interface UserOverviewData {
   activeProjects: number;
   totalBadges: number;
   badgesInLast30Days: number;
-  daysSinceLastBadge: number;
+  daysSinceLastBadge: number | string;
   topSkill: string;
 }
 
