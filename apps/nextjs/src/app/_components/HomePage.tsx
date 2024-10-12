@@ -9,7 +9,7 @@ import {
   login,
   logout,
 } from "../actions/authFront";
-import { client } from "../thirdwebClient";
+import { chain, client } from "../thirdwebClient";
 
 export function Login() {
   const router = useRouter();
@@ -19,6 +19,7 @@ export function Login() {
       <ConnectButton
         connectButton={{ label: "Start pumping tasks" }}
         client={client}
+        chain={chain}
         theme={darkTheme({
           colors: {
             primaryButtonBg: "#2aa72a",
