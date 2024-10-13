@@ -68,7 +68,8 @@
     "IPINFO_API_KEY",
     "THIRDWEB_ADMIN_PRIVATE_KEY",
     "THIRDWEB_AUTH_DOMAIN",
-    "NEXT_PUBLIC_CLIENT_ID"
+    "NEXT_PUBLIC_CLIENT_ID",
+    "SENDGRID_API_KEY"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",
