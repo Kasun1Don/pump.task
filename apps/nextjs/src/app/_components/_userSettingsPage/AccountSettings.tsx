@@ -25,6 +25,7 @@ import { languageFormSchema, themeFormSchema } from "@acme/validators";
 
 import { updateUserSettings } from "~/app/actions/handleUserUpdate";
 import { useUserNfts } from "~/app/helpers";
+import SendNftToUser from "~/app/helpers/SendNftToUser";
 
 export default function AccountSettings({
   language,
@@ -82,6 +83,7 @@ export default function AccountSettings({
           </div>
         ))}
       </div>
+      <SendNftToUser walletId={walletId} />
       <Form {...languageForm}>
         <form className="max-w-4/6 w-2/5 min-w-96 space-y-6">
           {/* Language Field */}

@@ -1,1 +1,2 @@
-export * from "./useUserNfts";
+export * from "./getUserNfts";
+export * from "./SendNftToUser";
