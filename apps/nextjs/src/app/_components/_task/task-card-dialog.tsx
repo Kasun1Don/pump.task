@@ -35,9 +35,8 @@ import { api } from "~/trpc/react";
 
 // TaskDialogProps updated to accept Zod form inputs
 export interface TaskCardDialogProps {
-  initialValues?: NewTaskCard; //z.infer<typeof TaskCardSchema>;
+  initialValues?: NewTaskCard;
   onSubmit: (taskData: NewTaskCard) => void;
-  // onSubmit: (taskData: z.infer<typeof TaskCardSchema>) => void;
   dialogTrigger?: React.ReactNode;
   dialogButtonText?: string;
   submitButtonText?: string;

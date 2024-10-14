@@ -1,8 +1,11 @@
 "use client";
 
+import type { Wallet } from "thirdweb/wallets";
+import type { z } from "zod";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useActiveWallet, useDisconnect } from "thirdweb/react";
 
 import {
   AlertDialog,
@@ -23,25 +26,45 @@ import {
   FormItem,
   FormLabel,
 } from "@acme/ui/form";
+import { toast } from "@acme/ui/toast";
+import { deleteAccountFormSchema } from "@acme/validators";
 
-const deleteAccountFormSchema = z.object({
-  deleteAccount: z.boolean().default(false).optional(),
-});
+import { logout } from "~/app/actions/authFront";
+import { api } from "~/trpc/react";
 
 export default function DeleteAccount({
   walletId,
 }: {
   walletId: string;
 }): JSX.Element {
-  console.log(walletId);
-
   const deleteAccountForm = useForm<z.infer<typeof deleteAccountFormSchema>>({
     resolver: zodResolver(deleteAccountFormSchema),
   });
 
-  const onDeleteConfirm = () => {
-    console.log("Account deleted");
-    deleteAccountForm.reset();
+  const router = useRouter();
+
+  const { disconnect } = useDisconnect();
+  const wallet = useActiveWallet() as Wallet;
+
+  const mutation = api.user.delete.useMutation();
+
+  const onDeleteConfirm = async () => {
+    try {
+      const response = await mutation.mutateAsync({
+        walletId: walletId,
+      });
+
+      if (response instanceof Error) {
+        throw response;
+      }
+      console.log("Account didn't throw an error", response);
+      await logout();
+      disconnect(wallet);
+      router.push("/");
+    } catch (error) {
+      toast.error("Error deleting account");
+      console.error("Error deleting account:", error);
+    }
   };
 
   return (

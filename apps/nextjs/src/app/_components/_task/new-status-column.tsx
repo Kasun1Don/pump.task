@@ -36,10 +36,13 @@ export default function NewStatusColumn({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  const utils = api.useUtils();
+
   // Handle creating a new status
   const createStatus = api.task.createStatus.useMutation({
     onSuccess: (newStatus) => {
       onStatusCreated(newStatus); // Call the callback with the new status created
+      void utils.task.getStatusesByProjectId.invalidate();
       setNewStatusName("");
       setOrder(0);
       setIsDialogOpen(false); // Close the dialog after creation

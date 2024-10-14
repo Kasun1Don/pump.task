@@ -1,11 +1,27 @@
 import React from "react";
+import { cookies } from "next/headers";
 import Image from "next/image";
 
+import type { UserClass } from "@acme/db";
+
+import { api } from "~/trpc/server";
 import BadgeSection from "../../_components/_profile/badgeSection";
 import CopyButton from "../../_components/_profile/copyButton";
+import UpdateBio from "../../_components/_profile/userBio";
 import UserOverview from "../../_components/_profile/userOverview";
 
-export default function UserProfile() {
+export default async function UserProfile() {
+  const walletId = cookies().get("wallet")?.value;
+
+  if (!walletId) {
+    console.error("Wallet ID is undefined or not found in cookies.");
+    return <div>Error: Wallet ID not found.</div>;
+  }
+
+  const response = await api.user.byWallet({ walletId });
+
+  const userData: UserClass | null = response as UserClass;
+
   return (
     <div className="relative">
       <section
@@ -18,21 +34,21 @@ export default function UserProfile() {
       ></section>
       <div className="relative mx-52">
         <Image
-          src="/labrysGreenSphere.png"
+          src={userData.image ?? "/labrysGreenSphere.png"}
           alt="User Profile Icon"
           width={120}
           height={120}
           className="mb-4 mt-36"
         />
 
-        <div className="mb-4 flex justify-between pb-6">
-          <div>
-            <h1 className="text-2xl font-bold">User's name</h1>
-            <p className="text-sm text-gray-400">User's Bio</p>
+        <div className="relative mb-4 flex h-auto justify-between">
+          <div className="w-7/10 justify-start" style={{ maxWidth: "70%" }}>
+            <h1 className="text-2xl font-bold">{userData.name}</h1>
+            <UpdateBio bio={userData.bio} walletId={walletId} />
           </div>
-          <div className="flex items-center justify-between rounded-lg border bg-gray-800 text-sm">
-            <p className="ms-3">pump.task/usersname</p>
-            <CopyButton textToCopy="pump.task/username" />
+          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-7 text-sm sm:w-auto">
+            <p>pump.task/{userData.name}</p>
+            <CopyButton textToCopy={`pump.task/${userData.name}`} />
           </div>
         </div>
 

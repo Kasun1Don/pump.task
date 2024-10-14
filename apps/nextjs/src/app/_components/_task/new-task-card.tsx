@@ -19,11 +19,15 @@ const NewTaskCard = ({
   statusId,
   onTaskCreated,
 }: NewTaskCardProps) => {
+  const utils = api.useUtils();
+
   const addTaskMutation = api.task.addTask.useMutation({
     onSuccess: (newTask) => {
       // Handle success
       console.log("Task created successfully");
+      void utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
       onTaskCreated(newTask); // Pass the new task back to the parent
+      // void utils.task.getStatusesByProjectId.invalidate();
     },
     onError: (error) => {
       console.error("Error creating task:", error);

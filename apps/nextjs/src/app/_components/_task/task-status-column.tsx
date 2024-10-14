@@ -65,7 +65,9 @@ const TaskStatusColumn = ({
 
   // Function to handle new task's created
   const handleTaskCreated = (newTask: TaskCardData) => {
-    setTasks((prevTasks) => [...prevTasks, newTask]);
+    if (newTask.statusId === statusId) {
+      setTasks((prevTasks) => [...prevTasks, newTask]);
+    }
   };
 
   // Deletion mutation for the status column
