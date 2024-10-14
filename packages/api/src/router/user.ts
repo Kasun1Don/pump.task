@@ -244,7 +244,6 @@ export const userRouter = {
       }
     }),
   overview: protectedProcedure
-
     .input(z.object({ walletId: z.string() }))
     .query(async ({ input }) => {
       const user = await User.findOne({ walletId: input.walletId })

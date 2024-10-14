@@ -33,9 +33,10 @@ export default function HotKeyEventListeners() {
   const handleKeyPress = (event: KeyboardEvent) => {
     // Check for Shift + Command + P (for Profile)
     if (
-      event.shiftKey &&
-      (event.metaKey || event.ctrlKey) &&
-      event.key.toLowerCase() === "p"
+      // Mac
+      (event.shiftKey && event.metaKey && event.key.toLowerCase() === "p") ||
+      // Windows
+      (event.ctrlKey && event.key.toLowerCase() === "p")
     ) {
       event.preventDefault();
       router.push("/profile");
@@ -44,12 +45,14 @@ export default function HotKeyEventListeners() {
     // Check for Command + S (for Settings)
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
       event.preventDefault();
-      router.push("/user-settings");
+      router.push("/settings");
     }
 
     // Logout for Shift + Q
     if (
+      // Windows
       (event.shiftKey && event.ctrlKey && event.key.toLowerCase() === "q") ||
+      // Mac
       (event.shiftKey && event.key.toLowerCase() === "q")
     ) {
       event.preventDefault();

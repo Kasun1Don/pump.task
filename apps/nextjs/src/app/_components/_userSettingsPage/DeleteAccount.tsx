@@ -57,7 +57,7 @@ export default function DeleteAccount({
       if (response instanceof Error) {
         throw response;
       }
-      console.log("Account didn't throw an error", response);
+
       await logout();
       disconnect(wallet);
       router.push("/");
