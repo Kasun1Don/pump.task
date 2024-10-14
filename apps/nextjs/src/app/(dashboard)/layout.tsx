@@ -76,7 +76,9 @@ export default async function Layout({ children }: { children: ReactNode }) {
               />
             ) : (
               <Link href="/projects">
-                <Button className="bg-zesty-green">Start a Project...</Button>
+                <Button className="hover:bg-zesty-green h-fit rounded-md bg-zinc-800 px-8 py-[0.375em] text-sm text-lime-500 hover:bg-opacity-50 hover:text-white">
+                  Start a Project...
+                </Button>
               </Link>
             )}
             {/* Pass user data to User dropdown */}
