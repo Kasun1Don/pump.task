@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ConnectButton, darkTheme } from "thirdweb/react";
 
+import { api } from "~/trpc/react";
 import {
   generatePayload,
   isLoggedIn,
@@ -14,8 +16,29 @@ import { client } from "../thirdwebClient";
 export function Login() {
   const router = useRouter();
 
+  const [triggerQuery, setTriggerQuery] = useState(false);
+
+  const walletId = "0x123";
+
+  const { data, isLoading } = api.email.sendEmail.useQuery(
+    {
+      walletId,
+    },
+    {
+      enabled: triggerQuery,
+    },
+  );
+
+  console.log(data);
+
+  const sendCode = () => {
+    setTriggerQuery(true);
+  };
+
   return (
     <>
+      <button onClick={sendCode} disabled={isLoading}></button>
+
       <ConnectButton
         connectButton={{ label: "Start pumping tasks" }}
         client={client}
