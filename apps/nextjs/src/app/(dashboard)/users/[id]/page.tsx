@@ -2,15 +2,14 @@ import type { ProjectClass } from "@acme/db";
 
 import { AddMember } from "~/app/_components/_users/addMember";
 import { EditMember } from "~/app/_components/_users/editMember";
-import { createServerSideFetch } from "~/app/actions/createServerSideFetchHelper";
+import { api } from "~/trpc/server";
 
 export default async function UsersPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const caller = await createServerSideFetch();
-  const response = await caller.project.byId({ id: params.id });
+  const response = await api.project.byId({ id: params.id });
   // Destructure user data from response
   const projectData: ProjectClass | null = response as ProjectClass;
 

@@ -6,8 +6,6 @@ import type {
 import { skipCSRFCheck } from "@auth/core";
 import Discord from "next-auth/providers/discord";
 
-import { env } from "../env";
-
 declare module "next-auth" {
   interface Session {
     user: {
@@ -18,7 +16,7 @@ declare module "next-auth" {
 
 // const adapter = MongoDBAdapter(clientPromise);
 
-export const isSecureContext = env.NODE_ENV !== "development";
+export const isSecureContext = process.env.NODE_ENV !== "development";
 
 export const authConfig = {
   // adapter,
@@ -29,7 +27,7 @@ export const authConfig = {
         trustHost: true,
       }
     : {}),
-  secret: env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET,
   providers: [Discord],
 } satisfies NextAuthConfig;
 

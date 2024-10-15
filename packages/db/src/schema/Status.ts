@@ -9,14 +9,14 @@ import {
 import { TaskClass } from "./TasksSchema";
 
 export class StatusSchema {
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public name!: string;
 
   @prop({ type: () => [TaskClass], default: [] })
   public tasks!: TaskClass[];
 }
 
-@modelOptions({ schemaOptions: { collection: "status" } }) // specify collection name for mongoose
+@modelOptions({ schemaOptions: { collection: "status" } })
 export class StatusClass extends StatusSchema {}
 
 export const Status =

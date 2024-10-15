@@ -9,10 +9,10 @@ import {
 import { TagsSchema } from "./TagsSchema";
 
 class CustomField {
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public fieldName!: string;
 
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public fieldValue!: string;
 }
 
@@ -20,6 +20,7 @@ export class TasksSchema {
   @prop({
     required: true,
     _id: false,
+    type: () => TagsSchema,
     validate: {
       validator: function (value: TagsSchema) {
         return (
@@ -33,28 +34,29 @@ export class TasksSchema {
   })
   public tags!: TagsSchema;
 
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public title!: string;
 
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public description!: string;
 
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public dueDate!: string;
 
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public status!: string;
 
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public assignee!: string;
 
-  @prop({ type: () => [CustomField], required: false })
+  @prop({ type: () => [CustomField], _id: false, required: false })
   public customFields?: CustomField[];
 }
 
 @modelOptions({ schemaOptions: { collection: "tasks" } })
 export class TaskClass extends TasksSchema {}
 
+// Create the Task model
 export const Task =
   (mongoose.models.TaskClass as
     | ReturnModelType<typeof TaskClass>

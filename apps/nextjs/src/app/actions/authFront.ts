@@ -1,4 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
 "use server";
 
 import type { VerifyLoginPayloadParams } from "thirdweb/auth";
@@ -20,9 +19,14 @@ const thirdwebAuth = createAuth({
   adminAccount: privateKeyToAccount({ client, privateKey }),
 });
 
-export const generatePayload = thirdwebAuth.generatePayload;
+export const generatePayload = async (
+  ...args: Parameters<typeof thirdwebAuth.generatePayload>
+) => {
+  return thirdwebAuth.generatePayload(...args);
+};
 
 export async function login(payload: VerifyLoginPayloadParams) {
+  console.log("logging in!", payload);
   const verifiedPayload = await thirdwebAuth.verifyPayload(payload);
   if (verifiedPayload.valid) {
     const jwt = await thirdwebAuth.generateJWT({
@@ -30,7 +34,7 @@ export async function login(payload: VerifyLoginPayloadParams) {
     });
     cookies().set("jwt", jwt);
     cookies().set("wallet", verifiedPayload.payload.address);
-    redirect("/newuser");
+    redirect("/auth");
   }
 }
 
@@ -41,6 +45,7 @@ export async function isLoggedIn() {
   }
 
   const authResult = await thirdwebAuth.verifyJWT({ jwt: jwt.value });
+  console.log("authResult", authResult);
   if (!authResult.valid) {
     return false;
   }
