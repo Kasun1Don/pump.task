@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
+import { useEffect, useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
 
-import { api } from "~/trpc/react";
 import { Button } from "@acme/ui/button";
 import { Switch } from "@acme/ui/switch";
+
+import { api } from "~/trpc/react";
 
 const templates = [
   { id: "60d5f484f8d2e30d8c4e4b0a", name: "DevOps Pipeline Template" },
@@ -16,11 +16,12 @@ const templates = [
 
 export default function ProjectsPage() {
   const activeAccount = useActiveAccount();
-  const [showOwnedOnly, setShowOwnedOnly] = useState(false);
+  const [showOwnedOnly, _setShowOwnedOnly] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
+  const [showFilter, setShowFilter] = useState("all");
 
   const userId = activeAccount?.address ?? "";
 
@@ -28,17 +29,23 @@ export default function ProjectsPage() {
     console.log("Current user ID (wallet address):", userId);
   }, [userId]);
 
-  const { data: projects, refetch: refetchProjects } = api.project.getAll.useQuery({
-    showOwnedOnly,
-    userId,
-  }, {
-    enabled: !!userId, // Only run the query if we have a userId
-  });
+  const { data: projects, refetch: refetchProjects } =
+    api.project.getAll.useQuery(
+      {
+        showOwnedOnly,
+        userId,
+      },
+      {
+        enabled: !!userId, // Only run the query if we have a userId
+      },
+    );
 
-  //filter projects based on showOwnedOnly, isPrivate and userId
-  const filteredProjects = projects?.filter(project => 
-    showOwnedOnly || !project.isPrivate || project.members.some(member => member.user === userId)
-  );
+  const filteredProjects = projects?.filter((project) => {
+    if (showFilter === "all") return true;
+    if (showFilter === "owned") return project.members.some(member => member.user === userId && member.role === "owner");
+    if (showFilter === "my") return project.members.some(member => member.user === userId);
+    return true;
+  });
 
   const createProject = api.project.create.useMutation({
     onSuccess: () => {
@@ -64,21 +71,31 @@ export default function ProjectsPage() {
             <div className="flex overflow-hidden rounded-lg border border-gray-700">
               <button
                 className={`px-4 py-2 font-semibold ${
-                  !showOwnedOnly
+                  showFilter === "all"
                     ? "bg-[#18181B] text-white"
                     : "bg-[#09090B] text-gray-400"
                 } hover:bg-[#27272A]`}
-                onClick={() => setShowOwnedOnly(false)}
+                onClick={() => setShowFilter("all")}
               >
                 All projects
               </button>
               <button
                 className={`px-4 py-2 font-semibold ${
-                  showOwnedOnly
+                  showFilter === "my"
                     ? "bg-[#18181B] text-white"
                     : "bg-[#09090B] text-gray-400"
                 } hover:bg-[#27272A]`}
-                onClick={() => setShowOwnedOnly(true)}
+                onClick={() => setShowFilter("my")}
+              >
+                My projects
+              </button>
+              <button
+                className={`px-4 py-2 font-semibold ${
+                  showFilter === "owned"
+                    ? "bg-[#18181B] text-white"
+                    : "bg-[#09090B] text-gray-400"
+                } hover:bg-[#27272A]`}
+                onClick={() => setShowFilter("owned")}
               >
                 Created by me
               </button>

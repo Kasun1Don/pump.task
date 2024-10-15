@@ -13,8 +13,10 @@ import { api } from "~/trpc/react";
 
 type StatusType = z.infer<typeof statusSchema>;
 
-function isValidStatus(status: StatusType): status is StatusType & { _id: ObjectIdString } {
-  return typeof status._id === 'string' && status._id.length > 0;
+function isValidStatus(
+  status: StatusType,
+): status is StatusType & { _id: ObjectIdString } {
+  return typeof status._id === "string" && status._id.length > 0;
 }
 
 export default function TasksPage() {

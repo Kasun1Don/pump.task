@@ -1,7 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-
-import { z } from "zod";
 import { Types } from "mongoose";
+import { z } from "zod";
 
 import { Project } from "@acme/db";
 
@@ -30,7 +29,7 @@ export const projectRouter = {
         const members = input.members
           ? input.members.map((member) => ({
               ...member,
-              user: member.user, 
+              user: member.user,
             }))
           : [];
 
@@ -60,22 +59,27 @@ export const projectRouter = {
     }),
 
   getAll: publicProcedure
-    .input(z.object({
-      showOwnedOnly: z.boolean().optional(),
-      userId: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        showOwnedOnly: z.boolean().optional(),
+        userId: z.string().optional(),
+      }),
+    )
     .query(async ({ input }) => {
       try {
         let query = {};
         if (input.showOwnedOnly && input.userId) {
-          query = { "members": { $elemMatch: { user: input.userId, role: "owner" } } };
+          query = {
+            members: { $elemMatch: { user: input.userId, role: "owner" } },
+          };
         }
         const projects = await Project.find(query).lean();
         return projects;
       } catch (error) {
         console.error("Error fetching projects:", error);
-        throw new Error(`Failed to fetch projects: ${(error as Error).message}`);
+        throw new Error(
+          `Failed to fetch projects: ${(error as Error).message}`,
+        );
       }
     }),
-
 } satisfies TRPCRouterRecord;
