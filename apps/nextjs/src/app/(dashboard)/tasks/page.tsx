@@ -53,7 +53,7 @@ export default function TasksPage() {
       projectId: projectId ?? "",
     },
     {
-      enabled: Boolean(projectId), // Only run query if projectId is valid
+      enabled: Boolean(validateObjectIdString(projectId)), // Only run query if projectId is valid
     },
   );
 
