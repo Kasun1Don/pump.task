@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useFieldArray, useForm } from "react-hook-form";
 
-import type { NewTaskCard, ObjectIdString } from "@acme/validators";
+import type { NewTaskCard, ObjectIdString, TaskCard } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
 import { Calendar } from "@acme/ui/calendar";
@@ -29,19 +29,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@acme/ui/select";
+import { Textarea } from "@acme/ui/textarea";
 import { NewTaskCardSchema } from "@acme/validators";
 
 import { api } from "~/trpc/react";
+import EditIcon from "./icons/EditIcon";
 
 // TaskDialogProps updated to accept Zod form inputs
 export interface TaskCardDialogProps {
-  initialValues?: NewTaskCard;
+  initialValues?: TaskCard;
   onSubmit: (taskData: NewTaskCard) => void;
   dialogTrigger?: React.ReactNode;
   dialogButtonText?: string;
   submitButtonText?: string;
   projectId: ObjectIdString;
   statusId: ObjectIdString;
+  isEditable?: boolean;
 }
 
 const TaskCardDialog = ({
@@ -52,6 +55,7 @@ const TaskCardDialog = ({
   submitButtonText = "Submit Button",
   projectId,
   statusId,
+  isEditable = false,
 }: TaskCardDialogProps) => {
   const defaultTags = [
     "Frontend",
@@ -60,7 +64,10 @@ const TaskCardDialog = ({
     "Smart Contracts",
     "Integration",
   ];
-  // const [userTags, setUserTags] = useState<string[]>([]);
+
+  const isNewTask = !initialValues?._id;
+
+  const [isEditMode, setIsEditMode] = useState<boolean>(isNewTask);
   const [newTag, setNewTag] = useState<string>("");
   const [isTagDialogOpen, setIsTagDialogOpen] = useState<boolean>(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
@@ -193,8 +200,19 @@ const TaskCardDialog = ({
         )}
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] max-w-[50vw] flex-col overflow-auto rounded-lg bg-gray-900 p-6 text-white">
-        <DialogHeader>
-          <DialogTitle>Task</DialogTitle>
+        <DialogHeader className="flex w-full items-center justify-between">
+          <DialogTitle className="text-lg font-semibold">
+            {initialValues?.title}
+            {/* Add an Edit button to toggle edit mode */}
+            {!isNewTask && isEditable && (
+              <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`ml-4 mt-2 ${isEditMode ? "stroke-amber-300 hover:stroke-green-400" : "stroke-gray-400 hover:stroke-amber-300"}`}
+              >
+                <EditIcon />
+              </button>
+            )}
+          </DialogTitle>
         </DialogHeader>
 
         {/* Tags */}
@@ -211,6 +229,7 @@ const TaskCardDialog = ({
                     ? "bg-zesty-green text-black"
                     : "bg-gray-700 text-white"
                 }`}
+                disabled={!isEditMode} // Disable tag selection if not in edit mode
               >
                 {tag}
               </Button>
@@ -221,6 +240,7 @@ const TaskCardDialog = ({
               <div key={tag} className="flex items-center">
                 <Button
                   onClick={() => toggleTagSelection(tag)}
+                  disabled={!isEditMode}
                   className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
                     selectedTags.userGeneratedTags.includes(tag)
                       ? "bg-zesty-green text-black"
@@ -229,46 +249,50 @@ const TaskCardDialog = ({
                 >
                   {tag}
                 </Button>
-                <button
-                  onClick={() => handleRemoveTag(tag)}
-                  className="ml-2 text-red-500"
-                >
-                  &times;
-                </button>
+                {isEditMode && (
+                  <button
+                    onClick={() => handleRemoveTag(tag)}
+                    className="ml-2 text-red-500"
+                  >
+                    &times;
+                  </button>
+                )}
               </div>
             ))}
 
             {/* Add New Tag Button */}
-            <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="ml-2 rounded-md bg-blue-400 px-3 py-1 text-sm text-black">
-                  + Add Tag
-                </Button>
-              </DialogTrigger>
-
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add a New Tag</DialogTitle>
-                </DialogHeader>
-                <Input
-                  type="text"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="Enter new tag"
-                  className="w-full rounded-md border border-gray-300 px-2 py-1"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleAddTag(); // Trigger add tag function on Enter key press
-                    }
-                  }}
-                />
-                <DialogFooter>
-                  <Button onClick={handleAddTag} className="bg-zesty-green">
-                    Add Tag
+            {isEditMode && (
+              <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="ml-2 rounded-md bg-blue-400 px-3 py-1 text-sm text-black">
+                    + Add Tag
                   </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add a New Tag</DialogTitle>
+                  </DialogHeader>
+                  <Input
+                    type="text"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Enter new tag"
+                    className="w-full rounded-md border border-gray-300 px-2 py-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleAddTag(); // Trigger add tag function on Enter key press
+                      }
+                    }}
+                  />
+                  <DialogFooter>
+                    <Button onClick={handleAddTag} className="bg-zesty-green">
+                      Add Tag
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
           {errors.tags?.defaultTags && (
             <p className="text-red-500">{errors.tags.defaultTags.message}</p>
@@ -276,24 +300,27 @@ const TaskCardDialog = ({
         </div>
 
         {/* Title */}
-        <div className="mb-4 flex-grow">
-          <h3 className="mb-2">TITLE</h3>
-          <Input
-            placeholder="Enter short task title."
-            className="h-24"
-            {...register("title")}
-          />
-          {errors.title?.message && (
-            <p className="text-red-500">{String(errors.title.message)}</p>
-          )}
-        </div>
+        {isEditMode && (
+          <div className="mb-4 flex-grow">
+            <h3 className="mb-2">TITLE</h3>
+            <Input
+              placeholder="Enter short task title."
+              className="h-24"
+              {...register("title")}
+            />
+            {errors.title?.message && (
+              <p className="text-red-500">{String(errors.title.message)}</p>
+            )}
+          </div>
+        )}
 
         {/* Description */}
         <div className="mb-4 flex-grow">
-          <h3 className="mb-2">DESCRIPTION</h3>
-          <Input
+          {isEditMode && <h3 className="mb-2">DESCRIPTION</h3>}
+          <Textarea
             placeholder="Enter detailed task description."
-            className="h-24 flex-wrap"
+            disabled={!isEditMode}
+            className="h-24"
             {...register("description")}
           />
           {errors.description?.message && (
@@ -308,6 +335,7 @@ const TaskCardDialog = ({
             <PopoverTrigger asChild>
               <Button
                 variant={"outline"}
+                disabled={!isEditMode}
                 className={cn(
                   "w-[280px] justify-start text-left font-normal",
                   isNaN(dueDate.getTime()) && "text-muted-foreground",
@@ -444,43 +472,48 @@ const TaskCardDialog = ({
         )}
 
         {/* Add Extra Fields Button */}
-        <div className="mb-4 flex-shrink-0">
-          <Dialog open={isFieldDialogOpen} onOpenChange={setIsFieldDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-auto rounded-md bg-blue-400 px-3 py-1 text-sm text-black">
-                + Add Custom Field
-              </Button>
-            </DialogTrigger>
+        {isEditMode && (
+          <div className="mb-4 flex-shrink-0">
+            <Dialog
+              open={isFieldDialogOpen}
+              onOpenChange={setIsFieldDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="w-auto rounded-md bg-blue-400 px-3 py-1 text-sm text-black">
+                  + Add Custom Field
+                </Button>
+              </DialogTrigger>
 
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add a Custom Field</DialogTitle>
-              </DialogHeader>
-              <Input
-                type="text"
-                value={newFieldName}
-                onChange={(e) => setNewFieldName(e.target.value)}
-                placeholder="Enter field name"
-                className="w-full rounded-md border border-gray-300 px-2 py-1"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddCustomField(); // Add custom field on Enter key press
-                  }
-                }}
-              />
-              <DialogFooter>
-                <DialogTrigger asChild>
-                  <Button
-                    onClick={handleAddCustomField}
-                    className="bg-zesty-green"
-                  >
-                    Add Field
-                  </Button>
-                </DialogTrigger>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add a Custom Field</DialogTitle>
+                </DialogHeader>
+                <Input
+                  type="text"
+                  value={newFieldName}
+                  onChange={(e) => setNewFieldName(e.target.value)}
+                  placeholder="Enter field name"
+                  className="w-full rounded-md border border-gray-300 px-2 py-1"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleAddCustomField(); // Add custom field on Enter key press
+                    }
+                  }}
+                />
+                <DialogFooter>
+                  <DialogTrigger asChild>
+                    <Button
+                      onClick={handleAddCustomField}
+                      className="bg-zesty-green"
+                    >
+                      Add Field
+                    </Button>
+                  </DialogTrigger>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
 
         {/* Submit Button */}
         <DialogFooter>

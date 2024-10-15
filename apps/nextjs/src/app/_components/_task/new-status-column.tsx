@@ -1,9 +1,8 @@
 "use client";
 
-import type { z } from "zod";
 import React, { useState } from "react";
 
-import type { ObjectIdString } from "@acme/validators";
+import type { ObjectIdString, StatusColumn } from "@acme/validators";
 import { Button } from "@acme/ui/button"; // Assuming this is part of the ChadCN UI lib
 
 import {
@@ -16,15 +15,13 @@ import {
 } from "@acme/ui/dialog";
 import { Input } from "@acme/ui/input"; // Assuming Input is part of ChadCN UI
 
-import { statusSchema } from "@acme/validators";
+import { NewStatusSchema } from "@acme/validators";
 
 import { api } from "~/trpc/react";
 
-type StatusType = z.infer<typeof statusSchema>;
-
 interface NewStatusColumnProps {
   projectId: ObjectIdString;
-  onStatusCreated: (newStatus: StatusType) => void;
+  onStatusCreated: (newStatus: StatusColumn) => void;
 }
 
 export default function NewStatusColumn({
@@ -53,7 +50,7 @@ export default function NewStatusColumn({
   });
 
   const handleCreateStatus = () => {
-    const validationResult = statusSchema.safeParse({
+    const validationResult = NewStatusSchema.safeParse({
       name: newStatusName,
       projectId,
       order,

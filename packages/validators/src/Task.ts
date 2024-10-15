@@ -23,7 +23,7 @@ const TagClassSchema = z
     },
   );
 
-// Zod schema for Task input
+// Zod schema for Task
 export const TaskCardSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
