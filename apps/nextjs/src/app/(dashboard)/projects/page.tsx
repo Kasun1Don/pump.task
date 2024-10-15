@@ -42,8 +42,12 @@ export default function ProjectsPage() {
 
   const filteredProjects = projects?.filter((project) => {
     if (showFilter === "all") return true;
-    if (showFilter === "owned") return project.members.some(member => member.user === userId && member.role === "owner");
-    if (showFilter === "my") return project.members.some(member => member.user === userId);
+    if (showFilter === "owned")
+      return project.members.some(
+        (member) => member.user === userId && member.role === "owner",
+      );
+    if (showFilter === "my")
+      return project.members.some((member) => member.user === userId);
     return true;
   });
 
