@@ -53,9 +53,11 @@ export const projectRouter = {
 
         const savedProject = await newProject.save();
 
-        console.log("Project Created Successfully:", savedProject);
+        const projectObject = savedProject.toObject();
 
-        return savedProject;
+        console.log("Project Created Successfully:", projectObject);
+
+        return projectObject;
       } catch (error) {
         console.error("Error creating project:", error);
         throw new Error(

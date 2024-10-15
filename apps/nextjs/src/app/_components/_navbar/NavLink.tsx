@@ -31,7 +31,7 @@ export default function NavLink({ href, children }: NavLinkProps) {
     // Navtive Link border - background
     <Link
       href={href}
-      className={`flex h-12 w-32 items-center justify-center text-center text-lg text-slate-500 hover:text-slate-50 ${
+      className={`flex h-12 w-24 items-center justify-center text-center text-sm text-slate-500 hover:text-slate-50 ${
         isActive ? "border-b-2 border-white text-slate-50" : ""
       }`}
     >

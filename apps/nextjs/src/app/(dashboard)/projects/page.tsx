@@ -34,12 +34,14 @@ export default function ProjectsPage() {
       console.log("Creating Project with variables:", variables); // log the mutation input before it's sent
     },
     onSuccess: (data) => {
+      const projectId = data._id.toString();
       console.log("Project Created Successfully:", data);
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedTemplate("");
       // navigate to the Tasks Page after successful creation
-      router.push(`/tasks?projectId=${data.id}`);
+      console.log(`Project ${projectId}`);
+      router.push(`/tasks?projectId=${projectId}`);
     },
     onError: (error) => {
       console.error("Error creating project:", error);
