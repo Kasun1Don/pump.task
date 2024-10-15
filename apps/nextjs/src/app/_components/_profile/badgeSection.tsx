@@ -1,6 +1,9 @@
+import { cookies } from "next/headers";
+
 import Badges from "./badges";
 
 const BadgeSection = () => {
+  const walletId = cookies().get("wallet")?.value;
   return (
     <div>
       <h1 className="text-3xl font-semibold">Badges Earned</h1>
@@ -9,9 +12,7 @@ const BadgeSection = () => {
         resume, they’re minted as NFTs on Base.
       </p>
       <div className="flex flex-wrap gap-4">
-        <Badges title="Frontend" count={12} imageUrl="/badge.png" />
-        <Badges title="Backend" count={1} imageUrl="/badge.png" />
-        <Badges title="Frontend" count={17} imageUrl="/badge.png" />
+        <Badges walletId={walletId} />
       </div>
     </div>
   );
