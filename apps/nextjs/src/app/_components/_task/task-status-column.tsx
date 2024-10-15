@@ -25,9 +25,7 @@ const TaskStatusColumn = ({
 
   console.log("task-status-column: statusId:", statusId);
 
-  const {
-    data: taskData,
-  } = api.task.getTaskByStatusId.useQuery(
+  const { data: taskData } = api.task.getTaskByStatusId.useQuery(
     {
       statusId: statusId,
     },

@@ -1,6 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-import mongoose from "mongoose";
+
 import { z } from "zod";
+import { Types } from "mongoose";
 
 import { Project } from "@acme/db";
 
@@ -29,23 +30,15 @@ export const projectRouter = {
         const members = input.members
           ? input.members.map((member) => ({
               ...member,
-              user: new mongoose.Types.ObjectId(member.user),
+              user: member.user, 
             }))
           : [];
-
-        // assign a default owner if no members are provided
-        if (members.length === 0) {
-          members.push({
-            user: new mongoose.Types.ObjectId(), // assign a default or anonymous user ID
-            role: "owner",
-          });
-        }
 
         const newProject = new Project({
           name: input.name,
           isPrivate: input.isPrivate,
           templateId: input.templateId
-            ? new mongoose.Types.ObjectId(input.templateId)
+            ? new Types.ObjectId(input.templateId)
             : undefined,
           members: members,
           status: input.status,
@@ -65,4 +58,24 @@ export const projectRouter = {
         );
       }
     }),
+
+  getAll: publicProcedure
+    .input(z.object({
+      showOwnedOnly: z.boolean().optional(),
+      userId: z.string().optional(),
+    }))
+    .query(async ({ input }) => {
+      try {
+        let query = {};
+        if (input.showOwnedOnly && input.userId) {
+          query = { "members": { $elemMatch: { user: input.userId, role: "owner" } } };
+        }
+        const projects = await Project.find(query).lean();
+        return projects;
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        throw new Error(`Failed to fetch projects: ${(error as Error).message}`);
+      }
+    }),
+
 } satisfies TRPCRouterRecord;

@@ -13,7 +13,6 @@ import { api } from "~/trpc/react";
 
 type StatusType = z.infer<typeof statusSchema>;
 
-// Add this type guard function at the top of the file
 function isValidStatus(status: StatusType): status is StatusType & { _id: ObjectIdString } {
   return typeof status._id === 'string' && status._id.length > 0;
 }
@@ -102,6 +101,7 @@ export default function TasksPage() {
         {statusColumns.filter(isValidStatus).map((status) => (
           <TaskStatusColumn
             key={status._id}
+            // task={task}
             statusName={status.name || "Unnamed"}
             projectId={projectId}
             statusId={status._id}
