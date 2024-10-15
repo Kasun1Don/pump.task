@@ -50,7 +50,7 @@ export default function TasksPage() {
     isLoading,
   } = api.task.getStatusesByProjectId.useQuery(
     {
-      projectId: projectId ?? "",
+      projectId: projectId as string,
     },
     {
       enabled: Boolean(validateObjectIdString(projectId)), // Only run query if projectId is valid
