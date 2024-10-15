@@ -311,6 +311,8 @@ export const userRouter = {
         [Skill.Design]: 0,
         [Skill.SmartContracts]: 0,
         [Skill.Integration]: 0,
+        [Skill.JSNinja]: 0,
+        [Skill.Misc]: 0,
       };
 
       serializedUser.badges?.forEach((badge) => {
