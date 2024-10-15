@@ -1,12 +1,14 @@
 "use client";
 
-import type { z } from "zod";
-import { useState } from "react";
+// Current testing URL for project board
+// http://localhost:3000/tasks?projectId=66fefc58ae1f45bac2056575
+import React, { useState } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useFieldArray, useForm } from "react-hook-form";
 
+import type { NewTaskCard, ObjectIdString } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
 import { Calendar } from "@acme/ui/calendar";
@@ -27,23 +29,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@acme/ui/select";
+import { NewTaskCardSchema } from "@acme/validators";
 
-import { taskCardSchema } from "./task-card-schema";
+import { api } from "~/trpc/react";
 
 // TaskDialogProps updated to accept Zod form inputs
 export interface TaskCardDialogProps {
-  initialValues?: z.infer<typeof taskCardSchema>;
-  onSubmit: (taskData: z.infer<typeof taskCardSchema>) => void;
+  initialValues?: NewTaskCard;
+  onSubmit: (taskData: NewTaskCard) => void;
+  dialogTrigger?: React.ReactNode;
   dialogButtonText?: string;
   submitButtonText?: string;
+  projectId: ObjectIdString;
+  statusId: ObjectIdString;
 }
 
-const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
+const TaskCardDialog = ({
   initialValues,
   onSubmit,
+  dialogTrigger,
   dialogButtonText = "Dialog Button",
   submitButtonText = "Submit Button",
-}) => {
+  projectId,
+  statusId,
+}: TaskCardDialogProps) => {
   const defaultTags = [
     "Frontend",
     "Backend",
@@ -51,7 +60,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     "Smart Contracts",
     "Integration",
   ];
-  const [userTags, setUserTags] = useState<string[]>([]);
+  // const [userTags, setUserTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
   const [isTagDialogOpen, setIsTagDialogOpen] = useState<boolean>(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
@@ -68,20 +77,35 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     watch,
     trigger,
     formState: { errors },
-  } = useForm<z.infer<typeof taskCardSchema>>({
-    resolver: zodResolver(taskCardSchema),
+  } = useForm<NewTaskCard>({
+    //<z.infer<typeof TaskCardSchema>>({
+    resolver: zodResolver(NewTaskCardSchema), //TaskCardSchema),
     defaultValues: initialValues ?? {
       title: "",
       description: "",
-      dueDate: "",
-      status: "To Do",
-      assignee: "Un Assigned",
+      dueDate: new Date(NaN),
+      statusId: statusId,
+      assigneeId: undefined,
+      projectId: projectId,
+      order: 0,
       tags: {
         defaultTags: [],
         userGeneratedTags: [],
       },
       customFields: [],
     },
+  });
+
+  if (initialValues) console.log(initialValues);
+  console.log("statusId prop:", statusId);
+
+  // Fetch statuses based on projectId
+  const {
+    data: statuses,
+    isLoading: isStatusesLoading,
+    error: statusesError,
+  } = api.task.getStatusesByProjectId.useQuery({
+    projectId,
   });
 
   // Use useFieldArray to manage custom fields dynamically
@@ -92,8 +116,8 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
 
   // Watch form values
   const dueDate = watch("dueDate");
-  const status = watch("status");
   const selectedTags = watch("tags");
+  const selectedStatusId = watch("statusId");
 
   // Toggle tag selection
   const toggleTagSelection = (tag: string) => {
@@ -119,20 +143,22 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
 
   // Add new custom tag
   const handleAddTag = () => {
-    if (newTag.trim() && !userTags.includes(newTag)) {
-      setUserTags([...userTags, newTag]);
-      toggleTagSelection(newTag);
+    if (newTag.trim() && !selectedTags.userGeneratedTags.includes(newTag)) {
+      setValue("tags.userGeneratedTags", [
+        ...selectedTags.userGeneratedTags,
+        newTag,
+      ]);
       setNewTag("");
       setIsTagDialogOpen(false); // Close the add tag dialog when a tag is added
+      void trigger("tags"); // Trigger validation
     }
   };
 
   // Remove user-generated tag
   const handleRemoveTag = (tagToRemove: string) => {
-    setUserTags(userTags.filter((tag) => tag !== tagToRemove));
     setValue(
       "tags.userGeneratedTags",
-      userTags.filter((tag) => tag !== tagToRemove),
+      selectedTags.userGeneratedTags.filter((tag) => tag !== tagToRemove),
     );
     void trigger("tags");
   };
@@ -153,16 +179,18 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
     // Remove the specific field from the array
     remove(index);
 
-    // Optionally trigger validation after removing
+    // Trigger validation after removing
     void trigger("customFields");
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="max-h-[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
-          {dialogButtonText}
-        </Button>
+        {dialogTrigger ?? (
+          <Button className="max-h-[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
+            {dialogButtonText}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] max-w-[50vw] flex-col overflow-auto rounded-lg bg-gray-900 p-6 text-white">
         <DialogHeader>
@@ -189,7 +217,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
             ))}
 
             {/* User-added Tags */}
-            {userTags.map((tag) => (
+            {selectedTags.userGeneratedTags.map((tag) => (
               <div key={tag} className="flex items-center">
                 <Button
                   onClick={() => toggleTagSelection(tag)}
@@ -282,7 +310,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                 variant={"outline"}
                 className={cn(
                   "w-[280px] justify-start text-left font-normal",
-                  !dueDate && "text-muted-foreground",
+                  isNaN(dueDate.getTime()) && "text-muted-foreground",
                 )}
                 onClick={() => setIsCalendarOpen(!isCalendarOpen)}
               >
@@ -293,7 +321,7 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
                   height={150}
                   className="mr-2 h-4 w-4"
                 />
-                {dueDate && !isNaN(Date.parse(dueDate)) ? (
+                {dueDate instanceof Date && !isNaN(dueDate.getTime()) ? (
                   format(new Date(dueDate), "PPP") // Display the formatted date if valid
                 ) : (
                   <span>Pick a date</span> // Display "Pick a date" if no valid date
@@ -303,17 +331,11 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
-                selected={
-                  dueDate && !isNaN(Date.parse(dueDate))
-                    ? new Date(dueDate)
-                    : undefined
-                }
+                selected={isNaN(dueDate.getTime()) ? new Date(NaN) : dueDate}
                 onSelect={(selectedDate) => {
-                  if (selectedDate) {
-                    setValue("dueDate", selectedDate.toISOString()); // Store as date string
-                    setIsCalendarOpen(false);
-                    void trigger("dueDate");
-                  }
+                  setValue("dueDate", selectedDate ?? new Date(NaN));
+                  setIsCalendarOpen(false);
+                  void trigger("dueDate");
                 }}
                 initialFocus
               />
@@ -326,54 +348,66 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
 
         {/* Status and Assignee */}
         <div className="mb-6 flex flex-shrink-0 gap-4">
+          {/* Status */}
           <div className="w-1/2">
             <h3 className="mb-2">STATUS</h3>
-            <Select
-              value={status} // Watch form value using "watch" from useForm
-              onValueChange={(value) =>
-                setValue(
-                  "status",
-                  value as
-                    | "To Do"
-                    | "In Progress"
-                    | "In QA"
-                    | "Done"
-                    | "Approved",
-                )
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="To Do">To Do</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="In QA">In QA</SelectItem>
-                <SelectItem value="Done">Done</SelectItem>
-                <SelectItem value="Approved">Approved</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.status?.message && (
-              <p className="text-red-500">{String(errors.status.message)}</p>
+            {isStatusesLoading ? (
+              <p>Loading statuses...</p>
+            ) : statusesError ? (
+              <p>Error loading statuses</p>
+            ) : (
+              <Select
+                value={selectedStatusId}
+                onValueChange={(value: ObjectIdString) => {
+                  setValue("statusId", value);
+                  void trigger("statusId");
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses?.map((status) => (
+                    <SelectItem
+                      // key={status._id}
+                      value={status._id}
+                    >
+                      {status.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {errors.statusId?.message && (
+              <p className="text-red-500">{String(errors.statusId.message)}</p>
             )}
           </div>
 
+          {/* Assignee */}
           <div className="w-1/2">
             <h3 className="mb-2">ASSIGNEE</h3>
             <Select
-              value={watch("assignee")} // Watch form value using "watch"
-              onValueChange={(value) => setValue("assignee", value)}
+              value={watch("assigneeId") ?? "unassigned"}
+              onValueChange={(value: ObjectIdString) => {
+                setValue(
+                  "assigneeId",
+                  value === "unassigned" ? undefined : value,
+                );
+                void trigger("assigneeId");
+              }}
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue placeholder="Unassigned" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Assign To Me">Assign To Me</SelectItem>
-                <SelectItem value="Un Assigned">Un Assigned</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {/* Add options for available assignees */}
               </SelectContent>
             </Select>
-            {errors.assignee?.message && (
-              <p className="text-red-500">{String(errors.assignee.message)}</p>
+            {errors.assigneeId?.message && (
+              <p className="text-red-500">
+                {String(errors.assigneeId.message)}
+              </p>
             )}
           </div>
         </div>
@@ -451,7 +485,10 @@ const TaskCardDialog: React.FC<TaskCardDialogProps> = ({
         {/* Submit Button */}
         <DialogFooter>
           <Button
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit((taskData) => {
+              console.log("Attempting to submit a task:", taskData); // This will now log the form data
+              onSubmit(taskData); // Pass the form data to the onSubmit function
+            })}
             className="bg-zesty-green w-full text-black"
           >
             {submitButtonText}
