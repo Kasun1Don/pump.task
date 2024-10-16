@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@acme/ui/select";
 import { Textarea } from "@acme/ui/textarea";
-import { NewTaskCardSchema } from "@acme/validators";
+import { NewTaskCardSchema, TaskCardSchema } from "@acme/validators";
 
 import { api } from "~/trpc/react";
 import EditIcon from "./icons/EditIcon";
@@ -38,7 +38,7 @@ import EditIcon from "./icons/EditIcon";
 // TaskDialogProps updated to accept Zod form inputs
 export interface TaskCardDialogProps {
   initialValues?: TaskCard;
-  onSubmit: (taskData: NewTaskCard) => void;
+  onSubmit: (taskData: TaskCard | NewTaskCard) => void;
   dialogTrigger?: React.ReactNode;
   dialogButtonText?: string;
   submitButtonText?: string;
@@ -84,9 +84,9 @@ const TaskCardDialog = ({
     watch,
     trigger,
     formState: { errors },
-  } = useForm<NewTaskCard>({
-    //<z.infer<typeof TaskCardSchema>>({
-    resolver: zodResolver(NewTaskCardSchema), //TaskCardSchema),
+  } = useForm<NewTaskCard | TaskCard>({
+    resolver: zodResolver(isNewTask ? NewTaskCardSchema : TaskCardSchema),
+    // resolver: zodResolver(NewTaskCardSchema),
     defaultValues: initialValues ?? {
       title: "",
       description: "",
@@ -520,7 +520,18 @@ const TaskCardDialog = ({
           <Button
             onClick={handleSubmit((taskData) => {
               console.log("Attempting to submit a task:", taskData); // This will now log the form data
-              onSubmit(taskData); // Pass the form data to the onSubmit function
+
+              if (isNewTask) {
+                const newTaskData: NewTaskCard = taskData;
+                onSubmit(newTaskData);
+              } else {
+                const updatedTaskData = {
+                  ...taskData,
+                  _id: initialValues._id as ObjectIdString,
+                };
+
+                onSubmit(updatedTaskData as TaskCard);
+              }
             })}
             className="bg-zesty-green w-full text-black"
           >

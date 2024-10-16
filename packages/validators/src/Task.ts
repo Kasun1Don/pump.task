@@ -34,7 +34,7 @@ export const TaskCardSchema = z.object({
   order: z.number().int().nonnegative("Order must be a non-negative integer"),
   tags: TagClassSchema,
   customFields: z.array(customFieldSchema).optional(),
-  _id: objectIdStringSchema(),
+  _id: objectIdStringSchema("taskId"),
 });
 
 export const NewTaskCardSchema = TaskCardSchema.omit({
