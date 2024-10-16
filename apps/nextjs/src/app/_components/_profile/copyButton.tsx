@@ -4,13 +4,13 @@ import React, { useState } from "react";
 import Image from "next/image";
 
 const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
-  const [imageSrc, setImageSrc] = useState("/copy.png");
+  const [imageSrc, setImageSrc] = useState("/profile/copy.svg");
 
   const handleCopyClick = () => {
     navigator.clipboard
       .writeText(textToCopy)
       .then(() => {
-        setImageSrc("/check.png");
+        setImageSrc("/profile/check.png");
       })
       .catch((err) => {
         console.error("Failed to copy text: ", err);

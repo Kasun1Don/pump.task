@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ConnectButton, darkTheme } from "thirdweb/react";
 
-import { Button } from "@acme/ui/button";
-
+import { api } from "~/trpc/react";
 import {
   generatePayload,
   isLoggedIn,
@@ -15,10 +14,31 @@ import {
 import { client } from "../thirdwebClient";
 
 export function Login() {
-  const [userLoggedIn, setUserLoggedIn] = useState(false);
   const router = useRouter();
+
+  const [triggerQuery, setTriggerQuery] = useState(false);
+
+  const walletId = "0x123";
+
+  const { data, isLoading } = api.email.sendEmail.useQuery(
+    {
+      walletId,
+    },
+    {
+      enabled: triggerQuery,
+    },
+  );
+
+  console.log(data);
+
+  const sendCode = () => {
+    setTriggerQuery(true);
+  };
+
   return (
     <>
+      <button onClick={sendCode} disabled={isLoading}></button>
+
       <ConnectButton
         connectButton={{ label: "Start pumping tasks" }}
         client={client}
@@ -28,12 +48,12 @@ export function Login() {
           },
         })}
         auth={{
-          isLoggedIn: async (address) => {
-            console.log("checking if logged in!", { address });
+          isLoggedIn: async () => {
             const response = await isLoggedIn();
             if (response) {
-              setUserLoggedIn(true);
+              router.push("/auth");
             }
+            console.log("user has JWT", response);
             return true;
           },
           doLogin: async (params) => {
@@ -47,12 +67,6 @@ export function Login() {
           },
         }}
       />
-      {userLoggedIn && (
-        <Button className="bg-zesty-green" onClick={() => router.push("/auth")}>
-          {" "}
-          Login Now!
-        </Button>
-      )}
     </>
   );
 }

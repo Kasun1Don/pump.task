@@ -26,6 +26,7 @@ export const generatePayload = async (
 };
 
 export async function login(payload: VerifyLoginPayloadParams) {
+  console.log("logging in!", payload);
   const verifiedPayload = await thirdwebAuth.verifyPayload(payload);
   if (verifiedPayload.valid) {
     const jwt = await thirdwebAuth.generateJWT({
@@ -44,6 +45,7 @@ export async function isLoggedIn() {
   }
 
   const authResult = await thirdwebAuth.verifyJWT({ jwt: jwt.value });
+  console.log("authResult", authResult);
   if (!authResult.valid) {
     return false;
   }

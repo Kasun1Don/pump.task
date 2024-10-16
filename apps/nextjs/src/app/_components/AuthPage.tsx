@@ -29,7 +29,6 @@ export default function UserLoginClient({
         location: locationData,
       });
 
-      console.log("Login successful");
       router.push("/profile");
     } catch (error) {
       console.error("Login failed:", error);

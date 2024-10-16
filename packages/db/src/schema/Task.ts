@@ -13,10 +13,10 @@ import { UserClass } from "./User";
 
 // Custom field name & values (Used when user adds a custom field to the task form)
 class CustomField {
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public fieldName!: string;
 
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public fieldValue!: string;
 }
 
@@ -31,6 +31,7 @@ export class TaskClass {
   @prop({
     required: true,
     _id: false,
+    type: () => TagClass,
     validate: {
       validator: function (value: TagClass) {
         return (
@@ -45,15 +46,15 @@ export class TaskClass {
   public tags!: TagClass;
 
   // Title of the task
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public title!: string;
 
   // Description of the task
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public description!: string;
 
   // Due Date for the task
-  @prop({ required: true })
+  @prop({ type: Date, required: true })
   public dueDate!: Date;
 
   // Assignee (User assigned to the task)
@@ -73,7 +74,7 @@ export class TaskClass {
   public projectId!: Ref<ProjectClass>;
 
   // Order of the task within column (Used to arrange location of task within status column)
-  @prop({ required: true })
+  @prop({ type: Number, required: true })
   public order!: number;
 }
 

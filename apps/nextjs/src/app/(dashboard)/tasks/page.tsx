@@ -56,10 +56,10 @@ export default function TasksPage() {
     isLoading,
   } = api.task.getStatusesByProjectId.useQuery(
     {
-      projectId: projectId ?? "",
+      projectId: projectId as string,
     },
     {
-      enabled: Boolean(projectId), // Only run query if projectId is valid
+      enabled: Boolean(validateObjectIdString(projectId)), // Only run query if projectId is valid
     },
   );
 
@@ -103,7 +103,6 @@ export default function TasksPage() {
         {statusColumns.filter(isValidStatus).map((status) => (
           <TaskStatusColumn
             key={status._id}
-            // task={task}
             statusName={status.name || "Unnamed"}
             projectId={projectId}
             statusId={status._id}

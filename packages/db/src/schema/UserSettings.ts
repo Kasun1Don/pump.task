@@ -1,33 +1,33 @@
 import { prop } from "@typegoose/typegoose";
 
 export class UserSettingsClass {
-  @prop({ default: "English" })
+  @prop({ type: String, default: "English" })
   public language?: string;
 
-  @prop({ default: true })
+  @prop({ type: Boolean, default: true })
   public isThemeDark?: boolean;
 
-  @prop({ default: false })
+  @prop({ type: Boolean, default: false })
   public twoFactorAuth?: boolean;
 
-  @prop()
+  @prop({ type: String })
   public notificationEmail?: string;
 
-  @prop({ default: true })
+  @prop({ type: Boolean, default: true })
   public dueDate?: boolean;
 
-  @prop({ default: true })
+  @prop({ type: Boolean, default: true })
   public comments?: boolean;
 
-  @prop({ default: true })
+  @prop({ type: Boolean, default: true })
   public assignedToCard?: boolean;
 
-  @prop({ default: true })
+  @prop({ type: Boolean, default: true })
   public removedFromCard?: boolean;
 
-  @prop({ default: true })
+  @prop({ type: Boolean, default: true })
   public changeCardStatus?: boolean;
 
-  @prop({ default: true })
+  @prop({ type: Boolean, default: true })
   public newBadge?: boolean;
 }

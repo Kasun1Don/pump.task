@@ -9,13 +9,13 @@ import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
 
 @modelOptions({ schemaOptions: { collection: "loginHistories" } })
 export class LoginHistoryClass extends TimeStamps {
-  @prop({ default: "unknown" })
+  @prop({ type: String, default: "unknown" })
   public location?: string;
 
-  @prop({ default: "unknown" })
+  @prop({ type: String, default: "unknown" })
   public browser?: string;
 
-  @prop({ default: "unknown" })
+  @prop({ type: String, default: "unknown" })
   public operatingSystem?: string;
 }
 

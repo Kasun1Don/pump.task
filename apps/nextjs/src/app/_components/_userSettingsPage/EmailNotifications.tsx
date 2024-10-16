@@ -1,9 +1,9 @@
 "use client";
 
+import type { z } from "zod";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import {
   Form,
@@ -15,19 +15,10 @@ import {
 } from "@acme/ui/form";
 import { Input } from "@acme/ui/input";
 import { Switch } from "@acme/ui/switch";
+import { toast } from "@acme/ui/toast";
+import { emailFormSchema } from "@acme/validators";
 
 import { updateUserSettings } from "~/app/actions/handleUserUpdate";
-
-// Schema for the form fields
-const emailFormSchema = z.object({
-  changeEmail: z.string().email({ message: "Invalid email address" }),
-  dueDates: z.boolean().optional(),
-  comments: z.boolean().optional(),
-  assignToCard: z.boolean().optional(),
-  removedFromCard: z.boolean().optional(),
-  changeCardStatus: z.boolean().optional(),
-  newBadge: z.boolean().optional(),
-});
 
 export default function EmailNotifications({
   email,
@@ -63,31 +54,48 @@ export default function EmailNotifications({
     },
   });
 
-  // Handle user settings update
   const handleUserSettingsUpdate = async () => {
-    const email = emailNotificationForm.getValues("changeEmail");
-    const dueDates = emailNotificationForm.getValues("dueDates");
-    const comments = emailNotificationForm.getValues("comments");
-    const assignedToCard = emailNotificationForm.getValues("assignToCard");
-    const removedFromCard = emailNotificationForm.getValues("removedFromCard");
-    const changeCardStatus =
-      emailNotificationForm.getValues("changeCardStatus");
-    const newBadge = emailNotificationForm.getValues("newBadge");
+    try {
+      const email = emailNotificationForm.getValues("changeEmail");
+      const dueDates = emailNotificationForm.getValues("dueDates");
+      const comments = emailNotificationForm.getValues("comments");
+      const assignedToCard = emailNotificationForm.getValues("assignToCard");
+      const removedFromCard =
+        emailNotificationForm.getValues("removedFromCard");
+      const changeCardStatus =
+        emailNotificationForm.getValues("changeCardStatus");
+      const newBadge = emailNotificationForm.getValues("newBadge");
 
-    const settingsToUpdate = {
-      walletId,
-      email: email,
-      dueDate: dueDates,
-      comments: comments,
-      assignedToCard: assignedToCard,
-      removedFromCard: removedFromCard,
-      changeCardStatus: changeCardStatus,
-      newBadge: newBadge,
-    };
+      const settingsToUpdate = {
+        walletId,
+        email: email,
+        dueDate: dueDates,
+        comments: comments,
+        assignedToCard: assignedToCard,
+        removedFromCard: removedFromCard,
+        changeCardStatus: changeCardStatus,
+        newBadge: newBadge,
+      };
+      const response = await updateUserSettings(settingsToUpdate);
 
-    await updateUserSettings(settingsToUpdate);
+      if (response instanceof Error) {
+        throw response;
+      }
 
-    setIsEditMode(false);
+      setIsEditMode(false);
+    } catch (error) {
+      toast.error(`Failed to update settings. Please try again.`);
+      console.error("Error updating user settings:", error);
+      emailNotificationForm.reset({
+        changeEmail: email,
+        dueDates: dueDate,
+        comments: comments,
+        assignToCard: assignToCard,
+        removedFromCard: removeFromCard,
+        changeCardStatus: changeCardStatus,
+        newBadge: newBadge,
+      });
+    }
   };
 
   return (

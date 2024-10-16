@@ -7,26 +7,30 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
+import { BadgeClass } from "./Badges";
 import { LoginHistoryClass } from "./LoginHistories";
 import { ProjectClass } from "./Projects";
 import { UserSettingsClass } from "./UserSettings";
 
 @modelOptions({ schemaOptions: { collection: "users" } })
 export class UserClass {
-  @prop({ required: true, unique: true })
+  @prop({ type: String, required: true, unique: true })
   public walletId?: string;
 
-  @prop()
+  @prop({ type: String })
   public name?: string;
 
-  @prop({ unique: true })
+  @prop({ type: String, unique: true })
   public email?: string;
 
-  @prop({ default: "/profileImage1.png" })
+  @prop({ type: String, default: "/profileImage1.png" })
   public image?: string;
 
-  @prop({ default: false })
+  @prop({ type: Boolean, default: false })
   public emailVerified?: boolean;
+
+  @prop({ type: String })
+  public bio?: string;
 
   @prop({
     ref: () => ProjectClass,
@@ -34,6 +38,13 @@ export class UserClass {
     default: [],
   })
   public projects?: Ref<ProjectClass>[];
+
+  @prop({
+    ref: () => BadgeClass,
+    type: mongoose.Schema.Types.ObjectId,
+    default: [],
+  })
+  public badges?: Ref<BadgeClass>[];
 
   @prop({ type: () => UserSettingsClass })
   public userSettings?: UserSettingsClass;

@@ -23,22 +23,6 @@ const TagClassSchema = z
     },
   );
 
-// Tags: Contains two arrays, one for default tags and another for user-generated tags
-// tags: z
-// .object({
-//   defaultTags: z.array(z.string()),
-//   userGeneratedTags: z.array(z.string()),
-// })
-// // Ensure at least one tag is selected, either from default or user-generated tags
-// .refine(
-//   (tags) =>
-//     tags.defaultTags.length > 0 || tags.userGeneratedTags.length > 0,
-//   {
-//     message: "At least one tag must be selected.", // Error message if no tags are selected
-//     path: ["defaultTags"], // Targeting defaultTags to highlight error location
-//   },
-// ),
-
 // Zod schema for Task input
 export const TaskCardSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -50,5 +34,16 @@ export const TaskCardSchema = z.object({
   order: z.number().int().nonnegative("Order must be a non-negative integer"),
   tags: TagClassSchema,
   customFields: z.array(customFieldSchema).optional(),
-  _id: objectIdStringSchema().optional(),
+  _id: objectIdStringSchema(),
 });
+
+export const NewTaskCardSchema = TaskCardSchema.omit({
+  _id: true,
+});
+
+export type TaskCard = z.infer<typeof TaskCardSchema>;
+export type NewTaskCard = z.infer<typeof NewTaskCardSchema>;
+
+export const createTaskCard = (input: z.infer<typeof TaskCardSchema>) => {
+  return TaskCardSchema.parse(input);
+};
