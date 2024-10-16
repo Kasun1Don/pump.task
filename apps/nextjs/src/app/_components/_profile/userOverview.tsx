@@ -19,7 +19,6 @@ export default async function UserOverview() {
     return <div>Error: Wallet ID is required.</div>;
   }
   try {
-     
     const userData: UserOverviewData = await api.user.overview({
       walletId,
     });
