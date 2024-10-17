@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
 
 import { Button } from "@acme/ui/button";
@@ -22,6 +23,7 @@ export default function ProjectsPage() {
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [showFilter, setShowFilter] = useState("all");
+  const router = useRouter();
 
   const userId = activeAccount?.address ?? "";
 
@@ -117,7 +119,10 @@ export default function ProjectsPage() {
             {filteredProjects?.map((project) => (
               <div
                 key={project._id.toString()}
-                className="flex min-h-32 flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold"
+                className="flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
+                onClick={() =>
+                  router.push(`/tasks?projectId=${project._id.toString()}`)
+                }
               >
                 <h3 className="p-4 text-white">{project.name}</h3>
                 <p className="px-4 pb-4 text-sm text-gray-400">
