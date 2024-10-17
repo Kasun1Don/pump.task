@@ -1,8 +1,8 @@
-import { mongoose, prop } from "@typegoose/typegoose";
+import { prop } from "@typegoose/typegoose";
 
 export class MemberSchema {
-  @prop({ type: mongoose.Schema.Types.ObjectId, ref: "User" })
-  public user!: mongoose.Types.ObjectId;
+  @prop({ required: true, type: String })
+  public user!: string;
 
   @prop({ type: String, required: true, enum: ["observer", "admin", "owner"] })
   public role!: "observer" | "admin" | "owner";
