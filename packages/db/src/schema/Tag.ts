@@ -1,6 +1,6 @@
 import { prop } from "@typegoose/typegoose";
 
-class TagsSchema {
+class TagClass {
   // Predefined/default tags (e.g., "Frontend", "Backend")
   @prop({
     type: () => [String],
@@ -20,4 +20,4 @@ class TagsSchema {
   public userGeneratedTags?: string[];
 }
 
-export { TagsSchema };
+export { TagClass };
