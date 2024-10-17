@@ -12,6 +12,9 @@ export class MemberSchema {
 
   @prop()
   public name?: string;
+
+  @prop()
+  public email?: string;
 }
 
 // Since MemberSchema is used as a subdocument, it doesn’t require a separate model.

@@ -20,6 +20,7 @@ export const projectRouter = {
               user: z.string(),
               role: z.enum(["Observer", "Admin", "Owner"]),
               walletId: z.string(),
+              email: z.string(),
             }),
           )
           .optional(),
@@ -40,7 +41,8 @@ export const projectRouter = {
           members.push({
             user: new mongoose.Types.ObjectId(), // assign a default or anonymous user ID
             role: "Owner",
-            walletId: "0x8De7B458D1e666006c8b993a70Df214E9C32015E",
+            walletId: "0xC3393B32eC70298075FA856df89e9E50FcE772bc",
+            email: "intameli@gmail.com",
           });
         }
 
@@ -80,35 +82,41 @@ export const projectRouter = {
   editMembers: adminProcedure
     .input(
       z.object({
-        walletId: z.string(),
+        email: z.string(),
         projectId: z.string(),
         role: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
-      const user = await User.findOne({ walletId: input.walletId });
+      const user = await User.findOne({ email: input.email });
       if (user === null) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "No user with that email",
+        });
       }
 
       await User.updateOne(
-        { walletId: input.walletId },
+        { email: input.email },
         { $push: { projects: input.projectId } },
       );
 
       const newMember = {
         // user: new mongoose.Types.ObjectId(),
         role: input.role,
-        walletId: user.walletId,
+        // walletId: user.walletId,
         name: user.name,
+        email: input.email,
+        walletId: user.walletId,
       };
 
       const project = await Project.findById(input.projectId);
-      const member = project?.members.find(
-        (obj) => obj.walletId === input.walletId,
-      );
+      const member = project?.members.find((obj) => obj.email === input.email);
       if (member) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "test" });
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User already on project",
+        });
       }
 
       await Project.updateOne(

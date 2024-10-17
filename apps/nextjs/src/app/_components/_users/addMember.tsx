@@ -23,7 +23,7 @@ import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
 export const AddMemberSchema = z.object({
-  walletId: z.string(),
+  email: z.string(),
   projectId: z.string(),
   role: z.string(),
 });
@@ -32,7 +32,7 @@ export function AddMember({ projectId }: { projectId: string }) {
   const form = useForm({
     schema: AddMemberSchema,
     defaultValues: {
-      walletId: "",
+      email: "",
       // role: "observer",
       projectId,
     },
@@ -45,9 +45,10 @@ export function AddMember({ projectId }: { projectId: string }) {
     },
     onError: (err) => {
       toast.error(
-        err.data?.code === "UNAUTHORIZED"
-          ? "You must be logged in to post"
-          : "Failed to create post",
+        err.message ? err.message : "Failed to create post",
+        // err.data?.code === "UNAUTHORIZED"
+        //   ? "You must be logged in to post"
+        //   : "Failed to create post",
       );
     },
   });
@@ -71,11 +72,11 @@ export function AddMember({ projectId }: { projectId: string }) {
           >
             <FormField
               control={form.control}
-              name="walletId"
+              name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} placeholder="Wallet Id" />
+                    <Input {...field} placeholder="Email" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

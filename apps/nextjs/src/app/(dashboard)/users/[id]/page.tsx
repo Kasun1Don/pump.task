@@ -27,7 +27,7 @@ export default async function UsersPage({
         {projectData.members.map((member, index) => (
           <>
             <span>{member.name ? member.name : "not available"}</span>
-            <span>test</span>
+            <span>{member.email ? member.email : "not available"}</span>
             <span className="col-span-2">
               {member.walletId ? member.walletId : "not available"}
             </span>
