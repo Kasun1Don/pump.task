@@ -1,10 +1,16 @@
 "use client";
 
+// http://localhost:3000/tasks?projectId=670e203762de6de8e32ed93b
 import type { z } from "zod";
 import { useState } from "react";
 import Image from "next/image";
 
-import type { ObjectIdString, TaskCardSchema } from "@acme/validators";
+import type {
+  NewTaskCard,
+  ObjectIdString,
+  TaskCard,
+  TaskCardSchema,
+} from "@acme/validators";
 import { Button } from "@acme/ui/button";
 import {
   Dialog,
@@ -46,9 +52,30 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
     },
   });
 
+  const updateTaskMutation = api.task.updateTask.useMutation({
+    onSuccess: (updatedTask) => {
+      // Handle success
+      console.log("Task updated successfully", updatedTask);
+      void utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
+    },
+    onError: (error) => {
+      console.error("Error creating task:", error);
+    },
+  }); // Initialize your mutation
+
   const handleDelete = () => {
     deleteTask.mutate({ taskId: task._id });
     setIsDeleteModalOpen(false);
+  };
+
+  const handleSubmit = async (taskData: TaskCard | NewTaskCard) => {
+    try {
+      console.log("running handle submit function");
+      // Send the task data (validated in TaskCardDialog) to the tRPC mutation
+      await updateTaskMutation.mutateAsync(taskData as TaskCard);
+    } catch (error) {
+      console.error("Error creating task:", error);
+    }
   };
 
   return (
@@ -57,7 +84,8 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
         initialValues={task}
         projectId={projectId}
         statusId={statusId}
-        onSubmit={(taskData) => console.log(taskData)}
+        onSubmit={handleSubmit}
+        isEditable={true} // Need to change this to be conditional based on user role
         dialogTrigger={
           <div className="group relative max-w-md rounded-lg border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">
             {/* Delete Icon */}
