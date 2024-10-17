@@ -22,8 +22,6 @@ export default async function UserProfile() {
 
   const userData: UserClass | null = response as UserClass;
 
-  console.log("Profile Update:");
-
   return (
     <div className="relative">
       <section

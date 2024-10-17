@@ -55,6 +55,9 @@ export default function NavUserDropdown({
       disconnect(wallet);
       await logout();
       router.push("/");
+    } else {
+      await logout();
+      router.push("/");
     }
   }
 
@@ -89,7 +92,7 @@ export default function NavUserDropdown({
               <h5>My Profile</h5>
             </Link>
           </div>
-          <div className="text-xxs">{isMac ? "⇧⌘P" : "⇧⌃P"}</div>
+          <div className="text-xxs">{isMac ? "⇧⌘P" : "Ctrl + P"}</div>
         </DropdownMenuItem>
 
         <DropdownMenuItem className="flex flex-row justify-between gap-16 hover:cursor-pointer">
@@ -100,11 +103,11 @@ export default function NavUserDropdown({
               width={20}
               height={20}
             />
-            <Link href="/user-settings">
+            <Link href="/settings">
               <h5>Settings</h5>
             </Link>
           </div>
-          <div className="text-xxs">{isMac ? "⌘S" : "⌃S"}</div>
+          <div className="text-xxs">{isMac ? "⌘S" : "Ctrl + S"}</div>
         </DropdownMenuItem>
 
         <DropdownMenuItem
@@ -115,7 +118,7 @@ export default function NavUserDropdown({
             <Image src="/LogoutIcon.png" alt="Logout" width={20} height={20} />
             <h5>Log out</h5>
           </div>
-          <div className="text-xxs">{isMac ? "⇧Q" : "⇧⌃Q"}</div>
+          <div className="text-xxs">{isMac ? "⇧Q" : "⇧ + Ctrl + Q"}</div>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

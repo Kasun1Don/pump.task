@@ -18,6 +18,8 @@ export async function updateUserSettings({
   image,
   bio,
   name,
+  emailVerified,
+  twoFactorAuth,
 }: {
   walletId: string;
   language?: string;
@@ -32,25 +34,34 @@ export async function updateUserSettings({
   image?: string;
   bio?: string;
   name?: string;
+  emailVerified?: boolean;
+  twoFactorAuth?: boolean;
 }) {
-  await api.user.update({
-    walletId,
-    email,
-    image,
-    bio,
-    name,
-    userSettings: {
-      isThemeDark,
-      language,
-      dueDate,
-      comments,
-      assignedToCard,
-      removedFromCard,
-      changeCardStatus,
-      newBadge,
-    },
-  });
-
-  revalidatePath("/user-settings", "page");
-  revalidatePath("/profile", "page");
+  try {
+    await api.user.update({
+      walletId,
+      email,
+      image,
+      bio,
+      name,
+      emailVerified,
+      userSettings: {
+        isThemeDark,
+        language,
+        dueDate,
+        comments,
+        twoFactorAuth,
+        assignedToCard,
+        removedFromCard,
+        changeCardStatus,
+        newBadge,
+      },
+    });
+    revalidatePath("/user-settings", "page");
+    revalidatePath("/profile", "page");
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user settings:", error);
+    return new Error("An error occurred while updating user settings.");
+  }
 }

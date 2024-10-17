@@ -1,58 +1,73 @@
 "use client";
 
-import { useState } from "react";
+// Thirdweb Wallet Type
+import type { Wallet } from "thirdweb/wallets";
+// Next.js Router Hook
 import { useRouter } from "next/navigation";
-import { ConnectButton, darkTheme } from "thirdweb/react";
+// Thirdweb React Components
+import {
+  ConnectButton,
+  darkTheme,
+  useActiveWallet,
+  useDisconnect,
+} from "thirdweb/react";
 
-import { Button } from "@acme/ui/button";
-
+// Functions for logging in and out, Auth
 import {
   generatePayload,
   isLoggedIn,
   login,
   logout,
 } from "../actions/authFront";
-import { client } from "../thirdwebClient";
+// The Thirdweb client and chain
+import { chain, client } from "../thirdwebClient";
 
 export function Login() {
-  const [userLoggedIn, setUserLoggedIn] = useState(false);
+  // Thirdweb Hooks
   const router = useRouter();
+  const disconnect = useDisconnect();
+  const activeWallet = useActiveWallet();
+
+  // Function to disconnect the wallet if user does not have a JWT
+  const disconnectWallet = () => {
+    disconnect.disconnect(activeWallet as Wallet);
+  };
+
   return (
     <>
       <ConnectButton
         connectButton={{ label: "Start pumping tasks" }}
         client={client}
+        chain={chain}
         theme={darkTheme({
           colors: {
             primaryButtonBg: "#2aa72a",
           },
         })}
         auth={{
-          isLoggedIn: async (address) => {
-            console.log("checking if logged in!", { address });
+          isLoggedIn: async () => {
+            // Check if the user is logged in & has a valid JWT
             const response = await isLoggedIn();
-            if (response) {
-              setUserLoggedIn(true);
+
+            // If the user has a valid JWT, redirect to the auth page
+            if (response == true) {
+              router.push("/auth");
+              // If the user does not have a valid JWT, disconnect the wallet
+            } else {
+              disconnectWallet();
             }
             return true;
           },
           doLogin: async (params) => {
-            console.log("logging in!");
             await login(params);
           },
           getLoginPayload: async ({ address }) => generatePayload({ address }),
           doLogout: async () => {
-            console.log("logging out!");
             await logout();
+            router.push("/");
           },
         }}
       />
-      {userLoggedIn && (
-        <Button className="bg-zesty-green" onClick={() => router.push("/auth")}>
-          {" "}
-          Login Now!
-        </Button>
-      )}
     </>
   );
 }

@@ -39,7 +39,7 @@ const formSchema = z.object({
 export default function NewUser() {
   const router = useRouter();
   const activeAccount = useActiveAccount();
-  const [selectedImage, setSelectedImage] = useState<string>(""); // Track the selected image
+  const [selectedImage, setSelectedImage] = useState<string>("");
 
   const form = useForm({
     schema: formSchema,
@@ -53,7 +53,6 @@ export default function NewUser() {
 
   const createUser = api.user.create.useMutation({
     onSuccess: () => {
-      console.log("success creation");
       router.push("/projects");
     },
     onError: (err) => {

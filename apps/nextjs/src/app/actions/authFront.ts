@@ -26,13 +26,25 @@ export const generatePayload = async (
 };
 
 export async function login(payload: VerifyLoginPayloadParams) {
+  console.log("logging in!", payload);
   const verifiedPayload = await thirdwebAuth.verifyPayload(payload);
   if (verifiedPayload.valid) {
     const jwt = await thirdwebAuth.generateJWT({
       payload: verifiedPayload.payload,
     });
-    cookies().set("jwt", jwt);
-    cookies().set("wallet", verifiedPayload.payload.address);
+
+    cookies().set("jwt", jwt, {
+      path: "/",
+      secure: true,
+      sameSite: "strict",
+    });
+    cookies().set("wallet", verifiedPayload.payload.address, {
+      path: "/",
+      secure: true,
+      sameSite: "strict",
+    });
+    // Added little promise to make sure the cookie is set before redirecting
+    await new Promise((resolve) => setTimeout(resolve, 100));
     redirect("/auth");
   }
 }
@@ -44,6 +56,7 @@ export async function isLoggedIn() {
   }
 
   const authResult = await thirdwebAuth.verifyJWT({ jwt: jwt.value });
+  console.log("authResult", authResult);
   if (!authResult.valid) {
     return false;
   }

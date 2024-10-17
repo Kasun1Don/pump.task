@@ -22,7 +22,7 @@ export default async function Page() {
   const userData: UserClass | null = response as UserClass;
 
   return (
-    <section className="my-8 flex flex-col items-center justify-center gap-4 pb-48">
+    <section className="my-2 flex flex-col items-center justify-center gap-4 pb-48">
       <AccountSettings
         language={userData.userSettings?.language}
         theme={userData.userSettings?.isThemeDark}
@@ -42,7 +42,6 @@ export default async function Page() {
         emailVerified={userData.emailVerified}
         authentication={userData.userSettings?.twoFactorAuth}
         walletId={walletId}
-        email={userData.email}
       />
       <DeleteAccount walletId={walletId} />
     </section>

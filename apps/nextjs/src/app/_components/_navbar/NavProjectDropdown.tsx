@@ -46,7 +46,6 @@ export default function NavProjectDropdown({
   const handleProjectChange = (projectName: string) => {
     try {
       setCurrentProject(projectName);
-      console.log(projectName);
     } catch (error) {
       console.error("Error updating project:", error);
     }
