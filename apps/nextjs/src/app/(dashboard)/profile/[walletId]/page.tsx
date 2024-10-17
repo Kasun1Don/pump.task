@@ -61,7 +61,7 @@ export default async function UserProfile({
             <UserOverview walletId={walletId} />
           </div>
           <div className="w-4/5 rounded-lg border border-gray-700 p-5">
-            <BadgeSection />
+            <BadgeSection walletId={walletId} />
           </div>
         </div>
       </div>

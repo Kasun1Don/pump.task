@@ -16,7 +16,12 @@ export enum Skill {
   Misc = "Misc.",
 }
 
-@modelOptions({ schemaOptions: { collection: "badges" } })
+@modelOptions({
+  schemaOptions: {
+    collection: "badges",
+    timestamps: true,
+  },
+})
 export class BadgeClass {
   @prop({ enum: Skill, required: true })
   public skill: Skill;
@@ -28,7 +33,10 @@ export class BadgeClass {
   public receivedDate: Date;
 
   @prop({ type: String, required: true })
-  public nftImage?: string;
+  public nftContractAddress?: string;
+
+  @prop({ type: String, required: true })
+  public nftTokenId?: string;
 
   constructor(skill: Skill, receivedDate: Date) {
     this.skill = skill;

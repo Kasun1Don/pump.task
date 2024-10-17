@@ -1,9 +1,6 @@
-import { cookies } from "next/headers";
-
 import Badges from "./badges";
 
-const BadgeSection = () => {
-  const walletId = cookies().get("wallet")?.value;
+export default function BadgeSection({ walletId }: { walletId: string }) {
   return (
     <div>
       <h1 className="text-3xl font-semibold">Badges Earned</h1>
@@ -16,6 +13,4 @@ const BadgeSection = () => {
       </div>
     </div>
   );
-};
-
-export default BadgeSection;
+}
