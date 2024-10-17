@@ -1,7 +1,7 @@
 "use client";
 
 import type { z } from "zod";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -28,27 +28,35 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@acme/ui/form";
 import { Input } from "@acme/ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@acme/ui/input-otp";
 import { Label } from "@acme/ui/label";
 import { Switch } from "@acme/ui/switch";
+import { toast } from "@acme/ui/toast";
 import { securityFormSchema } from "@acme/validators";
 
+import { send2FAEmail, verify2FACode } from "~/app/actions/2FAFunctions";
+import { updateUserSettings } from "~/app/actions/handleUserUpdate";
 import { api } from "~/trpc/react";
 
 export default function Security({
   emailVerified,
   authentication,
   walletId,
-  email,
 }: {
   emailVerified: boolean | undefined;
   authentication: boolean | undefined;
   walletId: string;
-  email: string | undefined;
 }): JSX.Element {
-  console.log("Console loggin to not throw unused variable lint error", email);
+  const [emailCodeVerified, setEmailCodeVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(false);
   const [emailCodeSent, setEmailCodeSent] = useState(false);
+  const [userAuthenticated, setUserAuthenticated] = useState(false);
+  const [value, setValue] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const securityForm = useForm<z.infer<typeof securityFormSchema>>({
     resolver: zodResolver(securityFormSchema),
@@ -56,6 +64,8 @@ export default function Security({
       authentication: authentication,
     },
   });
+
+  console.log(userAuthenticated);
 
   const {
     data: userData,
@@ -65,12 +75,78 @@ export default function Security({
     walletId,
   });
 
-  const handleAuthenticationChange = (checked: boolean) => {
-    if (checked) {
-      console.log("2FA authentication enabled");
+  const onSubmitSend = async () => {
+    setLoading(true);
+    const response = await send2FAEmail(walletId);
+    setLoading(false);
+    if (!response.success) {
+      setErrorMessage(response.message);
       return;
+    }
+    setEmailCodeSent(true);
+  };
+
+  const onSubmitVerify = useCallback(async () => {
+    setLoading(true);
+    const response = await verify2FACode(walletId, value);
+    setLoading(false);
+    if (response.success) {
+      setUserAuthenticated(true);
+      setEmailCodeVerified(true);
+      setSuccessMessage(true);
+      setErrorMessage("");
     } else {
-      console.log("2FA authentication disabled");
+      setErrorMessage(response.message);
+      setValue("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  useEffect(() => {
+    if (value.length === 6) {
+      onSubmitVerify().catch((error) => {
+        console.error("Error verifying 2FA code:", error);
+      });
+    }
+    if (value.length > 0) {
+      setErrorMessage("");
+    }
+  }, [value, onSubmitVerify]);
+
+  const handleUserSettingsUpdate = async () => {
+    try {
+      const authentication = securityForm.getValues("authentication");
+
+      console.log("authentication", authentication);
+
+      let settingsToUpdate;
+
+      settingsToUpdate = {
+        walletId,
+        twoFactorAuth: authentication,
+      };
+
+      if (authentication === false) {
+        settingsToUpdate = {
+          walletId,
+          twoFactorAuth: authentication,
+          emailVerified: false,
+        };
+      }
+
+      console.log("settingsToUpdate", settingsToUpdate);
+
+      const response = await updateUserSettings(settingsToUpdate);
+
+      if (response instanceof Error) {
+        throw response;
+      }
+    } catch (error) {
+      toast.error(`Failed to update settings. Please try again.`);
+      console.error("Error updating user settings:", error);
+      securityForm.reset({
+        authentication: authentication,
+      });
     }
   };
 
@@ -92,89 +168,133 @@ export default function Security({
                 </FormDescription>
               </div>
               <div className="flex items-center justify-center gap-6">
-                {field.value && !emailVerified ? (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <button
-                        type="button"
-                        className="text-zesty-green ml-4 text-sm"
-                      >
-                        Verify Now
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Secure your account</DialogTitle>
-                        <DialogDescription>
-                          Enter your email address to receive a verification
-                          code.
-                        </DialogDescription>
-                      </DialogHeader>
-                      {!emailCodeSent ? (
-                        <div className="grid gap-4 py-4">
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="email" className="text-right">
-                              Email
-                            </Label>
-                            <Input
-                              id="email"
-                              defaultValue={userData?.email ?? ""}
-                              className="col-span-3"
-                              disabled={true}
-                            />
+                {field.value ? (
+                  emailVerified ? (
+                    <p className="text-zesty-green">Verified</p>
+                  ) : (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button
+                          type="button"
+                          className="text-zesty-green ml-4 text-sm"
+                        >
+                          {emailCodeVerified ? "Verified" : "Verify Now"}
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Secure your account</DialogTitle>
+                          <DialogDescription>
+                            Enter your email address to receive a verification
+                            code.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {!emailCodeSent ? (
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="email" className="text-right">
+                                Email
+                              </Label>
+                              <Input
+                                id="email"
+                                defaultValue={userData?.email ?? ""}
+                                className="col-span-3"
+                                disabled={true}
+                              />
+                            </div>
+                            <DialogFooter>
+                              <Button
+                                className="bg-zesty-green sm:justify-center"
+                                type="button"
+                                onClick={onSubmitSend}
+                                disabled={loading}
+                              >
+                                {loading ? "Sending..." : "Send Code"}
+                              </Button>
+                            </DialogFooter>
                           </div>
-                          <DialogFooter>
-                            <Button
-                              className="sm\:justify-center bg-zesty-green"
-                              type="submit"
-                              onClick={() => setEmailCodeSent(!emailCodeSent)}
-                            >
-                              Send Code
-                            </Button>
-                          </DialogFooter>
-                        </div>
-                      ) : (
-                        <div className="grid gap-4 py-4">
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="email" className="text-right">
-                              Email
-                            </Label>
-                            <Input
-                              id="email"
-                              value={userData?.email ?? ""}
-                              className="col-span-3"
-                              disabled={true}
-                            />
+                        ) : (
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="email" className="text-right">
+                                Email
+                              </Label>
+                              <Input
+                                id="email"
+                                value={userData?.email ?? ""}
+                                className="col-span-3"
+                                disabled={true}
+                              />
+                            </div>
+                            <div className="flex flex-col items-center gap-4">
+                              {successMessage ? (
+                                <p className="text-green-500">Success!</p>
+                              ) : (
+                                <>
+                                  <FormItem className="flex flex-col items-center justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm">
+                                    <FormLabel>Code</FormLabel>
+                                    <FormControl>
+                                      <div className="space-y-2">
+                                        <InputOTP
+                                          maxLength={6}
+                                          value={value}
+                                          onChange={(value) => setValue(value)}
+                                        >
+                                          <InputOTPGroup>
+                                            <InputOTPSlot index={0} />
+                                            <InputOTPSlot index={1} />
+                                            <InputOTPSlot index={2} />
+                                            <InputOTPSlot index={3} />
+                                            <InputOTPSlot index={4} />
+                                            <InputOTPSlot index={5} />
+                                          </InputOTPGroup>
+                                        </InputOTP>
+                                      </div>
+                                    </FormControl>
+                                    <FormDescription>
+                                      Verify your identity by entering the code
+                                      sent to your email.
+                                    </FormDescription>
+                                    <FormMessage />
+                                    {errorMessage && (
+                                      <p className="text-xs text-red-500">
+                                        {errorMessage}
+                                      </p>
+                                    )}
+                                  </FormItem>
+                                  <DialogFooter>
+                                    <Button
+                                      className="bg-zesty-green sm:justify-center"
+                                      type="button"
+                                      onClick={() => setEmailCodeSent(false)}
+                                    >
+                                      Back
+                                    </Button>
+                                    <Button
+                                      className="bg-zesty-green sm:justify-center"
+                                      type="button"
+                                      onClick={onSubmitVerify}
+                                      disabled={loading}
+                                    >
+                                      {loading ? "Verifying..." : "Submit"}
+                                    </Button>
+                                  </DialogFooter>
+                                </>
+                              )}
+                            </div>
                           </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="code" className="text-right">
-                              Code
-                            </Label>
-                            <Input id="code" className="col-span-3" />
-                          </div>
-                          <DialogFooter>
-                            <Button
-                              className="sm\:justify-center bg-zesty-green"
-                              type="submit"
-                              onClick={() => setEmailCodeSent(!emailCodeSent)}
-                            >
-                              Submit
-                            </Button>
-                          </DialogFooter>
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
-                ) : field.value && emailVerified ? (
-                  <p className="text-zesty-green">Verified</p>
+                        )}
+                      </DialogContent>
+                    </Dialog>
+                  )
                 ) : null}
                 <FormControl>
                   <Switch
                     className={field.value ? "bg-zesty-green" : "bg-gray-200"}
                     checked={field.value}
-                    onCheckedChange={(checked: boolean) => {
+                    onCheckedChange={(checked) => {
                       field.onChange(checked);
-                      handleAuthenticationChange(checked);
+                      void handleUserSettingsUpdate();
                     }}
                   />
                 </FormControl>

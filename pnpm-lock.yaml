@@ -426,6 +426,9 @@ importers:
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
+      input-otp:
+        specifier: ^1.2.4
+        version: 1.2.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-themes:
         specifier: ^0.3.0
         version: 0.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -520,7 +523,7 @@ importers:
         version: 7.34.3(eslint@9.6.0)
       eslint-plugin-react-hooks:
         specifier: rc
-        version: 5.1.0-rc-cd22717c-20241013(eslint@9.6.0)
+        version: 5.1.0-rc-6cf85185-20241014(eslint@9.6.0)
       eslint-plugin-turbo:
         specifier: ^2.0.6
         version: 2.0.6(eslint@9.6.0)
@@ -4661,8 +4664,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
 
-  eslint-plugin-react-hooks@5.1.0-rc-cd22717c-20241013:
-    resolution: {integrity: sha512-p4gcOd9uRugj0w+23DAcb1quxz0RLLQrebiQ2wQ3+LbRlSic5SwixqdZmMsuQLkKdWYYftVIH6gsBoUBHNdsZg==}
+  eslint-plugin-react-hooks@5.1.0-rc-6cf85185-20241014:
+    resolution: {integrity: sha512-BeEXOFhXkde3ltdeI6TaiNm/2Fq7wevwjf6c+nPG57QewYiVRD5W910pEnsJikneK1QWrX5OgZS1vpCpUxzfYw==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -13989,7 +13992,7 @@ snapshots:
       safe-regex-test: 1.0.3
       string.prototype.includes: 2.0.0
 
-  eslint-plugin-react-hooks@5.1.0-rc-cd22717c-20241013(eslint@9.6.0):
+  eslint-plugin-react-hooks@5.1.0-rc-6cf85185-20241014(eslint@9.6.0):
     dependencies:
       eslint: 9.6.0
 
