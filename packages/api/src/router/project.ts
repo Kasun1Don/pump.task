@@ -2,7 +2,7 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import mongoose from "mongoose";
 import { z } from "zod";
 
-import { Project } from "@acme/db";
+import { Project, Status, Task } from "@acme/db";
 
 import { publicProcedure } from "../trpc";
 
@@ -53,6 +53,16 @@ export const projectRouter = {
 
         const savedProject = await newProject.save();
 
+        const newStatus = new Status({
+          name: "Approved", // The default column
+          projectId: savedProject._id,
+          order: 0,
+          isProtected: true, // This column is protected and cannot be removed
+        });
+
+        // Save the new status
+        await newStatus.save();
+
         const projectObject = savedProject.toObject();
 
         console.log("Project Created Successfully:", projectObject);
@@ -62,6 +72,42 @@ export const projectRouter = {
         console.error("Error creating project:", error);
         throw new Error(
           `Failed to create project: ${(error as Error).message}`,
+        );
+      }
+    }),
+
+  delete: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const projectId = new mongoose.Types.ObjectId(input.projectId);
+
+        // Delete all associated tasks
+        await Task.deleteMany({ projectId });
+
+        // Delete all associated status columns
+        await Status.deleteMany({ projectId });
+
+        // Delete the project itself
+        const deletedProject = await Project.findByIdAndDelete(projectId);
+
+        if (!deletedProject) {
+          throw new Error("Project not found");
+        }
+
+        console.log(
+          "Project and associated task and statuses deleted successfully",
+        );
+
+        return { message: "Project deleted successfully" };
+      } catch (error) {
+        console.error("Error deleting project:", error);
+        throw new Error(
+          `Failed to delete project: ${(error as Error).message}`,
         );
       }
     }),

@@ -283,6 +283,17 @@ export const taskRouter = {
 
           console.log("Attempting to delete status column:", statusId);
 
+          const statusColumn = await Status.findById(statusId);
+
+          if (!statusColumn) {
+            throw new Error("Status column not found");
+          }
+
+          // Prevent deletion of the "Approved" column
+          if (statusColumn.name === "Approved" || statusColumn.isProtected) {
+            throw new Error("The 'Approved' column cannot be deleted.");
+          }
+
           // Delete all tasks related to this status column
           const deletedTasks = await Task.deleteMany({
             statusId: new mongoose.Types.ObjectId(statusId),

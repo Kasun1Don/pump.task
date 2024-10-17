@@ -8,6 +8,7 @@ export const StatusSchema = z.object({
   projectId: objectIdStringSchema("projectId"),
   order: z.number().min(0, "Order must be a non-negative number").optional(),
   _id: objectIdStringSchema(),
+  isProtected: z.boolean().optional(),
 });
 
 export const NewStatusSchema = StatusSchema.omit({

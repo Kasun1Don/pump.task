@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import type {
-  ObjectIdString,
+  StatusColumn,
   TaskCard as TaskCardData,
 } from "@acme/validators";
 import { Button } from "@acme/ui/button";
@@ -24,16 +24,17 @@ import TaskCard from "./task-card";
 
 interface TaskStatusColumnProps {
   // task: TaskCardData;
-  statusName: string;
-  projectId: ObjectIdString;
-  statusId: ObjectIdString;
+  statusColumn: StatusColumn;
+  // statusName: string;
+  // projectId: ObjectIdString;
+  // statusId: ObjectIdString;
 }
 
 const TaskStatusColumn = ({
-  // task,
-  statusName,
-  projectId,
-  statusId,
+  statusColumn,
+  // statusName,
+  // projectId,
+  // statusId,
 }: TaskStatusColumnProps) => {
   const [tasks, setTasks] = useState<TaskCardData[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -41,10 +42,10 @@ const TaskStatusColumn = ({
   // Retrieve tasks
   const { data: taskData } = api.task.getTaskByStatusId.useQuery(
     {
-      statusId: statusId,
+      statusId: statusColumn._id,
     },
     {
-      enabled: Boolean(statusId), // Only run query if projectId is valid
+      enabled: Boolean(statusColumn._id), // Only run query if projectId is valid
     },
   );
 
@@ -65,7 +66,7 @@ const TaskStatusColumn = ({
 
   // Function to handle new task's created
   const handleTaskCreated = (newTask: TaskCardData) => {
-    if (newTask.statusId === statusId) {
+    if (newTask.statusId === statusColumn._id) {
       setTasks((prevTasks) => [...prevTasks, newTask]);
     }
   };
@@ -88,7 +89,7 @@ const TaskStatusColumn = ({
 
   // Handle deleting status column
   const handleDeleteColumn = () => {
-    deleteStatusColumn.mutate({ statusId });
+    deleteStatusColumn.mutate({ statusId: statusColumn._id });
     setIsDeleteModalOpen(false);
   };
 
@@ -96,30 +97,34 @@ const TaskStatusColumn = ({
     <div className="bg-transparent-[16] flex w-fit flex-col gap-5 rounded-lg bg-[#00000029] p-5">
       <div className="group relative flex items-center">
         <h2 className="flex justify-center text-lg font-extrabold">
-          {statusName}
+          {statusColumn.name}
         </h2>
         {/* Delete Icon for the column */}
-        <button
-          className="absolute right-2 top-2 stroke-gray-500 hover:stroke-rose-500"
-          onClick={() => setIsDeleteModalOpen(true)}
-          aria-label="Delete Status Column"
-        >
-          <TrashIcon />
-        </button>
+        {statusColumn.isProtected === false && (
+          <button
+            className="absolute right-2 top-2 stroke-gray-500 hover:stroke-rose-500"
+            onClick={() => setIsDeleteModalOpen(true)}
+            aria-label="Delete Status Column"
+          >
+            <TrashIcon />
+          </button>
+        )}
       </div>
       {tasks.map((task) => (
         <TaskCard
           key={task._id}
-          projectId={projectId}
-          statusId={statusId}
+          projectId={statusColumn.projectId}
+          statusId={statusColumn._id}
           task={task}
         />
       ))}
-      <NewTaskCard
-        statusId={statusId}
-        projectId={projectId}
-        onTaskCreated={handleTaskCreated}
-      />
+      {statusColumn.isProtected === false && (
+        <NewTaskCard
+          statusId={statusColumn._id}
+          projectId={statusColumn.projectId}
+          onTaskCreated={handleTaskCreated}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

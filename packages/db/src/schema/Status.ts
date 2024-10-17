@@ -21,10 +21,6 @@ export class StatusClass {
   public name!: string;
 
   // Reference to the Project ID (Which project this status belongs to)
-  // @prop({ ref: () => ProjectClass, required: true })
-  // public project!: Ref<ProjectClass>;
-
-  // Reference to the Project ID (Which project this status belongs to)
   @prop({
     type: () => mongoose.Schema.Types.ObjectId,
     ref: () => ProjectClass,
@@ -35,6 +31,9 @@ export class StatusClass {
   // Order of the status column (used to arrange location of status columns)
   @prop({ required: true })
   public order!: number;
+
+  @prop({ type: Boolean, default: false })
+  public isProtected!: boolean;
 }
 
 export const Status =
