@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { defineChain, getContract } from "thirdweb";
 import { sepolia } from "thirdweb/chains";
 import { balanceOf, getOwnedNFTs } from "thirdweb/extensions/erc1155";
@@ -9,7 +10,7 @@ import { client } from "~/app/thirdwebClient";
 
 const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
   const [nfts, setNfts] = useState<
-    { imageUrl: string; title: string; count: number }[]
+    { image: string; title: string; count: number }[]
   >([]);
 
   const chain = defineChain(sepolia);
@@ -33,7 +34,17 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
           address: walletId,
         });
 
-        const nftDataPromises = ownedNFTs.map(async (nft) => {
+        const images = [
+          "/nfts/Frontend.png",
+          "/nfts/Backend.png",
+          "/nfts/Design.png",
+          "/nfts/SmartContracts.png",
+          "/nfts/Integration.png",
+          "/nfts/JSNinja.png",
+          "/nfts/Misc.png",
+        ];
+
+        const nftDataPromises = ownedNFTs.map(async (nft, index) => {
           const balance = await balanceOf({
             contract,
             owner: walletId,
@@ -42,7 +53,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
 
           return {
             title: nft.metadata.name ?? "NFT",
-            imageUrl: nft.metadata.image ?? "/badge.png",
+            image: images[index] ?? "",
             count: Number(balance.toString()),
           };
         });
@@ -78,15 +89,15 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
             height: "216px",
           }}
         >
-          <div
-            className="relative"
-            style={{
-              height: "65%",
-              backgroundImage: `url(${nft.imageUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          ></div>
+          <div className="relative">
+            <Image
+              src={nft.image}
+              alt="NFT Media"
+              width={150}
+              height={130}
+              onError={() => console.log(`Image not found: ${nft.image}`)}
+            />
+          </div>
           <div className="border-t border-gray-700 bg-black bg-opacity-50 p-2">
             <h3 className="text-lg font-bold">{nft.title}</h3>
             <p className="text-right text-xs">x{nft.count}</p>

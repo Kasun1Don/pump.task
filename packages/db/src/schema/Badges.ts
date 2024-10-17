@@ -35,9 +35,6 @@ export class BadgeClass {
   @prop({ type: String })
   public imageUrl?: string;
 
-  @prop({ type: Date })
-  public mintedDate?: Date;
-
   constructor(skill: Skill, receivedDate: Date) {
     this.skill = skill;
     this.id = new mongoose.Types.ObjectId();
