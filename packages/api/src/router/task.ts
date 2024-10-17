@@ -50,6 +50,60 @@ export const taskRouter = {
       }
     }),
 
+  updateTask: publicProcedure
+    .input(
+      z.object({
+        _id: objectIdStringSchema("taskId"), // Identify the task to update
+        title: z.string().optional(), // Fields to update (all are optional)
+        description: z.string().optional(),
+        dueDate: z.date().optional(),
+        assigneeId: objectIdStringSchema("assigneeId").optional(),
+        statusId: objectIdStringSchema("statusId").optional(),
+        tags: z
+          .object({
+            defaultTags: z.array(z.string()).optional(),
+            userGeneratedTags: z.array(z.string()).optional(),
+          })
+          .optional(),
+        customFields: z
+          .array(
+            z.object({
+              fieldName: z.string(),
+              fieldValue: z.string(),
+            }),
+          )
+          .optional(),
+        order: z.number().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const taskId = input._id;
+
+        console.log("Attempting to update task:", taskId);
+
+        const updatedTask = await Task.findByIdAndUpdate(
+          new mongoose.Types.ObjectId(taskId),
+          { $set: input }, // Update only the fields provided in the input
+          { new: true, runValidators: true }, // Return the updated document and validate fields
+        )
+          .lean()
+          .exec();
+
+        if (!updatedTask) {
+          throw new Error("Task not found");
+        }
+
+        console.log("Task updated successfully:", updatedTask);
+
+        // Return the updated task
+        return updatedTask;
+      } catch (error) {
+        console.error("Error updating task:", error);
+        throw new Error("Failed to update task");
+      }
+    }),
+
   deleteTask: publicProcedure
     .input(
       z.object({

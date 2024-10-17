@@ -23,7 +23,7 @@ const TagClassSchema = z
     },
   );
 
-// Zod schema for Task input
+// Zod schema for Task
 export const TaskCardSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -34,7 +34,7 @@ export const TaskCardSchema = z.object({
   order: z.number().int().nonnegative("Order must be a non-negative integer"),
   tags: TagClassSchema,
   customFields: z.array(customFieldSchema).optional(),
-  _id: objectIdStringSchema(),
+  _id: objectIdStringSchema("taskId"),
 });
 
 export const NewTaskCardSchema = TaskCardSchema.omit({
