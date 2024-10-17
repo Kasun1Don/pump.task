@@ -4,24 +4,16 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { z } from "zod";
 
-import type { ObjectIdString } from "@acme/validators";
-import { statusSchema, validateObjectIdString } from "@acme/validators";
+import type { ObjectIdString, StatusColumn } from "@acme/validators";
+import { StatusSchema, validateObjectIdString } from "@acme/validators";
 
 import NewStatusColumn from "~/app/_components/_task/new-status-column";
 import TaskStatusColumn from "~/app/_components/_task/task-status-column";
 import { api } from "~/trpc/react";
 
-type StatusType = z.infer<typeof statusSchema>;
-
-function isValidStatus(
-  status: StatusType,
-): status is StatusType & { _id: ObjectIdString } {
-  return typeof status._id === "string" && status._id.length > 0;
-}
-
 export default function TasksPage() {
   // const [tasks, setTasks] = useState<TaskCardData[]>([]);
-  const [statusColumns, setStatusColumns] = useState<StatusType[]>([]);
+  const [statusColumns, setStatusColumns] = useState<StatusColumn[]>([]);
   const [projectId, setProjectId] = useState<ObjectIdString | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -59,13 +51,13 @@ export default function TasksPage() {
       projectId: projectId as string,
     },
     {
-      enabled: Boolean(validateObjectIdString(projectId)), // Only run query if projectId is valid
+      enabled: Boolean(projectId), // Only run query if projectId is valid
     },
   );
 
   useEffect(() => {
     if (statusData) {
-      const validationResult = statusSchema.array().safeParse(statusData);
+      const validationResult = StatusSchema.array().safeParse(statusData);
 
       if (validationResult.success) {
         setStatusColumns(validationResult.data);
@@ -76,7 +68,7 @@ export default function TasksPage() {
   }, [statusData]);
 
   // Callback function to handle when a new status column is created
-  const handleNewStatusCreated = (newStatus: StatusType) => {
+  const handleNewStatusCreated = (newStatus: StatusColumn) => {
     setStatusColumns((prevStatusColumns) => [...prevStatusColumns, newStatus]);
   };
 
@@ -100,7 +92,7 @@ export default function TasksPage() {
     <div>
       <h1 className="flex justify-center">Tasks Page ({projectId})</h1>
       <div className="flex flex-row gap-3 p-6">
-        {statusColumns.filter(isValidStatus).map((status) => (
+        {statusColumns.map((status) => (
           <TaskStatusColumn
             key={status._id}
             statusName={status.name || "Unnamed"}

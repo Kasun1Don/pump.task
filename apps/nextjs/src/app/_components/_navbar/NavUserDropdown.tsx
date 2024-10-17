@@ -55,6 +55,9 @@ export default function NavUserDropdown({
       disconnect(wallet);
       await logout();
       router.push("/");
+    } else {
+      await logout();
+      router.push("/");
     }
   }
 

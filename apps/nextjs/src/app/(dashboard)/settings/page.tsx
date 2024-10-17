@@ -42,7 +42,6 @@ export default async function Page() {
         emailVerified={userData.emailVerified}
         authentication={userData.userSettings?.twoFactorAuth}
         walletId={walletId}
-        email={userData.email}
       />
       <DeleteAccount walletId={walletId} />
     </section>
