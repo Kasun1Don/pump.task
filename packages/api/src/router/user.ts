@@ -158,6 +158,7 @@ export const userRouter = {
         email: z.string().email().optional(),
         image: z.string().optional(),
         bio: z.string().optional(),
+        emailVerified: z.boolean().optional(),
         userSettings: z
           .object({
             language: z.string().optional(),
@@ -186,6 +187,7 @@ export const userRouter = {
           email: input.email ?? user.email,
           image: input.image ?? user.image,
           bio: input.bio ?? user.bio,
+          emailVerified: input.emailVerified ?? user.emailVerified,
           userSettings: {
             language:
               input.userSettings?.language ?? user.userSettings?.language,

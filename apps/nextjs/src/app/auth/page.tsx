@@ -19,7 +19,6 @@ export default async function AuthPage() {
 
   // Redirect if wallet ID is undefined
   if (!walletId) {
-    console.error("Wallet ID is undefined or not found in cookies.");
     return (
       <div className="flex h-screen flex-col items-center justify-center text-center">
         <h1 className="text-2xl font-bold">Wallet ID Not Found</h1>

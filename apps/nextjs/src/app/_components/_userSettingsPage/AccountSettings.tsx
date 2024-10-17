@@ -24,8 +24,6 @@ import { toast } from "@acme/ui/toast";
 import { languageFormSchema, themeFormSchema } from "@acme/validators";
 
 import { updateUserSettings } from "~/app/actions/handleUserUpdate";
-import { useUserNfts } from "~/app/helpers";
-import SendNftToUser from "~/app/helpers/SendNftToUser";
 
 export default function AccountSettings({
   language,
@@ -36,7 +34,6 @@ export default function AccountSettings({
   theme: boolean | undefined;
   walletId: string;
 }) {
-  const nftValues = useUserNfts(walletId);
   const languageForm = useForm({
     resolver: zodResolver(languageFormSchema),
     defaultValues: { language: language },
@@ -74,16 +71,6 @@ export default function AccountSettings({
 
   return (
     <>
-      <div>
-        {nftValues.map((nft) => (
-          <div key={nft.id}>
-            <p>
-              TokenId: {nft.id} Balance: {nft.name}
-            </p>
-          </div>
-        ))}
-      </div>
-      <SendNftToUser walletId={walletId} />
       <Form {...languageForm}>
         <form className="max-w-4/6 w-2/5 min-w-96 space-y-6">
           {/* Language Field */}

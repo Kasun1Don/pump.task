@@ -7,3 +7,4 @@ export * from "./Badges";
 export * from "./Member";
 export * from "./Status";
 export * from "./TagsSchema";
+export * from "./TwoFacCode";
