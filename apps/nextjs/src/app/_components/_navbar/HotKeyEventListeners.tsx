@@ -26,6 +26,12 @@ export default function HotKeyEventListeners() {
           router.push("/");
         })
         .catch((err) => console.log(err));
+    } else {
+      logout()
+        .then(() => {
+          router.push("/");
+        })
+        .catch((err) => console.log(err));
     }
   };
 
