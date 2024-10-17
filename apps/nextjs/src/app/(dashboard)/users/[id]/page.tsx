@@ -20,7 +20,7 @@ export default async function UsersPage({
         <div className="col-span-6 grid grid-cols-6 border-b-2 font-bold">
           <span>Name</span>
           <span>Email</span>
-          <span>Wallet</span>
+          <span className="col-span-2">Wallet</span>
           <span>Role</span>
           <span></span>
         </div>

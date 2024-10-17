@@ -104,7 +104,6 @@ export const projectRouter = {
       const newMember = {
         // user: new mongoose.Types.ObjectId(),
         role: input.role,
-        // walletId: user.walletId,
         name: user.name,
         email: input.email,
         walletId: user.walletId,
@@ -123,6 +122,9 @@ export const projectRouter = {
         { _id: input.projectId },
         { $push: { members: newMember } },
       );
+      return {
+        email: input.email,
+      };
     }),
   removeMember: adminProcedure
     .input(z.object({ walletId: z.string(), projectId: z.string() }))

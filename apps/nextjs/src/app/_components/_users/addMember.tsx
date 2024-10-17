@@ -38,8 +38,15 @@ export function AddMember({ projectId }: { projectId: string }) {
     },
   });
 
+  const sendEmail = api.email.sendInvite.useMutation({
+    onSuccess: (data) => {
+      toast.message(`Invite sent to ${data.email}`);
+    },
+  });
+
   const updateMembers = api.project.editMembers.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (data) => {
+      sendEmail.mutate({ email: data.email });
       await revalidate(`/users/${projectId}`);
       setIsOpen(false);
     },
