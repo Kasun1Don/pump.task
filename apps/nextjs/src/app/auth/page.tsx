@@ -1,10 +1,15 @@
+// Import Next.js modules
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+// Import the UserClass type from the database
 import type { UserClass } from "@acme/db";
 
+// Import the TRPC API
 import { api } from "~/trpc/server";
+// Import the UserLoginClient component
 import UserLoginClient from "../_components/AuthPage";
+// Import the getUserLocation function
 import { getUserLocation } from "../actions/getUserLocation";
 
 // Define the AuthPage component
@@ -14,7 +19,6 @@ export default async function AuthPage() {
 
   // Redirect if wallet ID is undefined
   if (!walletId) {
-    console.error("Wallet ID is undefined or not found in cookies.");
     return (
       <div className="flex h-screen flex-col items-center justify-center text-center">
         <h1 className="text-2xl font-bold">Wallet ID Not Found</h1>
@@ -42,12 +46,13 @@ export default async function AuthPage() {
     redirect("/newuser");
   }
 
+  // Get user location
   const userLocation = await getUserLocation();
-
   const location = userLocation.location.city + userLocation.location.country;
 
   return (
     <UserLoginClient
+      email={userData.email}
       wallet={walletId}
       locationData={location || "localhost:3000"}
       userHas2FAEnabled={userData.emailVerified}

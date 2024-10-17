@@ -32,11 +32,11 @@ export class BadgeClass {
   @prop({ type: Date, required: true })
   public receivedDate: Date;
 
-  @prop({ type: String, required: true })
-  public nftContractAddress?: string;
+  @prop({ type: String })
+  public imageUrl?: string;
 
-  @prop({ type: String, required: true })
-  public nftTokenId?: string;
+  @prop({ type: Date })
+  public mintedDate?: Date;
 
   constructor(skill: Skill, receivedDate: Date) {
     this.skill = skill;

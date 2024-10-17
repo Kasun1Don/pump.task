@@ -18,6 +18,8 @@ export async function updateUserSettings({
   image,
   bio,
   name,
+  emailVerified,
+  twoFactorAuth,
 }: {
   walletId: string;
   language?: string;
@@ -32,6 +34,8 @@ export async function updateUserSettings({
   image?: string;
   bio?: string;
   name?: string;
+  emailVerified?: boolean;
+  twoFactorAuth?: boolean;
 }) {
   try {
     await api.user.update({
@@ -40,11 +44,13 @@ export async function updateUserSettings({
       image,
       bio,
       name,
+      emailVerified,
       userSettings: {
         isThemeDark,
         language,
         dueDate,
         comments,
+        twoFactorAuth,
         assignedToCard,
         removedFromCard,
         changeCardStatus,
