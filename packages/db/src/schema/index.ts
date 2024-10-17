@@ -6,7 +6,6 @@ export * from "./Task";
 export * from "./Badges";
 export * from "./Member";
 export * from "./Status";
-export * from "./TagsSchema";
 export * from "./TwoFacCode";
 export * from "./Tag";
 
