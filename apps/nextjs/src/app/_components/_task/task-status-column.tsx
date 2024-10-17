@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type {
-  StatusColumn,
-  TaskCard as TaskCardData,
-} from "@acme/validators";
+import type { StatusColumn, TaskCard as TaskCardData } from "@acme/validators";
 import { Button } from "@acme/ui/button";
 import {
   Dialog,
