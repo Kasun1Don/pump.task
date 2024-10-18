@@ -17,6 +17,7 @@ export async function updateUserSettings({
   newBadge,
   image,
   bio,
+  name,
   emailVerified,
   twoFactorAuth,
 }: {
@@ -32,6 +33,7 @@ export async function updateUserSettings({
   newBadge?: boolean;
   image?: string;
   bio?: string;
+  name?: string;
   emailVerified?: boolean;
   twoFactorAuth?: boolean;
 }) {
@@ -41,6 +43,7 @@ export async function updateUserSettings({
       email,
       image,
       bio,
+      name,
       emailVerified,
       userSettings: {
         isThemeDark,
@@ -55,7 +58,7 @@ export async function updateUserSettings({
       },
     });
     revalidatePath("/user-settings", "page");
-    revalidatePath("/proilfe", "page");
+    revalidatePath("/profile", "page");
     return { success: true };
   } catch (error) {
     console.error("Error updating user settings:", error);
