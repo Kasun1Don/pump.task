@@ -60,7 +60,17 @@ export default function TasksPage() {
       const validationResult = StatusSchema.array().safeParse(statusData);
 
       if (validationResult.success) {
-        setStatusColumns(validationResult.data);
+        const statusColumnsCopy = [...validationResult.data]; // Create a copy of the array
+
+        // Remove the status column at index 0 (which has isProtected flag)
+        const protectedColumn = statusColumnsCopy.shift();
+
+        // If the protected column exists, push it to the end
+        if (protectedColumn?.isProtected) {
+          statusColumnsCopy.push(protectedColumn);
+        }
+
+        setStatusColumns(statusColumnsCopy);
       } else {
         console.error("Validation error:", validationResult.error.errors);
       }
@@ -69,7 +79,22 @@ export default function TasksPage() {
 
   // Callback function to handle when a new status column is created
   const handleNewStatusCreated = (newStatus: StatusColumn) => {
-    setStatusColumns((prevStatusColumns) => [...prevStatusColumns, newStatus]);
+    setStatusColumns((prevStatusColumns) => {
+      const statusColumnsCopy = [...prevStatusColumns]; // Create a copy of the array
+
+      // Remove the status column at index 0 (which has isProtected flag)
+      const protectedColumn = statusColumnsCopy.shift();
+
+      // Add the new status column
+      statusColumns.push(newStatus);
+
+      // If the protected column exists, push it to the end
+      if (protectedColumn?.isProtected) {
+        statusColumnsCopy.push(protectedColumn);
+      }
+
+      return statusColumnsCopy;
+    });
   };
 
   if (validationError) {
@@ -95,9 +120,10 @@ export default function TasksPage() {
         {statusColumns.map((status) => (
           <TaskStatusColumn
             key={status._id}
-            statusName={status.name || "Unnamed"}
-            projectId={projectId}
-            statusId={status._id}
+            statusColumn={status}
+            // statusName={status.name || "Unnamed"}
+            // projectId={projectId}
+            // statusId={status._id}
           />
         ))}
 

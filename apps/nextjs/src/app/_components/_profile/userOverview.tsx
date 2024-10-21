@@ -1,5 +1,3 @@
-import { cookies } from "next/headers";
-
 import { api } from "~/trpc/server";
 
 // Define the interface for the user overview data
@@ -7,13 +5,15 @@ interface UserOverviewData {
   activeProjects: number;
   totalBadges: number;
   badgesInLast30Days: number;
-  daysSinceLastBadge: number;
+  daysSinceLastBadge: number | string;
   topSkill: string;
 }
 
-export default async function UserOverview() {
-  const walletId: string = cookies().get("wallet")?.value ?? "";
+interface userOverviewProps {
+  walletId: string;
+}
 
+export default async function UserOverview({ walletId }: userOverviewProps) {
   if (!walletId) {
     console.error("Wallet ID is undefined or not found on cookies.");
     return <div>Error: Wallet ID is required.</div>;
