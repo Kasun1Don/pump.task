@@ -2,7 +2,7 @@ import { prop } from "@typegoose/typegoose";
 
 export class MemberSchema {
   @prop({ required: true, type: String })
-  public user!: string;
+  public user?: string;
 
   @prop({ required: true, enum: ["Observer", "Admin", "Owner"] })
   public role!: "Observer" | "Admin" | "Owner";

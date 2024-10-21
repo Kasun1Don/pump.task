@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server";
-import mongoose from "mongoose";
+import { Types } from "mongoose";
 import { z } from "zod";
 
 import { Project, User } from "@acme/db";
@@ -19,8 +19,8 @@ export const projectRouter = {
             z.object({
               user: z.string(),
               role: z.enum(["Observer", "Admin", "Owner"]),
-              walletId: z.string(),
-              email: z.string(),
+              // walletId: z.string(),
+              // email: z.string(),
             }),
           )
           .optional(),
@@ -30,21 +30,30 @@ export const projectRouter = {
     .mutation(async ({ input }) => {
       try {
         const members = input.members
-          ? input.members.map((member) => ({
-              ...member,
-              user: member.user,
-            }))
+          ? await Promise.all(
+              input.members.map(async (member) => {
+                const user = await User.findOne({ walletId: member.user });
+                return {
+                  user: user?._id,
+                  name: user?.name,
+                  role: member.role,
+                  walletId: user?.walletId,
+                  email: user?.email,
+                };
+              }),
+            )
           : [];
 
         // assign a default owner if no members are provided
-        if (members.length === 0) {
-          members.push({
-            user: new mongoose.Types.ObjectId(), // assign a default or anonymous user ID
-            role: "Owner",
-            walletId: "0xC3393B32eC70298075FA856df89e9E50FcE772bc",
-            email: "intameli@gmail.com",
-          });
-        }
+        // if (members.length === 0) {
+        //   members.push({
+        //     user: new mongoose.Types.ObjectId(), // assign a default or anonymous user ID
+        //     role: "Owner",
+        //     walletId: "0xC3393B32eC70298075FA856df89e9E50FcE772bc",
+        //     email: "intameli@gmail.com",
+        //   });
+        // }
+        console.log("----input------", members);
 
         const newProject = new Project({
           name: input.name,
@@ -137,5 +146,29 @@ export const projectRouter = {
         { walletId: input.walletId },
         { $pull: { projects: input.projectId } },
       );
+    }),
+  getAll: publicProcedure
+    .input(
+      z.object({
+        showOwnedOnly: z.boolean().optional(),
+        userId: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      try {
+        let query = {};
+        if (input.showOwnedOnly && input.userId) {
+          query = {
+            members: { $elemMatch: { user: input.userId, role: "owner" } },
+          };
+        }
+        const projects = await Project.find(query).lean();
+        return projects;
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        throw new Error(
+          `Failed to fetch projects: ${(error as Error).message}`,
+        );
+      }
     }),
 } satisfies TRPCRouterRecord;
