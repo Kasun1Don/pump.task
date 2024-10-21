@@ -32,7 +32,7 @@ export const projectRouter = {
         const members = input.members
           ? input.members.map((member) => ({
               ...member,
-              user: new mongoose.Types.ObjectId(member.user),
+              user: member.user,
             }))
           : [];
 
@@ -50,7 +50,7 @@ export const projectRouter = {
           name: input.name,
           isPrivate: input.isPrivate,
           templateId: input.templateId
-            ? new mongoose.Types.ObjectId(input.templateId)
+            ? new Types.ObjectId(input.templateId)
             : undefined,
           members: members,
           status: input.status,

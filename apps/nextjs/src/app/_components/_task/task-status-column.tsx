@@ -23,14 +23,12 @@ import TaskCard from "./task-card";
 // type TaskCardData = z.infer<typeof TaskCardSchema>;
 
 interface TaskStatusColumnProps {
-  // task: TaskCardData;
   statusName: string;
   projectId: ObjectIdString;
   statusId: ObjectIdString;
 }
 
 const TaskStatusColumn = ({
-  // task,
   statusName,
   projectId,
   statusId,
@@ -44,7 +42,7 @@ const TaskStatusColumn = ({
       statusId: statusId,
     },
     {
-      enabled: Boolean(statusId), // Only run query if projectId is valid
+      enabled: Boolean(statusId),
     },
   );
 
