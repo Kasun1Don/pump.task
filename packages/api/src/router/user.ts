@@ -319,7 +319,7 @@ export const userRouter = {
 
       serializedUser.badges?.forEach((badge) => {
         if (isBadgeClass(badge)) {
-          badgeCounts[badge.skill]++;
+          badgeCounts[badge.skill as Skill]++;
         }
       });
 
