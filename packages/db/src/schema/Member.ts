@@ -2,10 +2,19 @@ import { prop } from "@typegoose/typegoose";
 
 export class MemberSchema {
   @prop({ required: true, type: String })
-  public user!: string;
+  public user?: string;
 
-  @prop({ type: String, required: true, enum: ["observer", "admin", "owner"] })
-  public role!: "observer" | "admin" | "owner";
+  @prop({ required: true, enum: ["Observer", "Admin", "Owner"] })
+  public role!: "Observer" | "Admin" | "Owner";
+
+  @prop()
+  public walletId?: string;
+
+  @prop()
+  public name?: string;
+
+  @prop()
+  public email?: string;
 }
 
 // Since MemberSchema is used as a subdocument, it doesn’t require a separate model.
