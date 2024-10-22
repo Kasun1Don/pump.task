@@ -32,14 +32,11 @@ export default async function UsersPage({
               {member.walletId ? member.walletId : "not available"}
             </span>
             <span>{member.role}</span>
-            {index ? (
-              <EditMember
-                walletId={member.walletId ?? ""}
-                projectId={params.id}
-              />
-            ) : (
-              <span></span>
-            )}
+            <EditMember
+              walletId={member.walletId ?? ""}
+              projectId={params.id}
+              isOwner={!index}
+            />
           </>
         ))}
       </div>
