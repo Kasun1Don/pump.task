@@ -7,8 +7,8 @@ import {
 } from "@typegoose/typegoose";
 
 export enum Skill {
-  Backend = "Backend",
   Frontend = "Frontend",
+  Backend = "Backend",
   Design = "Design",
   SmartContracts = "Smart Contracts",
   Integration = "Integration",
@@ -19,7 +19,6 @@ export enum Skill {
 @modelOptions({
   schemaOptions: {
     collection: "badges",
-    timestamps: true,
   },
 })
 export class BadgeClass {
@@ -31,9 +30,6 @@ export class BadgeClass {
 
   @prop({ type: Date, required: true })
   public receivedDate: Date;
-
-  @prop({ type: String })
-  public imageUrl?: string;
 
   constructor(skill: Skill, receivedDate: Date) {
     this.skill = skill;

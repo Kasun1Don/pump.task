@@ -22,7 +22,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
       const contract = getContract({
         client: client,
         chain: chain,
-        address: "0x4AAfc2Ca021F95014274499316f8dE834f092b8f",
+        address: "0x075f84c0613a0D9C23D5457fA0752fF5C5C0F6d6",
         abi: [],
       });
 
@@ -30,7 +30,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
         const ownedNFTs = await getOwnedNFTs({
           contract,
           start: 0,
-          count: 10,
+          count: 6,
           address: walletId,
         });
 
@@ -44,16 +44,19 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
           "/nfts/Misc.png",
         ];
 
-        const nftDataPromises = ownedNFTs.map(async (nft, index) => {
+        const nftDataPromises = ownedNFTs.map(async (nft) => {
           const balance = await balanceOf({
             contract,
             owner: walletId,
             tokenId: nft.id,
           });
 
+          const imageIndex = parseInt(nft.metadata.id as string);
+          const image = images[imageIndex] ?? "";
+
           return {
             title: nft.metadata.name ?? "NFT",
-            image: images[index] ?? "",
+            image,
             count: Number(balance.toString()),
           };
         });
@@ -75,7 +78,6 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
   if (nfts.length === 0) {
     return <div>No NFTs found.</div>;
   }
-
   return (
     <div>
       <h1 className="text-3xl font-semibold">Badges Earned</h1>
@@ -93,7 +95,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
             className="m-1 block overflow-hidden rounded-lg border border-gray-700 shadow-lg transition-transform hover:border-gray-300"
             style={{
               width: "150px",
-              height: "216px",
+              height: "270px",
             }}
           >
             <div className="relative">
