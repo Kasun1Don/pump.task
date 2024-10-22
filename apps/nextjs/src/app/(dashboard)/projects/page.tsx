@@ -96,11 +96,11 @@ export default function ProjectsPage() {
               </button>
               <button
                 className={`px-4 py-2 font-semibold ${
-                  showFilter === "owned"
+                  showFilter === "Owned"
                     ? "bg-[#18181B] text-white"
                     : "bg-[#09090B] text-gray-400"
                 } hover:bg-[#27272A]`}
-                onClick={() => setShowFilter("owned")}
+                onClick={() => setShowFilter("Owned")}
               >
                 Created by me
               </button>

@@ -34,7 +34,7 @@ export const projectRouter = {
               input.members.map(async (member) => {
                 const user = await User.findOne({ walletId: member.user });
                 return {
-                  user: user?._id,
+                  user: member.user,
                   name: user?.name,
                   role: member.role,
                   walletId: user?.walletId,
