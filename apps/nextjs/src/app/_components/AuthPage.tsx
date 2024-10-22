@@ -19,6 +19,7 @@ import {
 } from "@acme/ui/form";
 import { Input } from "@acme/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@acme/ui/input-otp";
+import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/react";
 import { send2FAEmail, verify2FACode } from "../actions/2FAFunctions";
@@ -63,6 +64,7 @@ export default function UserLoginClient({
       setErrorMessage(response.message);
       return;
     }
+    toast.success("Email sent successfully!");
     setEmailCodeSent(true);
   };
 
@@ -71,6 +73,8 @@ export default function UserLoginClient({
     const response = await verify2FACode(wallet, value);
     setLoading(false);
     if (response.success) {
+      toast.success("Code verified successfully!, Redireting to profile...");
+      setSuccessMessage(true);
       setUserAuthenticated(true);
       router.push("/profile");
     } else {
@@ -89,6 +93,7 @@ export default function UserLoginClient({
         operatingSystem: navigator.platform,
         location: locationData,
       });
+      toast.success("Login successful!, Redirecting to profile...");
       setSuccessMessage(true);
       router.push("/profile");
     } catch (error) {
@@ -127,14 +132,14 @@ export default function UserLoginClient({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(() => onSubmitSend())}
-                className="max-w-4/6 flex w-2/5 min-w-96 items-center justify-between space-y-6 rounded-lg bg-zinc-950 p-3 shadow-sm first:flex-col"
+                className="max-w-4/6 flex min-w-[450px] items-center justify-between space-y-6 rounded-lg bg-zinc-950 p-3 shadow-sm first:flex-col"
               >
                 <h1>Two Factor Authentication</h1>
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                    <FormItem className="items-left flex flex-col justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm">
+                    <FormItem className="items-left flex w-full flex-col justify-between gap-4 rounded-lg border bg-zinc-950 p-3 shadow-sm">
                       {!loading ? (
                         <>
                           <FormLabel>Linked Email</FormLabel>
@@ -147,7 +152,9 @@ export default function UserLoginClient({
                           <FormMessage />
                         </>
                       ) : (
-                        <p>Loading...</p>
+                        <div className="flex items-center justify-center">
+                          <p>Loading...</p>
+                        </div>
                       )}
                     </FormItem>
                   )}
@@ -207,7 +214,9 @@ export default function UserLoginClient({
                           )}
                         </>
                       ) : (
-                        <p>Loading...</p>
+                        <div className="flex items-center justify-center">
+                          <p>Loading...</p>
+                        </div>
                       )}
                     </FormItem>
                   )}

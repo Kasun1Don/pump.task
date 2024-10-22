@@ -1,16 +1,9 @@
 "use client";
 
-// Thirdweb Wallet Type
-import type { Wallet } from "thirdweb/wallets";
 // Next.js Router Hook
 import { useRouter } from "next/navigation";
 // Thirdweb React Components
-import {
-  ConnectButton,
-  darkTheme,
-  useActiveWallet,
-  useDisconnect,
-} from "thirdweb/react";
+import { ConnectButton, darkTheme } from "thirdweb/react";
 
 // Functions for logging in and out, Auth
 import {
@@ -23,15 +16,7 @@ import {
 import { chain, client } from "../thirdwebClient";
 
 export function Login() {
-  // Thirdweb Hooks
   const router = useRouter();
-  const disconnect = useDisconnect();
-  const activeWallet = useActiveWallet();
-
-  // Function to disconnect the wallet if user does not have a JWT
-  const disconnectWallet = () => {
-    disconnect.disconnect(activeWallet as Wallet);
-  };
 
   return (
     <>
@@ -45,26 +30,20 @@ export function Login() {
           },
         })}
         auth={{
-          isLoggedIn: async () => {
-            // Check if the user is logged in & has a valid JWT
-            const response = await isLoggedIn();
-
-            // If the user has a valid JWT, redirect to the auth page
-            if (response == true) {
-              router.push("/auth");
-              // If the user does not have a valid JWT, disconnect the wallet
-            } else {
-              disconnectWallet();
-            }
-            return true;
+          isLoggedIn: async (address) => {
+            console.log("checking if logged in!", { address });
+            const result = await isLoggedIn();
+            if (result) router.push("/auth");
+            return false;
           },
           doLogin: async (params) => {
+            console.log("logging in!");
             await login(params);
           },
           getLoginPayload: async ({ address }) => generatePayload({ address }),
           doLogout: async () => {
+            console.log("logging out!");
             await logout();
-            router.push("/");
           },
         }}
       />

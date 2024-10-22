@@ -12,7 +12,6 @@ import "~/app/globals.css";
 
 import { ThirdwebProvider } from "~/app/thirdweb";
 import { env } from "~/env";
-import { CurrentProjectProvider } from "./context/CurrentProjectProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -54,9 +53,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThirdwebProvider>
-            <CurrentProjectProvider>
-              <TRPCReactProvider>{props.children}</TRPCReactProvider>
-            </CurrentProjectProvider>
+            <TRPCReactProvider>{props.children}</TRPCReactProvider>
           </ThirdwebProvider>
           <div className="absolute bottom-4 right-4">
             <ThemeToggle />

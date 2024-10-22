@@ -43,8 +43,6 @@ export async function login(payload: VerifyLoginPayloadParams) {
       secure: true,
       sameSite: "strict",
     });
-    // Added little promise to make sure the cookie is set before redirecting
-    await new Promise((resolve) => setTimeout(resolve, 100));
     redirect("/auth");
   }
 }
