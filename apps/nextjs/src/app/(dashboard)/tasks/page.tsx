@@ -9,6 +9,7 @@ import { StatusSchema, validateObjectIdString } from "@acme/validators";
 
 import NewStatusColumn from "~/app/_components/_task/new-status-column";
 import TaskStatusColumn from "~/app/_components/_task/task-status-column";
+import TaskBoardSkeleton from "~/app/_components/_task/TaskBoardLoader";
 import { api } from "~/trpc/react";
 
 export default function TasksPage() {
@@ -102,7 +103,8 @@ export default function TasksPage() {
   }
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    // Display skeleton loading screen for status columns
+    return <TaskBoardSkeleton />;
   }
 
   if (error) {
@@ -110,7 +112,7 @@ export default function TasksPage() {
   }
 
   if (!projectId) {
-    return <p>Error: Invalid project ID</p>;
+    return <TaskBoardSkeleton />;
   }
 
   return (
@@ -118,13 +120,7 @@ export default function TasksPage() {
       <h1 className="flex justify-center">Tasks Page ({projectId})</h1>
       <div className="flex flex-row gap-3 p-6">
         {statusColumns.map((status) => (
-          <TaskStatusColumn
-            key={status._id}
-            statusColumn={status}
-            // statusName={status.name || "Unnamed"}
-            // projectId={projectId}
-            // statusId={status._id}
-          />
+          <TaskStatusColumn key={status._id} statusColumn={status} />
         ))}
 
         <NewStatusColumn
