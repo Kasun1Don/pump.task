@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import type { UserClass } from "@acme/db";
 
+import SendNftToUser from "~/app/helpers/sendNftToUser";
 import { api } from "~/trpc/server";
 import BadgeSection from "../../_components/_profile/badgeSection";
 import CopyButton from "../../_components/_profile/copyButton";
@@ -22,6 +23,12 @@ export default async function UserProfile() {
 
   const userData: UserClass | null = response as UserClass;
 
+  const handleClick = async () => {
+    const response = await SendNftToUser({ walletId });
+    console.log(response);
+    return response;
+  };
+
   return (
     <div className="relative">
       <section
@@ -32,6 +39,7 @@ export default async function UserProfile() {
           borderColor: "rgba(83, 83, 83, 0.5)",
         }}
       ></section>
+      <button onClick={handleClick}>Click to Claim</button>
       <div className="relative mx-52">
         <Image
           src={userData.image ?? "/labrysGreenSphere.png"}
