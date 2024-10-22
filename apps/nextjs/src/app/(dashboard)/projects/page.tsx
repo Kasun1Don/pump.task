@@ -41,12 +41,11 @@ export default function ProjectsPage() {
         enabled: !!userId, // Only run the query if we have a userId
       },
     );
-
   const filteredProjects = projects?.filter((project) => {
     if (showFilter === "all") return true;
     if (showFilter === "owned")
       return project.members.some(
-        (member) => member.user === userId && member.role === "owner",
+        (member) => member.user === userId && member.role === "Owner",
       );
     if (showFilter === "my")
       return project.members.some((member) => member.user === userId);
@@ -120,9 +119,12 @@ export default function ProjectsPage() {
               <div
                 key={project._id.toString()}
                 className="flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
-                onClick={() =>
-                  router.push(`/tasks?projectId=${project._id.toString()}`)
-                }
+                onClick={() => {
+                  console.log("bla bla");
+                  document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                  router.push(`/tasks?projectId=${project._id.toString()}`);
+                  router.refresh();
+                }}
               >
                 <h3 className="p-4 text-white">{project.name}</h3>
                 <p className="px-4 pb-4 text-sm text-gray-400">
@@ -215,7 +217,7 @@ export default function ProjectsPage() {
                     name: newProjectName,
                     isPrivate: isPrivate,
                     templateId: selectedTemplate || undefined,
-                    members: [{ user: userId, role: "owner" }],
+                    members: [{ user: userId, role: "Owner" }],
                   });
                 }}
                 className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
