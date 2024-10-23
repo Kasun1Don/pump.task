@@ -57,8 +57,7 @@ export async function updateUserSettings({
         newBadge,
       },
     });
-
-    revalidatePath("/user-settings", "page");
+    revalidatePath("/settings", "page");
     revalidatePath("/profile", "page");
     return { success: true };
   } catch (error) {
