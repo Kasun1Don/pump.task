@@ -118,7 +118,7 @@ export default function ProjectsPage() {
             {filteredProjects?.map((project) => (
               <div
                 key={project._id.toString()}
-                className="flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
+                className="relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
                 onClick={() => {
                   console.log("bla bla");
                   document.cookie = `projectId=${project._id.toString()}; path=/;`;
@@ -126,6 +126,17 @@ export default function ProjectsPage() {
                   router.refresh();
                 }}
               >
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="absolute right-2 top-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log("Delete project:", project._id.toString());
+                  }}
+                >
+                  X
+                </Button>
                 <h3 className="p-4 text-white">{project.name}</h3>
                 <p className="px-4 pb-4 text-sm text-gray-400">
                   {project.isPrivate ? "Private" : "Public"} project
