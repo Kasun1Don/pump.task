@@ -159,7 +159,9 @@ export default function UserLoginClient({
                     </FormItem>
                   )}
                 />
-                <Button type="submit">Send Code</Button>
+                <Button type="submit" className="bg-zesty-green">
+                  Send Code
+                </Button>
                 <Link href={"/"} className="text-xxs hover:underline">
                   I Don't have access to this Email
                 </Link>
