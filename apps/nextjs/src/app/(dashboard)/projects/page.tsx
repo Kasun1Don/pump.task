@@ -25,31 +25,30 @@ export default function ProjectsPage() {
   const [showFilter, setShowFilter] = useState("all");
   const router = useRouter();
 
-  const userId = activeAccount?.address ?? "";
+  const walletId = activeAccount?.address ?? "";
 
   useEffect(() => {
-    console.log("Current user ID (wallet address):", userId);
-  }, [userId]);
+    console.log("Current user ID (wallet address):", walletId);
+  }, [walletId]);
 
   const { data: projects, refetch: refetchProjects } =
     api.project.getAll.useQuery(
       {
         showOwnedOnly,
-        userId,
+        userId: walletId,
       },
       {
-        enabled: !!userId, // Only run the query if we have a userId
+        enabled: !!walletId, // Only run the query if we have a userId
       },
     );
-
   const filteredProjects = projects?.filter((project) => {
     if (showFilter === "all") return true;
     if (showFilter === "owned")
       return project.members.some(
-        (member) => member.user === userId && member.role === "owner",
+        (member) => member.walletId === walletId && member.role === "Owner",
       );
     if (showFilter === "my")
-      return project.members.some((member) => member.user === userId);
+      return project.members.some((member) => member.walletId === walletId);
     return true;
   });
 
@@ -120,9 +119,11 @@ export default function ProjectsPage() {
               <div
                 key={project._id.toString()}
                 className="flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
-                onClick={() =>
-                  router.push(`/tasks?projectId=${project._id.toString()}`)
-                }
+                onClick={() => {
+                  document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                  router.push(`/tasks?projectId=${project._id.toString()}`);
+                  router.refresh();
+                }}
               >
                 <h3 className="p-4 text-white">{project.name}</h3>
                 <p className="px-4 pb-4 text-sm text-gray-400">
@@ -201,7 +202,7 @@ export default function ProjectsPage() {
               </button>
               <button
                 onClick={() => {
-                  if (!userId) {
+                  if (!walletId) {
                     console.error("No active account found");
                     return;
                   }
@@ -209,13 +210,13 @@ export default function ProjectsPage() {
                     name: newProjectName,
                     isPrivate: isPrivate,
                     templateId: selectedTemplate || undefined,
-                    userId: userId,
+                    members: [{ user: walletId, role: "Owner" }],
                   });
                   createProject.mutate({
                     name: newProjectName,
                     isPrivate: isPrivate,
                     templateId: selectedTemplate || undefined,
-                    members: [{ user: userId, role: "owner" }],
+                    members: [{ user: walletId, role: "Owner" }],
                   });
                 }}
                 className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"

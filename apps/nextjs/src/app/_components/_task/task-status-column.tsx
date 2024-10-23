@@ -13,6 +13,7 @@ import {
 import { TaskCardSchema } from "@acme/validators";
 
 import { api } from "~/trpc/react";
+import EditIcon from "./icons/EditIcon";
 import TrashIcon from "./icons/TrashIcon";
 import NewTaskCard from "./new-task-card";
 import TaskCard from "./task-card";
@@ -35,6 +36,7 @@ const TaskStatusColumn = ({
 }: TaskStatusColumnProps) => {
   const [tasks, setTasks] = useState<TaskCardData[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isOptionsVisible, setIsOptionsVisible] = useState(false); // State to control options visibility
 
   // Retrieve tasks
   const { data: taskData } = api.task.getTaskByStatusId.useQuery(
@@ -48,7 +50,7 @@ const TaskStatusColumn = ({
 
   useEffect(() => {
     if (taskData) {
-      console.log(taskData);
+      // console.log(taskData);
       const validationResult = TaskCardSchema.array().safeParse(taskData);
 
       if (validationResult.success) {
@@ -90,23 +92,64 @@ const TaskStatusColumn = ({
     setIsDeleteModalOpen(false);
   };
 
+  // Toggle visibility of delete/rename options
+  const toggleOptions = () => {
+    setIsOptionsVisible((prev) => !prev);
+  };
+
   return (
-    <div className="bg-transparent-[16] flex w-fit flex-col gap-5 rounded-lg bg-[#00000029] p-5">
-      <div className="group relative flex items-center">
-        <h2 className="flex justify-center text-lg font-extrabold">
-          {statusColumn.name}
-        </h2>
-        {/* Delete Icon for the column */}
-        {statusColumn.isProtected === false && (
-          <button
-            className="absolute right-2 top-2 stroke-gray-500 hover:stroke-rose-500"
-            onClick={() => setIsDeleteModalOpen(true)}
-            aria-label="Delete Status Column"
-          >
-            <TrashIcon />
-          </button>
-        )}
+    <div
+      className="bg-transparent-[16] relative flex w-fit flex-col gap-5 rounded-lg bg-[#00000029] p-3"
+      onMouseLeave={() => setIsOptionsVisible(false)} // Hide menu when mouse leaves
+    >
+      {/* Menu in the top right corner */}
+      <div
+        onClick={toggleOptions}
+        className="absolute right-2 top-2 flex cursor-pointer items-center space-x-1"
+      >
+        <div aria-label="Options" className="flex">
+          <div className="h-1.5 w-1.5 rounded-full bg-gray-500 transition-all group-hover:bg-gray-300"></div>
+          <div className="h-1.5 w-1.5 rounded-full bg-gray-500 transition-all group-hover:bg-gray-300"></div>
+          <div className="h-1.5 w-1.5 rounded-full bg-gray-500 transition-all group-hover:bg-gray-300"></div>
+        </div>
       </div>
+
+      {/* Options (delete and rename) */}
+      {isOptionsVisible && (
+        <div
+          className="absolute right-2 top-4 flex flex-col gap-2 rounded bg-gray-800 stroke-gray-500 p-2 shadow-lg"
+          onMouseLeave={() => setIsOptionsVisible(false)}
+        >
+          {/* Rename option */}
+          <button
+            className="flex items-center text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
+            onClick={() => {
+              console.log("Rename column");
+              setIsOptionsVisible(false); // Close the menu after rename
+            }}
+          >
+            <EditIcon /> Rename
+          </button>
+
+          {/* Delete option */}
+          {statusColumn.isProtected === false && (
+            <button
+              className="flex items-center text-gray-500 hover:stroke-red-500 hover:text-red-500"
+              onClick={() => {
+                setIsDeleteModalOpen(true);
+                setIsOptionsVisible(false); // Close the menu after clicking delete
+              }}
+            >
+              <TrashIcon /> Delete
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Status name centered below the menu */}
+      <h2 className="flex justify-center text-lg font-extrabold">
+        {statusColumn.name}
+      </h2>
       {tasks.map((task) => (
         <TaskCard
           key={task._id}
@@ -122,16 +165,15 @@ const TaskStatusColumn = ({
           onTaskCreated={handleTaskCreated}
         />
       )}
-
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              <p>Are you sure you want to remove this status column?</p>
-              <p>This will also remove all tasks within the status</p>
-              <p>(This action cannot be undone)</p>
+              <div>Are you sure you want to remove this status column?</div>
+              <div>This will also remove all tasks within the status</div>
+              <div>(This action cannot be undone)</div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

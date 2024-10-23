@@ -51,8 +51,12 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             const headers = new Headers();
             headers.set("x-trpc-source", "nextjs-react");
             const token = getCookieValue("jwt");
+            const projectId = getCookieValue("projectId");
             if (token) {
               headers.set("Authorization", `Bearer ${token}`);
+            }
+            if (projectId) {
+              headers.set("projectId", projectId);
             }
             return headers;
           },

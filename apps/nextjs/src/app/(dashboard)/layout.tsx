@@ -26,6 +26,8 @@ import NavUserDropdown from "../_components/_navbar/NavUserDropdown";
  * @returns The Layout Component including the Navbar and the children components.
  */
 export default async function Layout({ children }: { children: ReactNode }) {
+  const projectIdCookie = cookies().get("projectId");
+  const projectId = projectIdCookie?.value;
   // Get wallet ID from cookies
   const walletId: string = cookies().get("wallet")?.value ?? "";
 
@@ -85,11 +87,14 @@ export default async function Layout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Navigation links */}
-        <div className="top-24 z-40 flex flex-wrap border-b-2 bg-zinc-950">
+        <div className="flex flex-wrap border-b-2">
           <NavLink href="/projects">Projects</NavLink>
           <NavLink href="/tasks">Tasks</NavLink>
           <NavLink href="/profile">My Profile</NavLink>
-          <NavLink href="/users">Users</NavLink>
+          <NavLink href={projectId ? `/users/${projectId}` : "/missingproject"}>
+            Users
+          </NavLink>
+          {/* <NavLink href={`/users/66fdf1c172285f6bc485b20c`}>{projectId}</NavLink> */}
           <NavLink href="/settings">Settings</NavLink>
         </div>
       </div>

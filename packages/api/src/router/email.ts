@@ -42,6 +42,29 @@ export const emailRouter = {
       }
     }),
 
+  sendInvite: publicProcedure
+    .input(z.object({ email: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        const msg = {
+          to: input.email,
+          from: "coderacademylabrys@gmail.com",
+          subject: "Pump.Task Invite",
+          html: "http://localhost:3000/",
+        };
+
+        await sgMail.send(msg);
+        return {
+          success: true,
+          message: "Email sent successfully",
+          email: input.email,
+        };
+      } catch (error) {
+        console.error("Error sending email:", error);
+        return { success: false, message: "Failed to send email" };
+      }
+    }),
+
   verifyCode: protectedProcedure
     .input(z.object({ walletId: z.string(), code: z.string() }))
     .query(async ({ input }) => {
