@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
 
 import { Button } from "@acme/ui/button";
-import { Switch } from "@acme/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -14,9 +13,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@acme/ui/dialog";
+import { Switch } from "@acme/ui/switch";
 
-import { api } from "~/trpc/react";
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
+import { api } from "~/trpc/react";
 
 const templates = [
   { id: "60d5f484f8d2e30d8c4e4b0a", name: "DevOps Pipeline Template" },
