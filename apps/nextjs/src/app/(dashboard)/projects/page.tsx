@@ -87,7 +87,7 @@ export default function ProjectsPage() {
       setSelectedTemplate("");
       setIsPrivate(false);
       router.push(`/tasks?projectId=${newProject.id.toString()}`);
-    }
+    },
   });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
