@@ -48,3 +48,26 @@
     --ring: 240 4.9% 83.9%;
   }
 }
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-path {
+  animation: draw 2s forwards;
+  animation-delay: 0s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 600;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}

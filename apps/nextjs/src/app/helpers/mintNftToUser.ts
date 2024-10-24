@@ -5,7 +5,7 @@ import { privateKeyToAccount } from "thirdweb/wallets";
 
 import { client, CONTRACT } from "../thirdwebClient";
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const privateKey = process.env.CLIENT_PRIVATE_KEY!;
 
 if (!privateKey) {

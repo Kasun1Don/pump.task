@@ -39,8 +39,6 @@ export default function NewUserPage({ wallet }: { wallet: string }) {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<string>("");
 
-  console.log(wallet);
-
   const form = useForm({
     schema: formSchema,
     defaultValues: {

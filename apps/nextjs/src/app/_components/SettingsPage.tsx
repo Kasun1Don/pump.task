@@ -8,7 +8,7 @@ import EmailNotifications from "~/app/_components/_userSettingsPage/EmailNotific
 import Security from "~/app/_components/_userSettingsPage/Security";
 import { api } from "~/trpc/server";
 
-export default function Page() {
+export default function SettingsPage() {
   // Get wallet ID from cookies
   const walletId: string = cookies().get("wallet")?.value ?? "";
 
@@ -24,7 +24,7 @@ export default function Page() {
   const userData: UserClass | null = response as unknown as UserClass;
 
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-48">
+    <section className="my-2 flex flex-col items-center justify-center gap-4 pb-48">
       <AccountSettings
         language={userData.userSettings?.language}
         theme={userData.userSettings?.isThemeDark}

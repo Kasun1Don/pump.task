@@ -164,7 +164,6 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
 
   const project = await Project.findById(ctx.projectId);
   const member = project?.members.find((obj) => obj.walletId === walletId);
-  // console.log("--------", member, project, walletId, ctx);
   if (member) {
     if (
       member.role.toLowerCase() !== "admin" &&

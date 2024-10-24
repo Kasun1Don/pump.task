@@ -18,6 +18,7 @@ export default async function UserOverview({ walletId }: userOverviewProps) {
     console.error("Wallet ID is undefined or not found on cookies.");
     return <div>Error: Wallet ID is required.</div>;
   }
+
   try {
     const userData: UserOverviewData = await api.user.overview({
       walletId,
