@@ -10,7 +10,6 @@ export default function NotFound() {
         <p className="text-xl">Couldn't find the requested resource</p>
 
         <Link href="/">
-          {/* TODO: update button style to match the project design guide */}
           <Button className="mt-4 bg-[#72D524]" variant="link" size="lg">
             Return to Home
           </Button>
