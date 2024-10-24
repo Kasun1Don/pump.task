@@ -42,6 +42,10 @@ export default async function Layout({ children }: { children: ReactNode }) {
   // Destructure user data from response
   const userData: UserClass | null = response as unknown as UserClass;
 
+  // Check if the user has any active projects
+  const hasActiveProjects =
+    userData.activeProjects && userData.activeProjects.length > 0;
+
   return (
     <section className="bg-custom-bg min-h-screen bg-cover bg-center">
       {/* Navbar section */}
@@ -89,11 +93,20 @@ export default async function Layout({ children }: { children: ReactNode }) {
         {/* Navigation links */}
         <div className="flex flex-wrap border-b-2">
           <NavLink href="/projects">Projects</NavLink>
-          <NavLink href="/tasks">Tasks</NavLink>
+          {/* <NavLink href={projectId ? `/tasks/${projectId}` : "/missingproject"}>
+            Tasks
+          </NavLink> */}
+          {hasActiveProjects && (
+            <NavLink href={`/tasks/${projectId}`}>Tasks</NavLink>
+          )}
           <NavLink href="/profile">My Profile</NavLink>
-          <NavLink href={projectId ? `/users/${projectId}` : "/missingproject"}>
-            Users
-          </NavLink>
+          {hasActiveProjects && (
+            <NavLink
+              href={projectId ? `/users/${projectId}` : "/missingproject"}
+            >
+              Users
+            </NavLink>
+          )}
           {/* <NavLink href={`/users/66fdf1c172285f6bc485b20c`}>{projectId}</NavLink> */}
           <NavLink href="/settings">Settings</NavLink>
         </div>

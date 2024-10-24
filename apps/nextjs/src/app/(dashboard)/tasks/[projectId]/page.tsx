@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { z } from "zod";
 
 import type { ObjectIdString, StatusColumn } from "@acme/validators";
@@ -12,25 +11,27 @@ import TaskStatusColumn from "~/app/_components/_task/task-status-column";
 import TaskBoardSkeleton from "~/app/_components/_task/TaskBoardLoader";
 import { api } from "~/trpc/react";
 
-export default function TasksPage() {
+export default function TasksPage({
+  params,
+}: {
+  params: { projectId: string };
+}) {
   // const [tasks, setTasks] = useState<TaskCardData[]>([]);
   // const [project, setProject] = useState<Project>();
   const [statusColumns, setStatusColumns] = useState<StatusColumn[]>([]);
-  const [projectId, setProjectId] = useState<ObjectIdString | null>(null);
+  const [projectId, setProjectId] = useState<ObjectIdString | null>(
+    params.projectId as ObjectIdString,
+  );
   const [validationError, setValidationError] = useState<string | null>(null);
-  const searchParams = useSearchParams();
 
-  // Retrieve projectId from URL
-  const rawProjectId = searchParams.get("projectId");
+  // // Retrieve projectId from URL
+  // const rawProjectId = searchParams.get("projectId");
 
   // Validate projectId inside useEffect
   useEffect(() => {
     try {
       // Validate projectId once during the component lifecycle
-      const validatedProjectId = validateObjectIdString(
-        rawProjectId,
-        "projectId",
-      );
+      const validatedProjectId = validateObjectIdString(projectId, "projectId");
       setProjectId(validatedProjectId);
       setValidationError(null);
     } catch (error) {
@@ -41,7 +42,7 @@ export default function TasksPage() {
         setValidationError("An unexpected error occurred");
       }
     }
-  }, [rawProjectId]);
+  }, [projectId]);
 
   // Retrieve the project object by projectId
   const { data: project } = api.project.byId.useQuery(
