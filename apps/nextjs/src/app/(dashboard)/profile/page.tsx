@@ -32,6 +32,7 @@ export default async function UserProfile() {
           borderColor: "rgba(83, 83, 83, 0.5)",
         }}
       ></section>
+
       <div className="relative mx-52">
         <Image
           src={userData.image ?? "/labrysGreenSphere.png"}

@@ -67,9 +67,6 @@ export const createTRPCContext = async (opts: {
   const projectId = opts.headers.get("projectId") ?? null;
   const session = await isomorphicGetSession(opts.headers);
 
-  const source = opts.headers.get("x-trpc-source") ?? "unknown";
-  console.log(">>> tRPC Request from", source, "by", session?.user);
-
   await dbConnect();
 
   return {
