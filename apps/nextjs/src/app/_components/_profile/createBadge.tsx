@@ -11,33 +11,66 @@ const CreateBadge: React.FC<{ walletID: string | undefined }> = ({
 }) => {
   const { mutateAsync: createBadge } = api.badge.create.useMutation();
 
-  const handleCreateBadge = async () => {
+  const nfts = [
+    "Backend",
+    "Design",
+    "Misc",
+    "Frontend",
+    "JSNinja",
+    "SmartContracts",
+    "Integration",
+    "UIUXSpec",
+  ];
+
+  const getIndex = (nft: string) => {
+    return nfts.indexOf(nft);
+  };
+
+  const handleCreateBadge = async (nft: string) => {
     try {
       if (!walletID) {
         console.error("Wallet ID is required");
         return;
       }
 
-      // Call the mutation to create the badge
+      const index = getIndex(nft);
+
+      if (index === -1) {
+        console.error("NFT not found");
+        return;
+      }
+
+      // mutation call to create the badge
       const result = await createBadge({
         walletId: walletID,
         receivedDate: new Date(),
-        index: 2,
+        index: index,
       });
 
       if (result.success) {
         console.log("Badge created successfully!");
-        toast.success("DB updated");
+        toast.success("Badge created successfully!");
       } else {
         console.error("Failed to create badge");
+        toast.error("Failed to create badge");
       }
     } catch (error) {
       console.error("Error creating badge:", error);
+      toast.error("Error creating badge");
     }
   };
+
+  const handleButtonClick = (nft: string) => {
+    return () => {
+      void handleCreateBadge(nft);
+    };
+  };
+
   return (
     <>
-      <button onClick={handleCreateBadge}>Create badge</button>
+      <button onClick={handleButtonClick("Backend")}>
+        Create backend badge
+      </button>
     </>
   );
 };

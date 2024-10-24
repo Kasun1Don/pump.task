@@ -34,8 +34,6 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
           address: walletId,
         });
 
-        console.log(ownedNFTs);
-
         const images = [
           "/nfts/Backend.png",
           "/nfts/Design.png",
@@ -54,8 +52,6 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
             tokenId: ownedNFT.id,
           });
 
-          console.log(balance);
-
           const imageIndex = ownedNFT.id.toString().split("n")[0] ?? "";
           const image = images[parseInt(imageIndex)] ?? "/nfts/placeholder.png";
 
@@ -68,7 +64,6 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
 
         const nftData = await Promise.all(nftDataPromises);
 
-        console.log(nftData);
         setNfts(nftData);
       } catch (error) {
         console.error("Error fetching NFTs: ", error);

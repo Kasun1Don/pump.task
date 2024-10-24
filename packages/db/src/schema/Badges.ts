@@ -6,35 +6,33 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 
-export enum Skill {
-  Frontend = "Frontend",
-  Backend = "Backend",
-  Design = "Design",
-  SmartContracts = "Smart Contracts",
-  Integration = "Integration",
-  JSNinja = "JS Ninja",
-  Misc = "Misc.",
-}
-
 @modelOptions({
   schemaOptions: {
     collection: "badges",
   },
 })
 export class BadgeClass {
-  @prop({ enum: Skill, required: true })
-  public skill: Skill;
+  @prop({ required: true })
+  public index: number;
 
   @prop({ required: true, default: () => new mongoose.Types.ObjectId() })
   public id: mongoose.Types.ObjectId;
 
+  @prop({ required: true })
+  public NFTTitle: string;
+
   @prop({ type: Date, required: true })
   public receivedDate: Date;
 
-  constructor(skill: Skill, receivedDate: Date) {
-    this.skill = skill;
+  @prop({ required: true })
+  public walletId: string;
+
+  constructor(index: number, NFTTitle: string, receivedDate: Date) {
+    this.index = index;
+    this.NFTTitle = NFTTitle;
     this.id = new mongoose.Types.ObjectId();
     this.receivedDate = receivedDate;
+    this.walletId = "";
   }
 }
 

@@ -1,10 +1,10 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { getContract } from "thirdweb";
 import { sepolia } from "thirdweb/chains";
-import { getOwnedNFTs } from "thirdweb/extensions/erc1155";
+import { getNFTs } from "thirdweb/extensions/erc1155";
 import { z } from "zod";
 
-import { Badge } from "@acme/db";
+import { Badge, User } from "@acme/db";
 
 import { client } from "../../../../apps/nextjs/src/app/thirdwebClient";
 import { protectedProcedure } from "../trpc";
@@ -19,35 +19,43 @@ export const badgeRouter = {
       }),
     )
     .mutation(async ({ input }) => {
-      const { walletId, receivedDate } = input;
-
-      const contract = getContract({
-        client: client,
-        chain: sepolia,
-        address: "0x075f84c0613a0D9C23D5457fA0752fF5C5C0F6d6",
-        abi: [],
-      });
-
+      const { walletId, receivedDate, index } = input;
       try {
-        const ownedNFTs = await getOwnedNFTs({
+        const contract = getContract({
+          client: client,
+          chain: sepolia,
+          address: "0x075f84c0613a0D9C23D5457fA0752fF5C5C0F6d6",
+        });
+
+        const nfts = await getNFTs({
           contract,
           start: 0,
-          count: 6,
-          address: walletId,
+          count: 8,
         });
 
-        const nftDataPromises = ownedNFTs.map(async (nft, index) => {
-          const badge = new Badge({
-            index,
-            receivedDate,
-          });
+        if (index >= nfts.length) {
+          throw new Error("Index out of range");
+        }
+        const nftMetadata = nfts[index]?.metadata;
 
-          await badge.save();
-          return { success: true, badge };
+        const user = await User.findOne({ walletId });
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        const badge = new Badge({
+          walletId,
+          receivedDate,
+          index,
+          NFTTitle: nftMetadata?.name,
         });
 
-        await Promise.all(nftDataPromises);
-        return { success: true };
+        await badge.save();
+
+        user.badges?.push(badge._id);
+        await user.save();
+
+        return { success: true, badge: {} };
       } catch (error) {
         console.error("Error fetching NFTs or creating badge: ", error);
         throw new Error("Failed to create badge.");
