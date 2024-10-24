@@ -47,18 +47,23 @@ export default async function mintNftToUser({
     throw new Error("Invalid Token ID");
   }
 
-  // Prepare the contract call to mint the NFT to the user
-  const transaction = prepareContractCall({
-    contract: CONTRACT,
-    method: "mintTo",
-    params: [to, nftId, uri, 1n],
-  });
+  try {
+    // Prepare the contract call to mint the NFT to the user
+    const transaction = prepareContractCall({
+      contract: CONTRACT,
+      method: "mintTo",
+      params: [to, nftId, uri, 1n],
+    });
 
-  // Send the transaction to mint the NFT to the user
-  const { transactionHash } = await sendTransaction({
-    transaction,
-    account: ACCOUNT,
-  });
+    // Send the transaction to mint the NFT to the user
+    const { transactionHash } = await sendTransaction({
+      transaction,
+      account: ACCOUNT,
+    });
 
-  return transactionHash;
+    return transactionHash;
+  } catch (error) {
+    console.error("Error minting NFT to user", error);
+    return new Error("Error minting NFT to user");
+  }
 }
