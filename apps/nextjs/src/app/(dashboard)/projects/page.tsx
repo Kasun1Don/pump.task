@@ -146,42 +146,58 @@ export default function ProjectsPage() {
             </div>
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
-            {filteredProjects?.map((project) => {
-              const isOwner = project.members.some(
-                (member) => member.user === walletId && member.role === "Owner",
-              );
+            {filteredProjects && filteredProjects.length > 0 ? (
+              filteredProjects?.map((project) => {
+                const isOwner = project.members.some(
+                  (member) => member.user === walletId && member.role === "Owner",
+                );
 
-              return (
-                <div
-                  key={project._id.toString()}
-                  className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
-                  onClick={() => {
-                    document.cookie = `projectId=${project._id.toString()}; path=/;`;
-                    router.push(`/tasks?projectId=${project._id.toString()}`);
-                    router.refresh();
-                  }}
-                >
-                  {isOwner && (
-                    <button
-                      className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-700 hover:stroke-rose-500 group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setProjectToDelete(project._id.toString());
-                        setIsDeleteModalOpen(true);
-                      }}
-                      aria-label="Delete Project"
-                    >
-                      <TrashIcon />
-                    </button>
-                  )}
+                return (
+                  <div
+                    key={project._id.toString()}
+                    className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
+                    onClick={() => {
+                      document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                      router.push(`/tasks?projectId=${project._id.toString()}`);
+                      router.refresh();
+                    }}
+                  >
+                    {isOwner && (
+                      <button
+                        className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-700 hover:stroke-rose-500 group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProjectToDelete(project._id.toString());
+                          setIsDeleteModalOpen(true);
+                        }}
+                        aria-label="Delete Project"
+                      >
+                        <TrashIcon />
+                      </button>
+                    )}
 
-                  <h3 className="p-4 text-white">{project.name}</h3>
-                  <p className="px-4 pb-4 text-sm text-gray-400">
-                    {project.isPrivate ? "Private" : "Public"} project
-                  </p>
-                </div>
-              );
-            })}
+                    <h3 className="p-4 text-white">{project.name}</h3>
+                    <p className="px-4 pb-4 text-sm text-gray-400">
+                      {project.isPrivate ? "Private" : "Public"} project
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-3 text-center text-gray-400">
+                <p className="mb-4">No projects found.</p>
+                <p>
+                  {showFilter === "all"
+                    ? "You are not associated with any projects yet."
+                    : showFilter === "my"
+                    ? "You are not a member of any projects."
+                    : "You haven't created any projects yet."}
+                </p>
+                <p className="mt-4">
+                  Click the "Create new project" button to get started!
+                </p>
+              </div>
+            )}
           </div>
         </div>
         <div>
