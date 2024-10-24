@@ -15,7 +15,11 @@ export default async function UsersPage({
 
   return (
     <div className="mx-20 mt-3 flex flex-col gap-3">
-      <AddMember projectId={params.id} />
+      <div className="flex w-full justify-between">
+        <h2>{projectData.name}</h2>
+        <AddMember projectId={params.id} />
+      </div>
+
       <div className="grid grid-cols-6 gap-3 rounded border-2 p-5">
         <div className="col-span-6 grid grid-cols-6 border-b-2 font-bold">
           <span>Name</span>
@@ -32,14 +36,11 @@ export default async function UsersPage({
               {member.walletId ? member.walletId : "not available"}
             </span>
             <span>{member.role}</span>
-            {index ? (
-              <EditMember
-                walletId={member.walletId ?? ""}
-                projectId={params.id}
-              />
-            ) : (
-              <span></span>
-            )}
+            <EditMember
+              walletId={member.walletId ?? ""}
+              projectId={params.id}
+              isOwner={!index}
+            />
           </>
         ))}
       </div>
