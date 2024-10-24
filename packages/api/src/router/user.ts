@@ -95,7 +95,7 @@ export const userRouter = {
           name: input.name,
           email: input.email,
           image: input.image,
-          bio: input.image,
+          bio: input.bio,
           userSettings: {},
           loginHistories: [newLogin._id],
         });
@@ -313,6 +313,8 @@ export const userRouter = {
         [Skill.Design]: 0,
         [Skill.SmartContracts]: 0,
         [Skill.Integration]: 0,
+        [Skill.JSNinja]: 0,
+        [Skill.Misc]: 0,
       };
 
       serializedUser.badges?.forEach((badge) => {

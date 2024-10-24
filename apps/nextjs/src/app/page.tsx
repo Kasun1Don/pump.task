@@ -6,7 +6,7 @@ import { Login } from "./_components/HomePage";
 export default function HomePage() {
   return (
     <HydrateClient>
-      <main className="bg-custom-bg container flex h-screen items-center justify-center bg-cover bg-center py-16 text-center">
+      <main className="bg-custom-bg flex h-screen w-screen items-center justify-center bg-cover bg-center py-16 text-center">
         <div className="flex max-w-5xl flex-col items-center justify-center gap-4">
           <div className="flex gap-3">
             <Image src="/pump.taskLogo.png" alt="Logo" width={50} height={50} />

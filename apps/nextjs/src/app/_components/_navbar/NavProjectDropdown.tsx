@@ -1,7 +1,7 @@
 "use client";
 
 // Import the required libraries
-import { useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
 // Import ProjectClass from Typegoose models
@@ -14,8 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
-
-import { useCurrentProject } from "~/app/context/CurrentProjectProvider";
 
 // Define the Props interface
 interface NavProjectDropdownProps {
@@ -33,14 +31,7 @@ interface NavProjectDropdownProps {
 export default function NavProjectDropdown({
   projects,
 }: NavProjectDropdownProps) {
-  // Get current project context  and set the current project
-  const { currentProject, setCurrentProject } = useCurrentProject();
-
-  // Set the current project to the first project in the on component mount
-  useEffect(() => {
-    setCurrentProject(projects[0]?.name ?? currentProject);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [currentProject, setCurrentProject] = useState<string>("");
 
   // Handle project change by updating the current project Context
   const handleProjectChange = (projectName: string) => {

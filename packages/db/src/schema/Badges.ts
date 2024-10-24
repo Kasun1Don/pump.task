@@ -12,9 +12,16 @@ export enum Skill {
   Design = "Design",
   SmartContracts = "Smart Contracts",
   Integration = "Integration",
+  JSNinja = "JS Ninja",
+  Misc = "Misc.",
 }
 
-@modelOptions({ schemaOptions: { collection: "badges" } })
+@modelOptions({
+  schemaOptions: {
+    collection: "badges",
+    timestamps: true,
+  },
+})
 export class BadgeClass {
   @prop({ enum: Skill, required: true })
   public skill: Skill;
@@ -24,6 +31,9 @@ export class BadgeClass {
 
   @prop({ type: Date, required: true })
   public receivedDate: Date;
+
+  @prop({ type: String })
+  public imageUrl?: string;
 
   constructor(skill: Skill, receivedDate: Date) {
     this.skill = skill;

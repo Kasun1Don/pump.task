@@ -54,6 +54,7 @@ export default function Security({
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
   const [emailCodeSent, setEmailCodeSent] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userAuthenticated, setUserAuthenticated] = useState(false);
   const [value, setValue] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -64,8 +65,6 @@ export default function Security({
       authentication: authentication,
     },
   });
-
-  console.log(userAuthenticated);
 
   const {
     data: userData,

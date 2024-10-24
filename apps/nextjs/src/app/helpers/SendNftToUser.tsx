@@ -5,7 +5,6 @@ import { CONTRACT } from "../thirdwebClient";
 
 export default function SendNftToUser({ walletId }: { walletId: string }) {
   const { mutate: sendTransaction } = useSendTransaction();
-  console.log("walletId", walletId);
 
   // Define the function to send the NFT
   const sendNft = () => {

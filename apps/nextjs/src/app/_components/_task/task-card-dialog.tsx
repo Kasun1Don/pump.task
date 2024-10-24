@@ -103,8 +103,8 @@ const TaskCardDialog = ({
     },
   });
 
-  if (initialValues) console.log(initialValues);
-  console.log("statusId prop:", statusId);
+  // if (initialValues) console.log(initialValues);
+  // console.log("statusId prop:", statusId);
 
   // Fetch statuses based on projectId
   const {
