@@ -90,7 +90,8 @@ export const projectRouter = {
   byId: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      const project = await Project.findById(input.id);
+      const project = await Project.findById(input.id).lean().exec();
+
       if (project === null) {
         return { error: " not found" };
       }

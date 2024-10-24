@@ -80,22 +80,14 @@ export const emailRouter = {
           return { success: false, message: "Invalid code. Please try again." };
         }
 
-        const user = await User.findOne({ walletId: input.walletId }).lean();
-
-        if (!user) {
-          throw new Error("User not found");
-        }
-
-        const updatedData = {
-          emailVerified: true,
-          userSettings: {
-            twoFactorAuth: true,
+        const UpdateUser = await User.findOneAndUpdate(
+          { walletId: input.walletId },
+          {
+            $set: {
+              emailVerified: true,
+              "userSettings.twoFactorAuth": true,
+            },
           },
-        };
-
-        const updatedUser = await User.findByIdAndUpdate(
-          user._id,
-          updatedData,
           { new: true },
         );
 

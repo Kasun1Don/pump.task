@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
-import { ConnectButton } from "thirdweb/react";
 
 // Import UserClass and ProjectClass from Typegoose models
 import type { ProjectClass, UserClass } from "@acme/db";
@@ -16,8 +15,6 @@ import HotKeyEventListeners from "../_components/_navbar/HotKeyEventListeners";
 import NavLink from "../_components/_navbar/NavLink";
 import NavProjectDropdown from "../_components/_navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/_navbar/NavUserDropdown";
-// Import for thirdwebClient
-import { client } from "../thirdwebClient";
 
 /**
  * @author Benjamin davies
@@ -66,8 +63,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
               Web3 Project Tracker
             </h5>
           </div>
-
-          <ConnectButton client={client} />
 
           {/* Navbar section right-hand side */}
           <div className="mt-1 flex max-h-8 gap-10 hover:cursor-pointer">

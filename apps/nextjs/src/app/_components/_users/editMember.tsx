@@ -1,6 +1,8 @@
 "use client";
 
 // import { CreatePostSchema } from "@acme/validators";
+import { useRouter } from "next/navigation";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,10 +17,14 @@ import { api } from "~/trpc/react";
 export function EditMember({
   projectId,
   walletId,
+  isOwner,
 }: {
   projectId: string;
   walletId: string;
+  isOwner: boolean;
 }) {
+  const router = useRouter();
+
   const removeMember = api.project.removeMember.useMutation({
     onSuccess: async () => {
       await revalidate(`/users/${projectId}`);
@@ -35,6 +41,11 @@ export function EditMember({
   function handleRemove() {
     removeMember.mutate({ walletId, projectId });
   }
+
+  function handleViewProfile() {
+    router.push(`/profile/${walletId}`);
+  }
+
   return (
     <div>
       <DropdownMenu>
@@ -42,8 +53,12 @@ export function EditMember({
           ...
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleRemove}>Remove</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleViewProfile}>
+            View Profile
+          </DropdownMenuItem>
+          {!isOwner && (
+            <DropdownMenuItem onClick={handleRemove}>Remove</DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

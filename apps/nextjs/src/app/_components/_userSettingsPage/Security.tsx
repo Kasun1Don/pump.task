@@ -55,8 +55,8 @@ export default function Security({
 
   // State for the email code sent
   const [emailCodeSent, setEmailCodeSent] = useState(false);
-
-  // State for the OTP value / user input for code
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [userAuthenticated, setUserAuthenticated] = useState(false);
   const [value, setValue] = useState("");
 
   // State for the error message
