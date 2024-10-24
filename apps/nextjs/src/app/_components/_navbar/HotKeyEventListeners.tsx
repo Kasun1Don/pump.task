@@ -59,7 +59,7 @@ export default function HotKeyEventListeners() {
       // Windows
       (event.shiftKey && event.ctrlKey && event.key.toLowerCase() === "q") ||
       // Mac
-      (event.shiftKey && event.key.toLowerCase() === "q")
+      (event.shiftKey && event.ctrlKey && event.key.toLowerCase() === "q")
     ) {
       event.preventDefault();
       try {

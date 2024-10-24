@@ -1,1 +1,1 @@
-export * from "./SendNftToUser";
+export * from "./mintNftToUser";

@@ -7,44 +7,6 @@ export const PUMP_TASK_ABI = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "index",
-        type: "uint256",
-      },
-    ],
-    name: "BatchMintInvalidBatchId",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "BatchMintInvalidTokenId",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "batchId",
-        type: "uint256",
-      },
-    ],
-    name: "BatchMintMetadataFrozen",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "ContractMetadataUnauthorized",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
         internalType: "address",
         name: "recipient",
         type: "address",
@@ -62,232 +24,21 @@ export const PUMP_TASK_ABI = [
     inputs: [
       {
         internalType: "uint256",
-        name: "expected",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "actual",
+        name: "tokenId",
         type: "uint256",
       },
     ],
-    name: "DropClaimExceedLimit",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "expected",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "actual",
-        type: "uint256",
-      },
-    ],
-    name: "DropClaimExceedMaxSupply",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "expectedCurrency",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "expectedPricePerToken",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "actualCurrency",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "actualExpectedPricePerToken",
-        type: "uint256",
-      },
-    ],
-    name: "DropClaimInvalidTokenPrice",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "expected",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "actual",
-        type: "uint256",
-      },
-    ],
-    name: "DropClaimNotStarted",
+    name: "NFTMetadataFrozen",
     type: "error",
   },
   {
     inputs: [],
-    name: "DropExceedMaxSupply",
+    name: "NFTMetadataInvalidUrl",
     type: "error",
   },
   {
     inputs: [],
-    name: "DropNoActiveCondition",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "DropUnauthorized",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "LazyMintInvalidAmount",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "LazyMintUnauthorized",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "OwnableUnauthorized",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-    ],
-    name: "PermissionsAlreadyGranted",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "expected",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "actual",
-        type: "address",
-      },
-    ],
-    name: "PermissionsInvalidPermission",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-      {
-        internalType: "bytes32",
-        name: "neededRole",
-        type: "bytes32",
-      },
-    ],
-    name: "PermissionsUnauthorizedAccount",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "max",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "actual",
-        type: "uint256",
-      },
-    ],
-    name: "PlatformFeeExceededMaxFeeBps",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "recipient",
-        type: "address",
-      },
-    ],
-    name: "PlatformFeeInvalidRecipient",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "PlatformFeeUnauthorized",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "recipient",
-        type: "address",
-      },
-    ],
-    name: "PrimarySaleInvalidRecipient",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "PrimarySaleUnauthorized",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "max",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "actual",
-        type: "uint256",
-      },
-    ],
-    name: "RoyaltyExceededMaxFeeBps",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "recipient",
-        type: "address",
-      },
-    ],
-    name: "RoyaltyInvalidRecipient",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "RoyaltyUnauthorized",
+    name: "NFTMetadataUnauthorized",
     type: "error",
   },
   {
@@ -339,92 +90,6 @@ export const PUMP_TASK_ABI = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "startTimestamp",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "maxClaimableSupply",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "supplyClaimed",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "quantityLimitPerWallet",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes32",
-            name: "merkleRoot",
-            type: "bytes32",
-          },
-          {
-            internalType: "uint256",
-            name: "pricePerToken",
-            type: "uint256",
-          },
-          {
-            internalType: "address",
-            name: "currency",
-            type: "address",
-          },
-          {
-            internalType: "string",
-            name: "metadata",
-            type: "string",
-          },
-        ],
-        indexed: false,
-        internalType: "struct IClaimCondition.ClaimCondition[]",
-        name: "claimConditions",
-        type: "tuple[]",
-      },
-      {
-        indexed: false,
-        internalType: "bool",
-        name: "resetEligibility",
-        type: "bool",
-      },
-    ],
-    name: "ClaimConditionsUpdated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "prevURI",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "newURI",
-        type: "string",
-      },
-    ],
-    name: "ContractURIUpdated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
         internalType: "address",
         name: "newRoyaltyRecipient",
         type: "address",
@@ -437,6 +102,12 @@ export const PUMP_TASK_ABI = [
       },
     ],
     name: "DefaultRoyalty",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [],
+    name: "EIP712DomainChanged",
     type: "event",
   },
   {
@@ -473,27 +144,21 @@ export const PUMP_TASK_ABI = [
   },
   {
     anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "maxTotalSupply",
-        type: "uint256",
-      },
-    ],
-    name: "MaxTotalSupplyUpdated",
+    inputs: [],
+    name: "MetadataFrozen",
     type: "event",
   },
   {
     anonymous: false,
-    inputs: [],
-    name: "MetadataFrozen",
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "MetadataUpdate",
     type: "event",
   },
   {
@@ -665,86 +330,123 @@ export const PUMP_TASK_ABI = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
         internalType: "address",
-        name: "saleRecipient",
-        type: "address",
-      },
-    ],
-    name: "SaleRecipientForTokenUpdated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "claimConditionIndex",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "claimer",
+        name: "mintedTo",
         type: "address",
       },
       {
         indexed: true,
-        internalType: "address",
-        name: "receiver",
-        type: "address",
-      },
-      {
-        indexed: false,
         internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "quantityClaimed",
-        type: "uint256",
-      },
-    ],
-    name: "TokensClaimed",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "startTokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "endTokenId",
+        name: "tokenIdMinted",
         type: "uint256",
       },
       {
         indexed: false,
         internalType: "string",
-        name: "baseURI",
+        name: "uri",
         type: "string",
       },
       {
         indexed: false,
-        internalType: "bytes",
-        name: "encryptedBaseURI",
-        type: "bytes",
+        internalType: "uint256",
+        name: "quantityMinted",
+        type: "uint256",
       },
     ],
-    name: "TokensLazyMinted",
+    name: "TokensMinted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "signer",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "mintedTo",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "tokenIdMinted",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "to",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "royaltyRecipient",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "royaltyBps",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "primarySaleRecipient",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "uri",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "quantity",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "pricePerToken",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "currency",
+            type: "address",
+          },
+          {
+            internalType: "uint128",
+            name: "validityStartTimestamp",
+            type: "uint128",
+          },
+          {
+            internalType: "uint128",
+            name: "validityEndTimestamp",
+            type: "uint128",
+          },
+          {
+            internalType: "bytes32",
+            name: "uid",
+            type: "bytes32",
+          },
+        ],
+        indexed: false,
+        internalType: "struct ITokenERC1155.MintRequest",
+        name: "mintRequest",
+        type: "tuple",
+      },
+    ],
+    name: "TokensMintedWithSignature",
     type: "event",
   },
   {
@@ -904,20 +606,24 @@ export const PUMP_TASK_ABI = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
         internalType: "uint256",
-        name: "",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "value",
         type: "uint256",
       },
     ],
-    name: "batchFrozen",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
+    name: "burn",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -941,95 +647,6 @@ export const PUMP_TASK_ABI = [
     name: "burnBatch",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_receiver",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_quantity",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_currency",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_pricePerToken",
-        type: "uint256",
-      },
-      {
-        components: [
-          {
-            internalType: "bytes32[]",
-            name: "proof",
-            type: "bytes32[]",
-          },
-          {
-            internalType: "uint256",
-            name: "quantityLimitPerWallet",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "pricePerToken",
-            type: "uint256",
-          },
-          {
-            internalType: "address",
-            name: "currency",
-            type: "address",
-          },
-        ],
-        internalType: "struct IDrop1155.AllowlistProof",
-        name: "_allowlistProof",
-        type: "tuple",
-      },
-      {
-        internalType: "bytes",
-        name: "_data",
-        type: "bytes",
-      },
-    ],
-    name: "claim",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "claimCondition",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "currentStartId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "count",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
   },
   {
@@ -1072,32 +689,43 @@ export const PUMP_TASK_ABI = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_index",
-        type: "uint256",
-      },
-    ],
-    name: "freezeBatchBaseURI",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "getActiveClaimConditionId",
+    inputs: [],
+    name: "eip712Domain",
     outputs: [
       {
+        internalType: "bytes1",
+        name: "fields",
+        type: "bytes1",
+      },
+      {
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "version",
+        type: "string",
+      },
+      {
         internalType: "uint256",
-        name: "",
+        name: "chainId",
         type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "verifyingContract",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "salt",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256[]",
+        name: "extensions",
+        type: "uint256[]",
       },
     ],
     stateMutability: "view",
@@ -1105,100 +733,9 @@ export const PUMP_TASK_ABI = [
   },
   {
     inputs: [],
-    name: "getBaseURICount",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_index",
-        type: "uint256",
-      },
-    ],
-    name: "getBatchIdAtIndex",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_conditionId",
-        type: "uint256",
-      },
-    ],
-    name: "getClaimConditionById",
-    outputs: [
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "startTimestamp",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "maxClaimableSupply",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "supplyClaimed",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "quantityLimitPerWallet",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes32",
-            name: "merkleRoot",
-            type: "bytes32",
-          },
-          {
-            internalType: "uint256",
-            name: "pricePerToken",
-            type: "uint256",
-          },
-          {
-            internalType: "address",
-            name: "currency",
-            type: "address",
-          },
-          {
-            internalType: "string",
-            name: "metadata",
-            type: "string",
-          },
-        ],
-        internalType: "struct IClaimCondition.ClaimCondition",
-        name: "condition",
-        type: "tuple",
-      },
-    ],
-    stateMutability: "view",
+    name: "freezeMetadata",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1304,7 +841,7 @@ export const PUMP_TASK_ABI = [
     outputs: [
       {
         internalType: "address",
-        name: "member",
+        name: "",
         type: "address",
       },
     ],
@@ -1323,7 +860,7 @@ export const PUMP_TASK_ABI = [
     outputs: [
       {
         internalType: "uint256",
-        name: "count",
+        name: "",
         type: "uint256",
       },
     ],
@@ -1349,35 +886,6 @@ export const PUMP_TASK_ABI = [
         internalType: "uint16",
         name: "",
         type: "uint16",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_conditionId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_claimer",
-        type: "address",
-      },
-    ],
-    name: "getSupplyClaimedByWallet",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "supplyClaimedByWallet",
-        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -1428,30 +936,6 @@ export const PUMP_TASK_ABI = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "hasRoleWithSwitch",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "address",
         name: "_defaultAdmin",
         type: "address",
@@ -1478,7 +962,7 @@ export const PUMP_TASK_ABI = [
       },
       {
         internalType: "address",
-        name: "_saleRecipient",
+        name: "_primarySaleRecipient",
         type: "address",
       },
       {
@@ -1553,49 +1037,109 @@ export const PUMP_TASK_ABI = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "_to",
+        type: "address",
+      },
+      {
         internalType: "uint256",
-        name: "_amount",
+        name: "_tokenId",
         type: "uint256",
       },
       {
         internalType: "string",
-        name: "_baseURIForTokens",
+        name: "_uri",
         type: "string",
       },
       {
-        internalType: "bytes",
-        name: "_data",
-        type: "bytes",
-      },
-    ],
-    name: "lazyMint",
-    outputs: [
-      {
         internalType: "uint256",
-        name: "batchId",
+        name: "_amount",
         type: "uint256",
       },
     ],
+    name: "mintTo",
+    outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
+        components: [
+          {
+            internalType: "address",
+            name: "to",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "royaltyRecipient",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "royaltyBps",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "primarySaleRecipient",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "uri",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "quantity",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "pricePerToken",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "currency",
+            type: "address",
+          },
+          {
+            internalType: "uint128",
+            name: "validityStartTimestamp",
+            type: "uint128",
+          },
+          {
+            internalType: "uint128",
+            name: "validityEndTimestamp",
+            type: "uint128",
+          },
+          {
+            internalType: "bytes32",
+            name: "uid",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct ITokenERC1155.MintRequest",
+        name: "_req",
+        type: "tuple",
       },
-    ],
-    name: "maxTotalSupply",
-    outputs: [
       {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
+        internalType: "bytes",
+        name: "_signature",
+        type: "bytes",
       },
     ],
-    stateMutability: "view",
+    name: "mintWithSignature",
+    outputs: [],
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -1646,6 +1190,19 @@ export const PUMP_TASK_ABI = [
   {
     inputs: [],
     name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "platformFeeRecipient",
     outputs: [
       {
         internalType: "address",
@@ -1808,7 +1365,7 @@ export const PUMP_TASK_ABI = [
         type: "uint256",
       },
     ],
-    name: "saleRecipient",
+    name: "saleRecipientForToken",
     outputs: [
       {
         internalType: "address",
@@ -1833,71 +1390,6 @@ export const PUMP_TASK_ABI = [
       },
     ],
     name: "setApprovalForAll",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "startTimestamp",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "maxClaimableSupply",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "supplyClaimed",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "quantityLimitPerWallet",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes32",
-            name: "merkleRoot",
-            type: "bytes32",
-          },
-          {
-            internalType: "uint256",
-            name: "pricePerToken",
-            type: "uint256",
-          },
-          {
-            internalType: "address",
-            name: "currency",
-            type: "address",
-          },
-          {
-            internalType: "string",
-            name: "metadata",
-            type: "string",
-          },
-        ],
-        internalType: "struct IClaimCondition.ClaimCondition[]",
-        name: "_conditions",
-        type: "tuple[]",
-      },
-      {
-        internalType: "bool",
-        name: "_resetClaimEligibility",
-        type: "bool",
-      },
-    ],
-    name: "setClaimConditions",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1947,24 +1439,6 @@ export const PUMP_TASK_ABI = [
       },
     ],
     name: "setFlatPlatformFeeInfo",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_maxTotalSupply",
-        type: "uint256",
-      },
-    ],
-    name: "setMaxTotalSupply",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -2057,12 +1531,12 @@ export const PUMP_TASK_ABI = [
         type: "uint256",
       },
       {
-        internalType: "address",
-        name: "_saleRecipient",
-        type: "address",
+        internalType: "string",
+        name: "_uri",
+        type: "string",
       },
     ],
-    name: "setSaleRecipientForToken",
+    name: "setTokenURI",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -2122,24 +1596,6 @@ export const PUMP_TASK_ABI = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_index",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "_uri",
-        type: "string",
-      },
-    ],
-    name: "updateBatchBaseURI",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
         name: "_tokenId",
         type: "uint256",
       },
@@ -2156,47 +1612,55 @@ export const PUMP_TASK_ABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "uriFrozen",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
-      {
-        internalType: "uint256",
-        name: "_conditionId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_claimer",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_quantity",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_currency",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_pricePerToken",
-        type: "uint256",
-      },
       {
         components: [
           {
-            internalType: "bytes32[]",
-            name: "proof",
-            type: "bytes32[]",
+            internalType: "address",
+            name: "to",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "royaltyRecipient",
+            type: "address",
           },
           {
             internalType: "uint256",
-            name: "quantityLimitPerWallet",
+            name: "royaltyBps",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "primarySaleRecipient",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "uri",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "quantity",
             type: "uint256",
           },
           {
@@ -2209,18 +1673,43 @@ export const PUMP_TASK_ABI = [
             name: "currency",
             type: "address",
           },
+          {
+            internalType: "uint128",
+            name: "validityStartTimestamp",
+            type: "uint128",
+          },
+          {
+            internalType: "uint128",
+            name: "validityEndTimestamp",
+            type: "uint128",
+          },
+          {
+            internalType: "bytes32",
+            name: "uid",
+            type: "bytes32",
+          },
         ],
-        internalType: "struct IDrop1155.AllowlistProof",
-        name: "_allowlistProof",
+        internalType: "struct ITokenERC1155.MintRequest",
+        name: "_req",
         type: "tuple",
       },
+      {
+        internalType: "bytes",
+        name: "_signature",
+        type: "bytes",
+      },
     ],
-    name: "verifyClaim",
+    name: "verify",
     outputs: [
       {
         internalType: "bool",
-        name: "isOverride",
+        name: "",
         type: "bool",
+      },
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
