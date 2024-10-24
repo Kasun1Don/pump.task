@@ -5,8 +5,17 @@ import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
 
 import { Button } from "@acme/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@acme/ui/dialog";
 import { Switch } from "@acme/ui/switch";
 
+import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
 import { api } from "~/trpc/react";
 
 const templates = [
@@ -25,7 +34,25 @@ export default function ProjectsPage() {
   const [showFilter, setShowFilter] = useState("all");
   const router = useRouter();
 
-  const walletId = activeAccount?.address ?? "";
+  // Modified wallet ID retrieval with cookie fallback
+  const [walletId, setWalletId] = useState<string>("");
+
+  useEffect(() => {
+    // Try to get wallet from activeAccount first
+    if (activeAccount?.address) {
+      setWalletId(activeAccount.address);
+    } else {
+      // Fallback to cookie if activeAccount is not available
+      const cookieWallet = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("wallet="))
+        ?.split("=")[1];
+
+      if (cookieWallet) {
+        setWalletId(cookieWallet);
+      }
+    }
+  }, [activeAccount]);
 
   useEffect(() => {
     console.log("Current user ID (wallet address):", walletId);
@@ -41,9 +68,10 @@ export default function ProjectsPage() {
         enabled: !!walletId, // Only run the query if we have a userId
       },
     );
+
   const filteredProjects = projects?.filter((project) => {
     if (showFilter === "all") return true;
-    if (showFilter === "owned")
+    if (showFilter === "Owned")
       return project.members.some(
         (member) => member.walletId === walletId && member.role === "Owner",
       );
@@ -64,6 +92,27 @@ export default function ProjectsPage() {
       console.error("Error creating project:", error);
     },
   });
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+
+  const deleteProject = api.project.delete.useMutation({
+    onSuccess: () => {
+      console.log("Project deleted successfully");
+      void refetchProjects();
+    },
+    onError: (error) => {
+      console.error("Error deleting project:", error);
+    },
+  });
+
+  const handleDelete = () => {
+    if (projectToDelete) {
+      deleteProject.mutate({ projectId: projectToDelete });
+      setIsDeleteModalOpen(false);
+      setProjectToDelete(null);
+    }
+  };
 
   // Initialize the mutation
   const updateActiveProjectsMutation =
@@ -108,11 +157,11 @@ export default function ProjectsPage() {
               </button>
               <button
                 className={`px-4 py-2 font-semibold ${
-                  showFilter === "owned"
+                  showFilter === "Owned"
                     ? "bg-[#18181B] text-white"
                     : "bg-[#09090B] text-gray-400"
                 } hover:bg-[#27272A]`}
-                onClick={() => setShowFilter("owned")}
+                onClick={() => setShowFilter("Owned")}
               >
                 Created by me
               </button>
@@ -127,38 +176,75 @@ export default function ProjectsPage() {
             </div>
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
-            {filteredProjects?.map((project) => (
-              <div
-                key={project._id.toString()}
-                className="flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
-                onClick={async () => {
-                  try {
-                    // Update active projects
-                    await updateActiveProjectsMutation.mutateAsync({
-                      walletId: walletId,
-                      projectId: project._id.toString(),
-                    });
+            {filteredProjects && filteredProjects.length > 0 ? (
+              filteredProjects.map((project) => {
+                const isOwner = project.members.some(
+                  (member) =>
+                    member.user === walletId && member.role === "Owner",
+                );
 
-                    // Set the cookie
-                    document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                return (
+                  <div
+                    key={project._id.toString()}
+                    className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
+                    onClick={async () => {
+                      try {
+                        // Update active projects
+                        await updateActiveProjectsMutation.mutateAsync({
+                          walletId: walletId,
+                          projectId: project._id.toString(),
+                        });
 
-                    // Navigate to the project's tasks page
-                    router.push(`/tasks/${project._id.toString()}`);
-                  } catch (error) {
-                    console.error("Error updating active projects:", error);
-                    // Optionally, display an error message to the user
-                  }
-                  //document.cookie = `projectId=${project._id.toString()}; path=/;`;
-                  //router.push(`/tasks/${project._id.toString()}`);
-                  // router.refresh();
-                }}
-              >
-                <h3 className="p-4 text-white">{project.name}</h3>
-                <p className="px-4 pb-4 text-sm text-gray-400">
-                  {project.isPrivate ? "Private" : "Public"} project
+                        // Set the cookie
+                        document.cookie = `projectId=${project._id.toString()}; path=/;`;
+
+                        // Navigate to the project's tasks page
+                        router.push(`/tasks/${project._id.toString()}`);
+                      } catch (error) {
+                        console.error("Error updating active projects:", error);
+                        // Optionally, display an error message to the user
+                      }
+                      //document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                      //router.push(`/tasks/${project._id.toString()}`);
+                      // router.refresh();
+                    }}
+                  >
+                    {isOwner && (
+                      <button
+                        className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-700 hover:stroke-rose-500 group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProjectToDelete(project._id.toString());
+                          setIsDeleteModalOpen(true);
+                        }}
+                        aria-label="Delete Project"
+                      >
+                        <TrashIcon />
+                      </button>
+                    )}
+
+                    <h3 className="p-4 text-white">{project.name}</h3>
+                    <p className="px-4 pb-4 text-sm text-gray-400">
+                      {project.isPrivate ? "Private" : "Public"} project
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-3 text-center text-gray-400">
+                <p className="mb-4">No projects found.</p>
+                <p>
+                  {showFilter === "all"
+                    ? "You are not associated with any projects yet."
+                    : showFilter === "my"
+                      ? "You are not a member of any projects."
+                      : "You haven't created any projects yet."}
+                </p>
+                <p className="mt-4">
+                  Click the "Create new project" button to get started!
                 </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
         <div>
@@ -255,6 +341,30 @@ export default function ProjectsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              <p>Are you sure you want to remove this project?</p>
+              <p>(This action cannot be undone)</p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
