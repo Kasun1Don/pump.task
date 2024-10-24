@@ -44,10 +44,10 @@ export default function ProjectsPage() {
     } else {
       // Fallback to cookie if activeAccount is not available
       const cookieWallet = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('wallet='))
-        ?.split('=')[1];
-      
+        .split("; ")
+        .find((row) => row.startsWith("wallet="))
+        ?.split("=")[1];
+
       if (cookieWallet) {
         setWalletId(cookieWallet);
       }
