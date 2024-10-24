@@ -6,8 +6,18 @@ import { z } from "zod";
 
 import { Badge, User } from "@acme/db";
 
+import mintNftToUser from "../../../../apps/nextjs/src/app/helpers/mintNftToUser";
 import { client } from "../../../../apps/nextjs/src/app/thirdwebClient";
 import { protectedProcedure } from "../trpc";
+
+const tagToIndexMap: Record<string, number> = {
+  Frontend: 3,
+  Backend: 0,
+  Design: 1,
+  "Smart Contracts": 5,
+  Integration: 6,
+  Misc: 2, // User-generated tags will map to Misc
+};
 
 export const badgeRouter = {
   create: protectedProcedure
@@ -15,11 +25,12 @@ export const badgeRouter = {
       z.object({
         walletId: z.string(),
         receivedDate: z.date(),
-        index: z.number().min(0).max(6),
+        tags: z.array(z.string()), // Accept multiple tags
       }),
     )
     .mutation(async ({ input }) => {
-      const { walletId, receivedDate, index } = input;
+      const { walletId, receivedDate, tags } = input;
+
       try {
         const contract = getContract({
           client: client,
@@ -33,37 +44,48 @@ export const badgeRouter = {
           count: 8,
         });
 
-        if (index >= nfts.length) {
-          throw new Error("Index out of range");
-        }
-        console.log(`-----NFT metadata found for index ${index}`);
-        const nftMetadata = nfts[index]?.metadata;
-
-        console.log(`----Finding user with wallet ID: ${walletId}`);
         const user = await User.findOne({ walletId });
         if (!user) {
           throw new Error("User not found");
         }
 
-        console.log(`-----Creating badge...`);
-        const badge = new Badge({
-          walletId,
-          receivedDate,
-          index,
-          NFTTitle: nftMetadata?.name,
-        });
+        const indices = tags
+          .map((tag) => tagToIndexMap[tag] ?? tagToIndexMap.Misc) // Map user-generated tags to Misc
+          .filter((index) => index !== undefined);
 
-        await badge.save();
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`-----Badge saved successfully: ${badge._id}`);
+        for (const index of indices) {
+          if (index >= nfts.length) {
+            continue; // Skip invalid indices
+          }
 
-        user.badges?.push(badge._id);
+          const nftMetadata = nfts[index]?.metadata;
+
+          // Mint NFT to user
+          const mintResult = await mintNftToUser({
+            to: walletId,
+            tokenId: index,
+          });
+          if (mintResult instanceof Error) {
+            continue; // Skip if minting fails for this particular index
+          }
+
+          const badge = new Badge({
+            walletId,
+            receivedDate,
+            index,
+            NFTTitle: nftMetadata?.name,
+          });
+
+          await badge.save();
+
+          user.badges?.push(badge._id);
+        }
+
         await user.save();
-
-        return { success: true, badge: {} };
+        return { success: true, badges: user.badges };
       } catch (error) {
-        console.error("Error fetching NFTs or creating badge: ", error);
-        throw new Error("Failed to create badge.");
+        console.error("Error creating badges: ", error);
+        throw new Error("Failed to create badges.");
       }
     }),
 } satisfies TRPCRouterRecord;

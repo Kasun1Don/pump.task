@@ -1,78 +1,52 @@
 "use client";
 
-import React from "react";
-
 import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/react";
 
-const CreateBadge: React.FC<{ walletID: string | undefined }> = ({
-  walletID,
-}) => {
+// Function to create a delay
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const createBadge = async (
+  walletID: string | undefined,
+  tags: string[],
+) => {
   const { mutateAsync: createBadge } = api.badge.create.useMutation();
 
-  const nfts = [
-    "Backend",
-    "Design",
-    "Misc",
-    "Frontend",
-    "JSNinja",
-    "SmartContracts",
-    "Integration",
-    "UIUXSpec",
-  ];
+  try {
+    if (!walletID) {
+      console.error("Wallet ID is required");
+      toast.error("Wallet ID is required");
+      return;
+    }
 
-  const getIndex = (nft: string) => {
-    return nfts.indexOf(nft);
-  };
+    if (tags.length === 0) {
+      console.error("At least one tag is required");
+      toast.error("At least one tag is required");
+      return;
+    }
 
-  const handleCreateBadge = async (nft: string) => {
-    try {
-      if (!walletID) {
-        console.error("Wallet ID is required");
-        return;
-      }
-
-      const index = getIndex(nft);
-
-      if (index === -1) {
-        console.error("NFT not found");
-        return;
-      }
-
-      // mutation call to create the badge
+    // Iterate through tags and create each badge one by one, waiting for each to complete
+    for (const tag of tags) {
       const result = await createBadge({
         walletId: walletID,
         receivedDate: new Date(),
-        index: index,
+        tags: [tag],
       });
 
       if (result.success) {
-        console.log("Badge created successfully!");
-        toast.success("Badge created successfully!");
+        toast.success(`Badge created successfully for tag: ${tag}`);
       } else {
-        console.error("Failed to create badge");
-        toast.error("Failed to create badge");
+        console.error(`Failed to create badge for tag: ${tag}`);
+        toast.error(`Failed to create badge for tag: ${tag}`);
+        return; // Stop further processing if one badge creation fails
       }
-    } catch (error) {
-      console.error("Error creating badge:", error);
-      toast.error("Error creating badge");
+
+      // Add a delay between badge creations to avoid transaction collisions
+      await delay(10000); // 10-second delay
     }
-  };
-
-  const handleButtonClick = (nft: string) => {
-    return () => {
-      void handleCreateBadge(nft);
-    };
-  };
-
-  return (
-    <>
-      <button onClick={handleButtonClick("Backend")}>
-        Create backend badge
-      </button>
-    </>
-  );
+  } catch (error) {
+    console.error("Error creating badges:", error);
+    toast.error("Error creating badges");
+  }
 };
-
-export default CreateBadge;

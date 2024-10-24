@@ -103,7 +103,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
       <HotKeyEventListeners />
 
       {/* Main content - adjusted margin to avoid overlap with navbar and navlinks */}
-      <main className="pt-48">{children}</main>
+      <main>{children}</main>
     </section>
   );
 }

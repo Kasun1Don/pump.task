@@ -4,7 +4,6 @@ import Image from "next/image";
 
 import type { UserClass } from "@acme/db";
 
-import CreateBadge from "~/app/_components/_profile/createBadge";
 import { api } from "~/trpc/server";
 import BadgeSection from "../../_components/_profile/badgeSection";
 import CopyButton from "../../_components/_profile/copyButton";
@@ -60,7 +59,6 @@ export default async function UserProfile() {
             <UserOverview walletId={walletId} />
           </div>
           <div className="w-4/5 rounded-lg border border-gray-700 p-5">
-            <CreateBadge walletID={walletId} />
             <BadgeSection walletId={walletId} />
           </div>
         </div>
