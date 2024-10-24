@@ -80,7 +80,6 @@ const wallet = "0x17F683a6d8fba5Fd49D36ed9AfaF032654D0E24a";
         operatingSystem: operatingSystem,
         location: locationData.city + ", " + locationData.country,
       });
-      console.log("Login successful");
     } catch (error) {
       console.error("Login failed:", error);
     }
