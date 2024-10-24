@@ -81,15 +81,12 @@ export default function ProjectsPage() {
   });
 
   const createProject = api.project.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (newProject) => {
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
-      void refetchProjects();
-    },
-    onError: (error) => {
-      console.error("Error creating project:", error);
+      router.push(`/tasks?projectId=${newProject.id.toString()}`);
     },
   });
 
@@ -130,11 +127,17 @@ export default function ProjectsPage() {
     <>
       <div className="m-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="pl-8 pr-8">
-              <h1 className="text-xl font-bold">Your Project Task Boards</h1>
-            </div>
-            <div className="flex overflow-hidden rounded-lg border border-gray-700">
+          <div className="mb-6 flex items-center justify-between px-8">
+            <h1 className="text-xl font-bold">Your Project Task Boards</h1>
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
+            >
+              + Create new project
+            </Button>
+          </div>
+          <div className="flex justify-center">
+            <div className="overflow-hidden rounded-lg border border-gray-700">
               <button
                 className={`px-4 py-2 font-semibold ${
                   showFilter === "all"
@@ -165,14 +168,6 @@ export default function ProjectsPage() {
               >
                 Created by me
               </button>
-            </div>
-            <div className="mr-8">
-              <Button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
-              >
-                + Create new project
-              </Button>
             </div>
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
