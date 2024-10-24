@@ -22,7 +22,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
       const contract = getContract({
         client: client,
         chain: chain,
-        address: "0x4AAfc2Ca021F95014274499316f8dE834f092b8f",
+        address: "0x075f84c0613a0D9C23D5457fA0752fF5C5C0F6d6",
         abi: [],
       });
 
@@ -30,35 +30,40 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
         const ownedNFTs = await getOwnedNFTs({
           contract,
           start: 0,
-          count: 10,
+          count: 7,
           address: walletId,
         });
 
         const images = [
-          "/nfts/Frontend.png",
           "/nfts/Backend.png",
           "/nfts/Design.png",
+          "/nfts/Misc.png",
+          "/nfts/Frontend.png",
+          "/nfts/JSNinja.png",
           "/nfts/SmartContracts.png",
           "/nfts/Integration.png",
-          "/nfts/JSNinja.png",
-          "/nfts/Misc.png",
+          "/nfts/UIUXSpec.png",
         ];
 
-        const nftDataPromises = ownedNFTs.map(async (nft, index) => {
+        const nftDataPromises = ownedNFTs.map(async (ownedNFT) => {
           const balance = await balanceOf({
             contract,
             owner: walletId,
-            tokenId: nft.id,
+            tokenId: ownedNFT.id,
           });
 
+          const imageIndex = ownedNFT.id.toString().split("n")[0] ?? "";
+          const image = images[parseInt(imageIndex)] ?? "/nfts/placeholder.png";
+
           return {
-            title: nft.metadata.name ?? "NFT",
-            image: images[index] ?? "",
+            title: ownedNFT.metadata.name ?? "NFT",
+            image,
             count: Number(balance.toString()),
           };
         });
 
         const nftData = await Promise.all(nftDataPromises);
+
         setNfts(nftData);
       } catch (error) {
         console.error("Error fetching NFTs: ", error);
@@ -66,7 +71,8 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
     };
 
     fetchNFTs().catch((error) => console.error("Error fetching NFTs: ", error));
-  }, [chain, walletId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletId]);
 
   if (!walletId) {
     return <div>Error: Wallet ID not found.</div>;
@@ -75,7 +81,6 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
   if (nfts.length === 0) {
     return <div>No NFTs found.</div>;
   }
-
   return (
     <div>
       <h1 className="text-3xl font-semibold">Badges Earned</h1>
@@ -93,7 +98,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
             className="m-1 block overflow-hidden rounded-lg border border-gray-700 shadow-lg transition-transform hover:border-gray-300"
             style={{
               width: "150px",
-              height: "216px",
+              height: "270px",
             }}
           >
             <div className="relative">
