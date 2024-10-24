@@ -33,6 +33,17 @@ export class UserClass {
   public bio?: string;
 
   @prop({
+    type: () => mongoose.Schema.Types.ObjectId,
+    ref: () => ProjectClass,
+    default: [],
+    validate: [
+      (arr: Ref<ProjectClass>[]) => arr.length <= 3,
+      "Active projects can have a maximum of 3 items.",
+    ],
+  })
+  public activeProjects?: Ref<ProjectClass>[];
+
+  @prop({
     ref: () => ProjectClass,
     type: mongoose.Schema.Types.ObjectId,
     default: [],

@@ -65,6 +65,18 @@ export default function ProjectsPage() {
     },
   });
 
+  // Initialize the mutation
+  const updateActiveProjectsMutation =
+    api.user.updateActiveProjects.useMutation({
+      onSuccess: (data) => {
+        console.log("Active projects updated:", data.activeProjects);
+      },
+      onError: (error) => {
+        console.error("Error updating active projects:", error);
+        // Optionally, display an error message to the user
+      },
+    });
+
   return (
     <>
       <div className="m-8">
@@ -119,10 +131,26 @@ export default function ProjectsPage() {
               <div
                 key={project._id.toString()}
                 className="flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
-                onClick={() => {
-                  document.cookie = `projectId=${project._id.toString()}; path=/;`;
-                  router.push(`/tasks?projectId=${project._id.toString()}`);
-                  router.refresh();
+                onClick={async () => {
+                  try {
+                    // Update active projects
+                    await updateActiveProjectsMutation.mutateAsync({
+                      walletId: walletId,
+                      projectId: project._id.toString(),
+                    });
+
+                    // Set the cookie
+                    document.cookie = `projectId=${project._id.toString()}; path=/;`;
+
+                    // Navigate to the project's tasks page
+                    router.push(`/tasks/${project._id.toString()}`);
+                  } catch (error) {
+                    console.error("Error updating active projects:", error);
+                    // Optionally, display an error message to the user
+                  }
+                  //document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                  //router.push(`/tasks/${project._id.toString()}`);
+                  // router.refresh();
                 }}
               >
                 <h3 className="p-4 text-white">{project.name}</h3>
