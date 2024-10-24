@@ -6,8 +6,17 @@ import { useActiveAccount } from "thirdweb/react";
 
 import { Button } from "@acme/ui/button";
 import { Switch } from "@acme/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@acme/ui/dialog";
 
 import { api } from "~/trpc/react";
+import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
 
 const templates = [
   { id: "60d5f484f8d2e30d8c4e4b0a", name: "DevOps Pipeline Template" },
@@ -41,9 +50,10 @@ export default function ProjectsPage() {
         enabled: !!userId, // Only run the query if we have a userId
       },
     );
+
   const filteredProjects = projects?.filter((project) => {
     if (showFilter === "all") return true;
-    if (showFilter === "owned")
+    if (showFilter === "Owned")
       return project.members.some(
         (member) => member.user === userId && member.role === "Owner",
       );
@@ -64,6 +74,27 @@ export default function ProjectsPage() {
       console.error("Error creating project:", error);
     },
   });
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+
+  const deleteProject = api.project.delete.useMutation({
+    onSuccess: () => {
+      console.log("Project deleted successfully");
+      void refetchProjects();
+    },
+    onError: (error) => {
+      console.error("Error deleting project:", error);
+    },
+  });
+
+  const handleDelete = () => {
+    if (projectToDelete) {
+      deleteProject.mutate({ projectId: projectToDelete });
+      setIsDeleteModalOpen(false);
+      setProjectToDelete(null);
+    }
+  };
 
   return (
     <>
@@ -115,34 +146,42 @@ export default function ProjectsPage() {
             </div>
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
-            {filteredProjects?.map((project) => (
-              <div
-                key={project._id.toString()}
-                className="relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
-                onClick={() => {
-                  console.log("bla bla");
-                  document.cookie = `projectId=${project._id.toString()}; path=/;`;
-                  router.push(`/tasks?projectId=${project._id.toString()}`);
-                  router.refresh();
-                }}
-              >
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="absolute right-2 top-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log("Delete project:", project._id.toString());
+            {filteredProjects?.map((project) => {
+              const isOwner = project.members.some(
+                (member) => member.user === userId && member.role === "Owner",
+              );
+
+              return (
+                <div
+                  key={project._id.toString()}
+                  className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
+                  onClick={() => {
+                    document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                    router.push(`/tasks?projectId=${project._id.toString()}`);
+                    router.refresh();
                   }}
                 >
-                  X
-                </Button>
-                <h3 className="p-4 text-white">{project.name}</h3>
-                <p className="px-4 pb-4 text-sm text-gray-400">
-                  {project.isPrivate ? "Private" : "Public"} project
-                </p>
-              </div>
-            ))}
+                  {isOwner && (
+                    <button
+                      className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-700 hover:stroke-rose-500 group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProjectToDelete(project._id.toString());
+                        setIsDeleteModalOpen(true);
+                      }}
+                      aria-label="Delete Project"
+                    >
+                      <TrashIcon />
+                    </button>
+                  )}
+
+                  <h3 className="p-4 text-white">{project.name}</h3>
+                  <p className="px-4 pb-4 text-sm text-gray-400">
+                    {project.isPrivate ? "Private" : "Public"} project
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
         <div>
@@ -239,6 +278,30 @@ export default function ProjectsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              <p>Are you sure you want to remove this project?</p>
+              <p>(This action cannot be undone)</p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
