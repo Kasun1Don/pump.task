@@ -69,7 +69,8 @@
     "THIRDWEB_ADMIN_PRIVATE_KEY",
     "THIRDWEB_AUTH_DOMAIN",
     "NEXT_PUBLIC_CLIENT_ID",
-    "SENDGRID_API_KEY"
+    "SENDGRID_API_KEY",
+    "CLIENT_PRIVATE_KEY"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

@@ -80,7 +80,7 @@ export const emailRouter = {
           return { success: false, message: "Invalid code. Please try again." };
         }
 
-        const UpdateUser = await User.findOneAndUpdate(
+        const updateUser = await User.findOneAndUpdate(
           { walletId: input.walletId },
           {
             $set: {
@@ -91,7 +91,7 @@ export const emailRouter = {
           { new: true },
         );
 
-        if (!UpdateUser) {
+        if (!updateUser) {
           throw new Error("Failed to update user details");
         }
 
