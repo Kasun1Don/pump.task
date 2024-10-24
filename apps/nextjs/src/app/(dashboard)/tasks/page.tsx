@@ -14,6 +14,7 @@ import { api } from "~/trpc/react";
 
 export default function TasksPage() {
   // const [tasks, setTasks] = useState<TaskCardData[]>([]);
+  // const [project, setProject] = useState<Project>();
   const [statusColumns, setStatusColumns] = useState<StatusColumn[]>([]);
   const [projectId, setProjectId] = useState<ObjectIdString | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -41,6 +42,27 @@ export default function TasksPage() {
       }
     }
   }, [rawProjectId]);
+
+  // Retrieve the project object by projectId
+  const { data: project } = api.project.byId.useQuery(
+    { id: projectId as string },
+    { enabled: Boolean(projectId) },
+  );
+
+  // useEffect(() => {
+  //   if (projectData) {
+  //     // Validate projectData using Zod schema
+  //     const validationResult = ProjectSchema.safeParse(projectData);
+
+  //     if (validationResult.success) {
+  //       console.log("current project:", validationResult.data);
+  //       setProject(validationResult.data);
+  //     } else {
+  //       console.error("Validation error:", validationResult.error.errors);
+  //       setValidationError("Invalid project data");
+  //     }
+  //   }
+  // }, [projectData]);
 
   // Retrieve status columns
   const {
@@ -111,16 +133,26 @@ export default function TasksPage() {
     return <p>Error fetching statuses: {error.message}</p>;
   }
 
-  if (!projectId) {
+  if (!projectId || !project) {
     return <TaskBoardSkeleton />;
+  }
+
+  if ("error" in project) {
+    return <p>Error fetching project: {project.error}</p>;
   }
 
   return (
     <div>
-      <h1 className="flex justify-center">Tasks Page ({projectId})</h1>
+      <h1 className="mb-3 flex justify-center text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg">
+        {project.name}
+      </h1>
       <div className="flex flex-row gap-3 p-6">
         {statusColumns.map((status) => (
-          <TaskStatusColumn key={status._id} statusColumn={status} />
+          <TaskStatusColumn
+            key={status._id}
+            // project={projectData}
+            statusColumn={status}
+          />
         ))}
 
         <NewStatusColumn
