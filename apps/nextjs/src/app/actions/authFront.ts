@@ -26,39 +26,46 @@ export const generatePayload = async (
 };
 
 export async function login(payload: VerifyLoginPayloadParams) {
-  console.log("logging in!", payload);
-  const verifiedPayload = await thirdwebAuth.verifyPayload(payload);
-  if (verifiedPayload.valid) {
-    const jwt = await thirdwebAuth.generateJWT({
-      payload: verifiedPayload.payload,
-    });
+  try {
+    const verifiedPayload = await thirdwebAuth.verifyPayload(payload);
+    if (verifiedPayload.valid) {
+      const jwt = await thirdwebAuth.generateJWT({
+        payload: verifiedPayload.payload,
+      });
 
-    cookies().set("jwt", jwt, {
-      path: "/",
-      secure: true,
-      sameSite: "strict",
-    });
-    cookies().set("wallet", verifiedPayload.payload.address, {
-      path: "/",
-      secure: true,
-      sameSite: "strict",
-    });
-    redirect("/auth");
+      cookies().set("jwt", jwt, {
+        path: "/",
+        secure: true,
+        sameSite: "strict",
+      });
+      cookies().set("wallet", verifiedPayload.payload.address, {
+        path: "/",
+        secure: true,
+        sameSite: "strict",
+      });
+      redirect("/auth");
+    }
+  } catch (error) {
+    console.error("Error logging in", error);
   }
 }
 
 export async function isLoggedIn() {
-  const jwt = cookies().get("jwt");
-  if (!jwt?.value) {
-    return false;
-  }
+  try {
+    const jwt = cookies().get("jwt");
+    if (!jwt?.value) {
+      return false;
+    }
 
-  const authResult = await thirdwebAuth.verifyJWT({ jwt: jwt.value });
-  console.log("authResult", authResult);
-  if (!authResult.valid) {
+    const authResult = await thirdwebAuth.verifyJWT({ jwt: jwt.value });
+    if (!authResult.valid) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error checking login status", error);
     return false;
   }
-  return true;
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 // Thirdweb React Components
 import { ConnectButton, darkTheme } from "thirdweb/react";
 
+import { api } from "~/trpc/react";
 // Functions for logging in and out, Auth
 import {
   generatePayload,
@@ -16,6 +17,16 @@ import {
 import { chain, client } from "../thirdwebClient";
 
 export function Login() {
+  const utils = api.useUtils();
+
+  const handlePrefetchUser = (walletId: string) => {
+    if (!walletId) {
+      console.error("Wallet ID is undefined or not found in cookies.");
+      return;
+    }
+    void utils.user.byWallet.prefetch({ walletId });
+  };
+
   const router = useRouter();
 
   return (
@@ -31,9 +42,11 @@ export function Login() {
         })}
         auth={{
           isLoggedIn: async (address) => {
-            console.log("checking if logged in!", { address });
             const result = await isLoggedIn();
-            if (result) router.push("/auth");
+            if (result) {
+              handlePrefetchUser(address);
+              router.push("/auth");
+            }
             return false;
           },
           doLogin: async (params) => {

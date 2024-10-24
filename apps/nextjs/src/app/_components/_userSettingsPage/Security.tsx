@@ -120,9 +120,6 @@ export default function Security({
   const handleUserSettingsUpdate = async () => {
     try {
       const authentication = securityForm.getValues("authentication");
-
-      console.log("authentication", authentication);
-
       let settingsToUpdate;
 
       settingsToUpdate = {
@@ -138,8 +135,6 @@ export default function Security({
           emailVerified: false,
         };
       }
-
-      console.log("settingsToUpdate", settingsToUpdate);
 
       const response = await updateUserSettings(settingsToUpdate);
 
