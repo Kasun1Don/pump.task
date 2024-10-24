@@ -81,16 +81,13 @@ export default function ProjectsPage() {
   });
 
   const createProject = api.project.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (newProject) => {
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
-      void refetchProjects();
-    },
-    onError: (error) => {
-      console.error("Error creating project:", error);
-    },
+      router.push(`/tasks?projectId=${newProject.id.toString()}`);
+    }
   });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
