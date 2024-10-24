@@ -34,7 +34,25 @@ export default function ProjectsPage() {
   const [showFilter, setShowFilter] = useState("all");
   const router = useRouter();
 
-  const walletId = activeAccount?.address ?? "";
+  // Modified wallet ID retrieval with cookie fallback
+  const [walletId, setWalletId] = useState<string>("");
+
+  useEffect(() => {
+    // Try to get wallet from activeAccount first
+    if (activeAccount?.address) {
+      setWalletId(activeAccount.address);
+    } else {
+      // Fallback to cookie if activeAccount is not available
+      const cookieWallet = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('wallet='))
+        ?.split('=')[1];
+      
+      if (cookieWallet) {
+        setWalletId(cookieWallet);
+      }
+    }
+  }, [activeAccount]);
 
   useEffect(() => {
     console.log("Current user ID (wallet address):", walletId);
@@ -147,9 +165,10 @@ export default function ProjectsPage() {
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
             {filteredProjects && filteredProjects.length > 0 ? (
-              filteredProjects?.map((project) => {
+              filteredProjects.map((project) => {
                 const isOwner = project.members.some(
-                  (member) => member.user === walletId && member.role === "Owner",
+                  (member) =>
+                    member.user === walletId && member.role === "Owner",
                 );
 
                 return (
@@ -190,8 +209,8 @@ export default function ProjectsPage() {
                   {showFilter === "all"
                     ? "You are not associated with any projects yet."
                     : showFilter === "my"
-                    ? "You are not a member of any projects."
-                    : "You haven't created any projects yet."}
+                      ? "You are not a member of any projects."
+                      : "You haven't created any projects yet."}
                 </p>
                 <p className="mt-4">
                   Click the "Create new project" button to get started!
