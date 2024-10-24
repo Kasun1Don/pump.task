@@ -36,13 +36,16 @@ export const badgeRouter = {
         if (index >= nfts.length) {
           throw new Error("Index out of range");
         }
+        console.log(`-----NFT metadata found for index ${index}`);
         const nftMetadata = nfts[index]?.metadata;
 
+        console.log(`----Finding user with wallet ID: ${walletId}`);
         const user = await User.findOne({ walletId });
         if (!user) {
           throw new Error("User not found");
         }
 
+        console.log(`-----Creating badge...`);
         const badge = new Badge({
           walletId,
           receivedDate,
@@ -51,6 +54,8 @@ export const badgeRouter = {
         });
 
         await badge.save();
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`-----Badge saved successfully: ${badge._id}`);
 
         user.badges?.push(badge._id);
         await user.save();
