@@ -12,7 +12,6 @@ import "~/app/globals.css";
 
 import { ThirdwebProvider } from "~/app/thirdweb";
 import { env } from "~/env";
-import { CurrentProjectProvider } from "./context/CurrentProjectProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -20,19 +19,22 @@ export const metadata: Metadata = {
       ? "https://turbo.t3.gg"
       : "http://localhost:3000",
   ),
-  title: "Create T3 Turbo",
-  description: "Simple monorepo with shared backend for web & mobile apps",
+  title: "pump.task",
+  icons: {
+    icon: "/favicon.png",
+  },
+  description: "Project management with integrated web3 features",
   openGraph: {
-    title: "Create T3 Turbo",
-    description: "Simple monorepo with shared backend for web & mobile apps",
+    title: "pump.task",
+    description: "Project management with integrated web3 features",
     url: "https://create-t3-turbo.vercel.app",
-    siteName: "Create T3 Turbo",
+    siteName: "pump.task",
   },
-  twitter: {
-    card: "summary_large_image",
-    site: "@jullerino",
-    creator: "@jullerino",
-  },
+  // twitter: {
+  //   card: "summary_large_image",
+  //   site: "@jullerino",
+  //   creator: "@jullerino",
+  // },
 };
 
 export const viewport: Viewport = {
@@ -54,9 +56,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThirdwebProvider>
-            <CurrentProjectProvider>
-              <TRPCReactProvider>{props.children}</TRPCReactProvider>
-            </CurrentProjectProvider>
+            <TRPCReactProvider>{props.children}</TRPCReactProvider>
           </ThirdwebProvider>
           <div className="absolute bottom-4 right-4">
             <ThemeToggle />

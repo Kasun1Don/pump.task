@@ -28,7 +28,7 @@ export const emailRouter = {
         );
 
         const msg = {
-          to: "bendavies600@gmail.com",
+          to: user.email,
           from: "coderacademylabrys@gmail.com",
           subject: "Pump.Task 2FA Authentication",
           html: `<h2>Pump.Task</h2><br><br><strong>Your code is ${code}</strong>`,
@@ -80,17 +80,18 @@ export const emailRouter = {
           return { success: false, message: "Invalid code. Please try again." };
         }
 
-        const UpdateUser = await User.findOneAndUpdate({
-          walletId: input.walletId,
-          DataToUpdate: {
-            emailVerified: true,
-            userSettings: {
-              twoFactorAuth: true,
+        const updateUser = await User.findOneAndUpdate(
+          { walletId: input.walletId },
+          {
+            $set: {
+              emailVerified: true,
+              "userSettings.twoFactorAuth": true,
             },
           },
-        });
+          { new: true },
+        );
 
-        if (!UpdateUser) {
+        if (!updateUser) {
           throw new Error("Failed to update user details");
         }
 

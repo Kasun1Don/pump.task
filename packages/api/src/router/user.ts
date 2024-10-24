@@ -94,7 +94,7 @@ export const userRouter = {
           name: input.name,
           email: input.email,
           image: input.image,
-          bio: input.image,
+          bio: input.bio,
           userSettings: {},
           loginHistories: [newLogin._id],
         });

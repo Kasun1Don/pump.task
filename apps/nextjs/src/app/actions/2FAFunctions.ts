@@ -10,7 +10,7 @@ interface ApiResponse {
 export async function send2FAEmail(wallet: string): Promise<ApiResponse> {
   try {
     const response = await api.email.sendEmail({ walletId: wallet });
-    return response; // This should already conform to ApiResponse
+    return response;
   } catch (error) {
     console.error("Error sending 2FA email:", error);
     return {
