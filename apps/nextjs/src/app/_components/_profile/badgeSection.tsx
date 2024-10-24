@@ -30,38 +30,45 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
         const ownedNFTs = await getOwnedNFTs({
           contract,
           start: 0,
-          count: 6,
+          count: 7,
           address: walletId,
         });
 
+        console.log(ownedNFTs);
+
         const images = [
-          "/nfts/Frontend.png",
           "/nfts/Backend.png",
           "/nfts/Design.png",
+          "/nfts/Misc.png",
+          "/nfts/Frontend.png",
+          "/nfts/JSNinja.png",
           "/nfts/SmartContracts.png",
           "/nfts/Integration.png",
-          "/nfts/JSNinja.png",
-          "/nfts/Misc.png",
+          "/nfts/UIUXSpec.png",
         ];
 
-        const nftDataPromises = ownedNFTs.map(async (nft) => {
+        const nftDataPromises = ownedNFTs.map(async (ownedNFT) => {
           const balance = await balanceOf({
             contract,
             owner: walletId,
-            tokenId: nft.id,
+            tokenId: ownedNFT.id,
           });
 
-          const imageIndex = parseInt(nft.metadata.id as string);
-          const image = images[imageIndex] ?? "";
+          console.log(balance);
+
+          const imageIndex = ownedNFT.id.toString().split("n")[0] ?? "";
+          const image = images[parseInt(imageIndex)] ?? "/nfts/placeholder.png";
 
           return {
-            title: nft.metadata.name ?? "NFT",
+            title: ownedNFT.metadata.name ?? "NFT",
             image,
             count: Number(balance.toString()),
           };
         });
 
         const nftData = await Promise.all(nftDataPromises);
+
+        console.log(nftData);
         setNfts(nftData);
       } catch (error) {
         console.error("Error fetching NFTs: ", error);
@@ -69,7 +76,8 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
     };
 
     fetchNFTs().catch((error) => console.error("Error fetching NFTs: ", error));
-  }, [chain, walletId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletId]);
 
   if (!walletId) {
     return <div>Error: Wallet ID not found.</div>;
