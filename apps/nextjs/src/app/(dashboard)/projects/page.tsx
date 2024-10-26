@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
-import { Switch } from "@acme/ui/switch";
 
 import { Button } from "@acme/ui/button";
 import {
@@ -23,7 +22,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@acme/ui/pagination";
-
+import { Switch } from "@acme/ui/switch";
 
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
 import { api } from "~/trpc/react";
