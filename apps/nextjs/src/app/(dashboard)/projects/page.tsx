@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
+import { Switch } from "@acme/ui/switch";
 
 import { Button } from "@acme/ui/button";
 import {
@@ -22,7 +23,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@acme/ui/pagination";
-import { Switch } from "@acme/ui/switch";
+
 
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
 import { api } from "~/trpc/react";
@@ -83,16 +84,18 @@ export default function ProjectsPage() {
       },
     );
 
-  const filteredProjects = projects?.filter((project) => {
-    if (showFilter === "all") return true;
-    if (showFilter === "Owned")
-      return project.members.some(
-        (member) => member.walletId === walletId && member.role === "Owner",
-      );
-    if (showFilter === "my")
-      return project.members.some((member) => member.walletId === walletId);
-    return true;
-  })?.reverse(); // reverse here shows newest first
+  const filteredProjects = projects
+    ?.filter((project) => {
+      if (showFilter === "all") return true;
+      if (showFilter === "Owned")
+        return project.members.some(
+          (member) => member.walletId === walletId && member.role === "Owner",
+        );
+      if (showFilter === "my")
+        return project.members.some((member) => member.walletId === walletId);
+      return true;
+    })
+    .reverse(); // reverse here shows newest first
 
   // Calculate pagination
   const totalPages = Math.ceil(
