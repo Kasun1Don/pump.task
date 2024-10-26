@@ -15,6 +15,16 @@ import {
 } from "@acme/ui/dialog";
 import { Switch } from "@acme/ui/switch";
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@acme/ui/pagination";
+
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
 import { api } from "~/trpc/react";
 
@@ -36,6 +46,11 @@ export default function ProjectsPage() {
 
   // Modified wallet ID retrieval with cookie fallback
   const [walletId, setWalletId] = useState<string>("");
+
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  // number of projects per page
+  const projectsPerPage = 9; 
 
   useEffect(() => {
     // Try to get wallet from activeAccount first
@@ -79,6 +94,42 @@ export default function ProjectsPage() {
       return project.members.some((member) => member.walletId === walletId);
     return true;
   });
+
+  // Calculate pagination
+  const totalPages = Math.ceil((filteredProjects?.length ?? 0) / projectsPerPage);
+  const startIndex = (currentPage - 1) * projectsPerPage;
+  const endIndex = startIndex + projectsPerPage;
+  const currentProjects = filteredProjects?.slice(startIndex, endIndex);
+
+  // function to generate page numbers for pagination
+  const generatePaginationItems = () => {
+    const items = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => setCurrentPage(i)}
+              isActive={currentPage === i}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>,
+        );
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationEllipsis />
+          </PaginationItem>,
+        );
+      }
+    }
+    return items;
+  };
 
   const createProject = api.project.create.useMutation({
     onSuccess: (newProject) => {
@@ -171,12 +222,13 @@ export default function ProjectsPage() {
             </div>
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
-            {filteredProjects && filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => {
-                const isOwner = project.members.some(
-                  (member) =>
-                    member.user === walletId && member.role === "Owner",
-                );
+            {currentProjects && currentProjects.length > 0 ? (
+              <>
+                {currentProjects.map((project) => {
+                  const isOwner = project.members.some(
+                    (member) =>
+                      member.user === walletId && member.role === "Owner",
+                  );
 
                 return (
                   <div
@@ -218,13 +270,38 @@ export default function ProjectsPage() {
                       </button>
                     )}
 
-                    <h3 className="p-4 text-white">{project.name}</h3>
-                    <p className="px-4 pb-4 text-sm text-gray-400">
-                      {project.isPrivate ? "Private" : "Public"} project
-                    </p>
+                      <h3 className="p-4 text-white">{project.name}</h3>
+                      <p className="px-4 pb-4 text-sm text-gray-400">
+                        {project.isPrivate ? "Private" : "Public"} project
+                      </p>
+                    </div>
+                  );
+                })}
+                {/* pagination only renders if there are more than 1 page of projects*/}
+                {totalPages > 1 && (
+                  <div className="col-span-3 mt-6">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                          />
+                        </PaginationItem>
+                        
+                        {generatePaginationItems()}
+
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
                   </div>
-                );
-              })
+                )}
+              </>
             ) : (
               <div className="col-span-3 text-center text-gray-400">
                 <p className="mb-4">No projects found.</p>
