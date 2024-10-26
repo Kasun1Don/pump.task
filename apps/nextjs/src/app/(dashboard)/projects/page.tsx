@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
+import { Switch } from "@acme/ui/switch";
 
 import { Button } from "@acme/ui/button";
 import {
@@ -13,8 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@acme/ui/dialog";
-import { Switch } from "@acme/ui/switch";
-
 import {
   Pagination,
   PaginationContent,
@@ -24,6 +23,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@acme/ui/pagination";
+
 
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
 import { api } from "~/trpc/react";
@@ -50,7 +50,7 @@ export default function ProjectsPage() {
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
   // number of projects per page
-  const projectsPerPage = 9; 
+  const projectsPerPage = 9;
 
   useEffect(() => {
     // Try to get wallet from activeAccount first
@@ -96,7 +96,9 @@ export default function ProjectsPage() {
   });
 
   // Calculate pagination
-  const totalPages = Math.ceil((filteredProjects?.length ?? 0) / projectsPerPage);
+  const totalPages = Math.ceil(
+    (filteredProjects?.length ?? 0) / projectsPerPage,
+  );
   const startIndex = (currentPage - 1) * projectsPerPage;
   const endIndex = startIndex + projectsPerPage;
   const currentProjects = filteredProjects?.slice(startIndex, endIndex);
@@ -230,45 +232,48 @@ export default function ProjectsPage() {
                       member.user === walletId && member.role === "Owner",
                   );
 
-                return (
-                  <div
-                    key={project._id.toString()}
-                    className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
-                    onClick={async () => {
-                      try {
-                        // Update active projects
-                        await updateActiveProjectsMutation.mutateAsync({
-                          walletId: walletId,
-                          projectId: project._id.toString(),
-                        });
+                  return (
+                    <div
+                      key={project._id.toString()}
+                      className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
+                      onClick={async () => {
+                        try {
+                          // Update active projects
+                          await updateActiveProjectsMutation.mutateAsync({
+                            walletId: walletId,
+                            projectId: project._id.toString(),
+                          });
 
-                        // Set the cookie
-                        document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                          // Set the cookie
+                          document.cookie = `projectId=${project._id.toString()}; path=/;`;
 
-                        // Navigate to the project's tasks page
-                        router.push(`/tasks/${project._id.toString()}`);
-                      } catch (error) {
-                        console.error("Error updating active projects:", error);
-                        // Optionally, display an error message to the user
-                      }
-                      //document.cookie = `projectId=${project._id.toString()}; path=/;`;
-                      //router.push(`/tasks/${project._id.toString()}`);
-                      // router.refresh();
-                    }}
-                  >
-                    {isOwner && (
-                      <button
-                        className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-700 hover:stroke-rose-500 group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setProjectToDelete(project._id.toString());
-                          setIsDeleteModalOpen(true);
-                        }}
-                        aria-label="Delete Project"
-                      >
-                        <TrashIcon />
-                      </button>
-                    )}
+                          // Navigate to the project's tasks page
+                          router.push(`/tasks/${project._id.toString()}`);
+                        } catch (error) {
+                          console.error(
+                            "Error updating active projects:",
+                            error,
+                          );
+                          // Optionally, display an error message to the user
+                        }
+                        //document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                        //router.push(`/tasks/${project._id.toString()}`);
+                        // router.refresh();
+                      }}
+                    >
+                      {isOwner && (
+                        <button
+                          className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-700 hover:stroke-rose-500 group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProjectToDelete(project._id.toString());
+                            setIsDeleteModalOpen(true);
+                          }}
+                          aria-label="Delete Project"
+                        >
+                          <TrashIcon />
+                        </button>
+                      )}
 
                       <h3 className="p-4 text-white">{project.name}</h3>
                       <p className="px-4 pb-4 text-sm text-gray-400">
@@ -284,17 +289,29 @@ export default function ProjectsPage() {
                       <PaginationContent>
                         <PaginationItem>
                           <PaginationPrevious
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                            onClick={() =>
+                              setCurrentPage((p) => Math.max(1, p - 1))
+                            }
+                            className={
+                              currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
                           />
                         </PaginationItem>
-                        
+
                         {generatePaginationItems()}
 
                         <PaginationItem>
                           <PaginationNext
-                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                            onClick={() =>
+                              setCurrentPage((p) => Math.min(totalPages, p + 1))
+                            }
+                            className={
+                              currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
                           />
                         </PaginationItem>
                       </PaginationContent>
