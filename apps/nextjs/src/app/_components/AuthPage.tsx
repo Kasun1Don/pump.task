@@ -93,7 +93,6 @@ export default function UserLoginClient({
         operatingSystem: navigator.platform,
         location: locationData,
       });
-      toast.success("Login successful!, Redirecting to profile...");
       setSuccessMessage(true);
       router.push("/profile");
     } catch (error) {
