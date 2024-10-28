@@ -39,7 +39,7 @@ export default async function UserProfile() {
           alt="User Profile Icon"
           width={120}
           height={120}
-          className="mb-4 mt-36"
+          className="mb-4"
         />
 
         <div className="relative mb-4 flex h-auto justify-between gap-2">

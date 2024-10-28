@@ -24,7 +24,7 @@ export default async function Page() {
   const userData: UserClass | null = response as unknown as UserClass;
 
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-48">
+    <section className="flex flex-col items-center justify-center gap-4">
       <AccountSettings
         language={userData.userSettings?.language}
         theme={userData.userSettings?.isThemeDark}
