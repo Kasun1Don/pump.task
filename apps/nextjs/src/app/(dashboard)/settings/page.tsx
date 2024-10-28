@@ -8,7 +8,7 @@ import EmailNotifications from "~/app/_components/_userSettingsPage/EmailNotific
 import Security from "~/app/_components/_userSettingsPage/Security";
 import { api } from "~/trpc/server";
 
-export default function Page() {
+export default async function Page() {
   // Get wallet ID from cookies
   const walletId: string = cookies().get("wallet")?.value ?? "";
 
@@ -18,7 +18,7 @@ export default function Page() {
   }
 
   // Fetch user data with wallet ID
-  const response = api.user.byWallet({ walletId });
+  const response = await api.user.byWallet({ walletId });
 
   // Destructure user data from response
   const userData: UserClass | null = response as unknown as UserClass;

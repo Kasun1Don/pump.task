@@ -24,7 +24,6 @@ import { toast } from "@acme/ui/toast";
 import { languageFormSchema, themeFormSchema } from "@acme/validators";
 
 import { updateUserSettings } from "~/app/actions/handleUserUpdate";
-import mintNftToUser from "~/app/helpers/mintNftToUser";
 
 export default function AccountSettings({
   language,
@@ -37,7 +36,7 @@ export default function AccountSettings({
 }) {
   const languageForm = useForm({
     resolver: zodResolver(languageFormSchema),
-    defaultValues: { language: language },
+    defaultValues: { language: language ?? "English" },
   });
 
   const themeForm = useForm({
@@ -72,16 +71,6 @@ export default function AccountSettings({
 
   return (
     <>
-      <button
-        onClick={() =>
-          mintNftToUser({
-            to: "0xD30c5f23Fe92e39EeF42F6FFBB971C8B061976cf",
-            tokenId: 2,
-          })
-        }
-      >
-        Click to mint NFT
-      </button>
       <Form {...languageForm}>
         <form className="max-w-4/6 w-2/5 min-w-96 space-y-6">
           {/* Language Field */}
