@@ -19,41 +19,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@acme/ui/select";
-import { Switch } from "@acme/ui/switch";
 import { toast } from "@acme/ui/toast";
-import { languageFormSchema, themeFormSchema } from "@acme/validators";
+import { languageFormSchema } from "@acme/validators";
 
 import { updateUserSettings } from "~/app/actions/handleUserUpdate";
-import mintNftToUser from "~/app/helpers/mintNftToUser";
 
 export default function AccountSettings({
   language,
-  theme,
   walletId,
 }: {
   language: string | undefined;
-  theme: boolean | undefined;
   walletId: string;
 }) {
   const languageForm = useForm({
     resolver: zodResolver(languageFormSchema),
-    defaultValues: { language: language },
-  });
-
-  const themeForm = useForm({
-    resolver: zodResolver(themeFormSchema),
-    defaultValues: { theme: theme },
+    defaultValues: { language: language ?? "English" },
   });
 
   const handleUserSettingsUpdate = async () => {
     try {
       const language = languageForm.getValues("language");
-      const isThemeDark = themeForm.getValues("theme");
 
       const settingsToUpdate = {
         walletId,
         language,
-        isThemeDark,
       };
 
       const response = await updateUserSettings(settingsToUpdate);
@@ -66,22 +55,11 @@ export default function AccountSettings({
       console.error("Error updating user settings:", err);
 
       languageForm.reset();
-      themeForm.reset();
     }
   };
 
   return (
     <>
-      <button
-        onClick={() =>
-          mintNftToUser({
-            to: "0xD30c5f23Fe92e39EeF42F6FFBB971C8B061976cf",
-            tokenId: 2,
-          })
-        }
-      >
-        Click to mint NFT
-      </button>
       <Form {...languageForm}>
         <form className="max-w-4/6 w-2/5 min-w-96 space-y-6">
           {/* Language Field */}
@@ -117,32 +95,6 @@ export default function AccountSettings({
                   Select the language you would like to use
                 </FormDescription>
                 <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Theme Field */}
-          <FormField
-            control={themeForm.control}
-            name="theme"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm">
-                <div className="space-y-0.5">
-                  <FormLabel>Theme</FormLabel>
-                  <FormDescription>
-                    Toggle between light and dark mode
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    className={field.value ? "bg-zesty-green" : "bg-gray-200"}
-                    checked={field.value}
-                    onCheckedChange={(checked) => {
-                      field.onChange(checked);
-                      void handleUserSettingsUpdate();
-                    }}
-                  />
-                </FormControl>
               </FormItem>
             )}
           />

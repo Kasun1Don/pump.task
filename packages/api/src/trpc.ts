@@ -133,11 +133,14 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (!ctx.token) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const token = ctx.token.split(" ")[1]!;
-    const verified = await thirdwebAuth.verifyJWT({ jwt: token });
-    if (!verified.valid) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+    try {
+      const token = ctx.token.split(" ")[1] ?? "";
+      const verified = await thirdwebAuth.verifyJWT({ jwt: token });
+      if (!verified.valid) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+    } catch (error) {
+      console.log("Error in protectedProcedure", error);
     }
   }
   return next({
