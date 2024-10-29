@@ -36,7 +36,7 @@ export default function AccountSettings({
 }) {
   const languageForm = useForm({
     resolver: zodResolver(languageFormSchema),
-    defaultValues: { language: language },
+    defaultValues: { language: language ?? "English" },
   });
 
   const themeForm = useForm({

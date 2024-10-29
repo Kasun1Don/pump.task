@@ -1,10 +1,10 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import mongoose from "mongoose";
 import { z } from "zod";
 
 import type { BadgeClass } from "@acme/db";
-import { LoginHistory, User } from "@acme/db";
+import { Badge, LoginHistory, User } from "@acme/db";
 
-import { Skill } from "../../../db/src/schema/Badges";
 import { protectedProcedure, publicProcedure } from "../trpc";
 
 export const userRouter = {
@@ -267,15 +267,14 @@ export const userRouter = {
         badges: user.badges?.map((badge) => ({
           ...badge,
           _id: badge._id.toString(),
-        })),
+        })) as BadgeClass[],
       };
 
       const activeProjects = serializedUser.projects?.length ?? 0;
-      const totalBadges = serializedUser.badges?.length ?? 0;
+      const totalBadges = serializedUser.badges.length;
 
-      const isBadgeClass = (
-        badge: unknown,
-      ): badge is BadgeClass & { skill: Skill } => {
+      // Helper function to check if an object is a BadgeClass
+      const isBadgeClass = (badge: unknown): badge is BadgeClass => {
         if (typeof badge !== "object" || badge === null) {
           return false;
         }
@@ -284,55 +283,45 @@ export const userRouter = {
 
         return (
           "receivedDate" in badgeObj &&
-          "skill" in badgeObj &&
+          "index" in badgeObj &&
+          "NFTTitle" in badgeObj &&
           (badgeObj.receivedDate instanceof Date ||
             !isNaN(Date.parse(badgeObj.receivedDate as string)))
         );
       };
 
-      const badgesInLast30Days =
-        serializedUser.badges?.filter(
-          (badge) =>
-            isBadgeClass(badge) &&
-            new Date(badge.receivedDate) >=
-              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        ).length ?? 0;
+      // Count badges received in the last 30 days
+      const badgesInLast30Days = serializedUser.badges.filter(
+        (badge) =>
+          isBadgeClass(badge) &&
+          new Date(badge.receivedDate) >=
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      ).length;
 
-      const daysSinceLastBadge =
-        serializedUser.badges &&
-        serializedUser.badges.length > 0 &&
-        isBadgeClass(serializedUser.badges[0])
-          ? Math.floor(
-              (Date.now() -
-                new Date(serializedUser.badges[0].receivedDate).getTime()) /
-                (1000 * 3600 * 24),
-            )
-          : "N/A"; // Default if no badges found
+      // Calculate days since the last badge
+      const daysSinceLastBadge = isBadgeClass(serializedUser.badges[0])
+        ? Math.floor(
+            (Date.now() -
+              new Date(serializedUser.badges[0].receivedDate).getTime()) /
+              (1000 * 3600 * 24),
+          )
+        : "N/A"; // Default if no badges found
 
-      const badgeCounts: { [key in Skill]: number } = {
-        [Skill.Backend]: 0,
-        [Skill.Frontend]: 0,
-        [Skill.Design]: 0,
-        [Skill.SmartContracts]: 0,
-        [Skill.Integration]: 0,
-        [Skill.JSNinja]: 0,
-        [Skill.Misc]: 0,
-      };
+      interface TopSkill {
+        _id: string;
+        count: number;
+      }
 
-      serializedUser.badges?.forEach((badge) => {
-        if (isBadgeClass(badge)) {
-          badgeCounts[badge.skill]++;
-        }
-      });
+      const topSkillAggregation: TopSkill[] = await Badge.aggregate([
+        { $match: { walletId: input.walletId } }, // Filter badges by walletId
+        { $group: { _id: "$NFTTitle", count: { $sum: 1 } } }, // Group by NFTTitle and count
+        { $sort: { count: -1 } }, // Sort by count in descending order
+        { $limit: 1 }, // Limit to the top result
+      ]);
 
-      let topSkill = "N/A"; // Default if no badges found
-      let maxCount = 0;
-      Object.keys(badgeCounts).forEach((skill) => {
-        if (badgeCounts[skill as Skill] > maxCount) {
-          maxCount = badgeCounts[skill as Skill];
-          topSkill = skill;
-        }
-      });
+      const topSkill: string = topSkillAggregation[0]?._id ?? "N/A";
+
+      // Return the summary data
       return {
         activeProjects,
         totalBadges,
@@ -340,5 +329,67 @@ export const userRouter = {
         daysSinceLastBadge,
         topSkill,
       };
+    }),
+  updateActiveProjects: protectedProcedure
+    .input(z.object({ walletId: z.string(), projectId: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        console.log("Updating active projects");
+
+        // Fetch the user by walletId
+        const user = await User.findOne({ walletId: String(input.walletId) })
+          .lean()
+          .exec();
+
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        // Get the activeProjects array or initialize it if empty
+        const activeProjects = user.activeProjects ?? [];
+
+        if (activeProjects.length > 0) {
+          // Remove the project if it already exists in active projects
+          const projectIndex = activeProjects.indexOf(
+            new mongoose.Types.ObjectId(input.projectId),
+          );
+          if (projectIndex !== -1) {
+            activeProjects.splice(projectIndex, 1);
+          }
+        }
+
+        // Add the project to the end (making it the most recent)
+        activeProjects.push(new mongoose.Types.ObjectId(input.projectId));
+
+        // Ensure the array contains a maximum of 3 projects
+        if (activeProjects.length > 3) {
+          activeProjects.shift(); // Remove the oldest project (first item)
+        }
+
+        // Build the updatedData object
+        const updatedData = {
+          activeProjects: activeProjects,
+        };
+
+        // Update the user using findByIdAndUpdate
+        const updatedUser = await User.findByIdAndUpdate(
+          user._id,
+          { $set: updatedData },
+          { new: true },
+        );
+
+        if (!updatedUser) {
+          throw new Error("Failed to update active projects");
+        }
+
+        // Return the updated activeProjects
+        return {
+          message: "Active projects updated successfully",
+          activeProjects: updatedUser.activeProjects,
+        };
+      } catch (error) {
+        console.error("Error updating activeProjects:", error);
+        throw new Error("Failed to update active projects");
+      }
     }),
 } satisfies TRPCRouterRecord;

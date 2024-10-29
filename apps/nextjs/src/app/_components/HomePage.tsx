@@ -1,6 +1,7 @@
 "use client";
 
 // Next.js Router Hook
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 // Thirdweb React Components
 import { ConnectButton, darkTheme } from "thirdweb/react";
@@ -16,6 +17,7 @@ import {
 import { chain, client } from "../thirdwebClient";
 
 export function Login() {
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   return (
@@ -30,13 +32,15 @@ export function Login() {
           },
         })}
         auth={{
-          isLoggedIn: async (address) => {
-            console.log("checking if logged in!", { address });
+          isLoggedIn: async () => {
             const result = await isLoggedIn();
-            if (result) router.push("/auth");
+            if (result) {
+              router.push("/auth");
+            }
             return false;
           },
           doLogin: async (params) => {
+            setLoading(true);
             console.log("logging in!");
             await login(params);
           },
@@ -45,6 +49,9 @@ export function Login() {
             console.log("logging out!");
             await logout();
           },
+        }}
+        signInButton={{
+          label: !loading ? "Sign in" : "Loading...",
         }}
       />
     </>

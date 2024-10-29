@@ -50,14 +50,20 @@ export default function Security({
   authentication: boolean | undefined;
   walletId: string;
 }): JSX.Element {
-  const [emailCodeVerified, setEmailCodeVerified] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // State for the success message
   const [successMessage, setSuccessMessage] = useState(false);
+
+  // State for the email code sent
   const [emailCodeSent, setEmailCodeSent] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userAuthenticated, setUserAuthenticated] = useState(false);
   const [value, setValue] = useState("");
+
+  // State for the error message
   const [errorMessage, setErrorMessage] = useState("");
+
+  // State for loading state
+  const [loading, setLoading] = useState(false);
 
   const securityForm = useForm<z.infer<typeof securityFormSchema>>({
     resolver: zodResolver(securityFormSchema),
@@ -90,8 +96,7 @@ export default function Security({
     const response = await verify2FACode(walletId, value);
     setLoading(false);
     if (response.success) {
-      setUserAuthenticated(true);
-      setEmailCodeVerified(true);
+      void handleUserSettingsUpdate();
       setSuccessMessage(true);
       setErrorMessage("");
     } else {
@@ -115,9 +120,6 @@ export default function Security({
   const handleUserSettingsUpdate = async () => {
     try {
       const authentication = securityForm.getValues("authentication");
-
-      console.log("authentication", authentication);
-
       let settingsToUpdate;
 
       settingsToUpdate = {
@@ -126,14 +128,13 @@ export default function Security({
       };
 
       if (authentication === false) {
+        setEmailCodeSent(false);
         settingsToUpdate = {
           walletId,
           twoFactorAuth: authentication,
           emailVerified: false,
         };
       }
-
-      console.log("settingsToUpdate", settingsToUpdate);
 
       const response = await updateUserSettings(settingsToUpdate);
 
@@ -177,7 +178,7 @@ export default function Security({
                           type="button"
                           className="text-zesty-green ml-4 text-sm"
                         >
-                          {emailCodeVerified ? "Verified" : "Verify Now"}
+                          Verify Now
                         </button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[425px]">

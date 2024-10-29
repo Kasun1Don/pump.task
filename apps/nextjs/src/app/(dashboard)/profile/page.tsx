@@ -32,13 +32,14 @@ export default async function UserProfile() {
           borderColor: "rgba(83, 83, 83, 0.5)",
         }}
       ></section>
+
       <div className="relative mx-52">
         <Image
           src={userData.image ?? "/labrysGreenSphere.png"}
           alt="User Profile Icon"
           width={120}
           height={120}
-          className="mb-4 mt-36"
+          className="mb-4"
         />
 
         <div className="relative mb-4 flex h-auto justify-between gap-2">
