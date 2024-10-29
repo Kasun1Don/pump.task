@@ -25,6 +25,7 @@ import {
 import { Switch } from "@acme/ui/switch";
 
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
+import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
 const templates = [
@@ -155,11 +156,12 @@ export default function ProjectsPage() {
   };
 
   const createProject = api.project.create.useMutation({
-    onSuccess: (newProject) => {
+    onSuccess: async (newProject) => {
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
+      await revalidate("/");
       router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
@@ -270,6 +272,7 @@ export default function ProjectsPage() {
                           document.cookie = `projectId=${project._id.toString()}; path=/;`;
 
                           // Navigate to the project's tasks page
+                          await revalidate("/");
                           router.push(`/tasks/${project._id.toString()}`);
                         } catch (error) {
                           console.error(
