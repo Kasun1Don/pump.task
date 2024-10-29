@@ -8,7 +8,6 @@ export async function updateUserSettings({
   walletId,
   language,
   email,
-  isThemeDark,
   dueDate,
   comments,
   assignedToCard,
@@ -24,7 +23,6 @@ export async function updateUserSettings({
   walletId: string;
   language?: string;
   email?: string;
-  isThemeDark?: boolean;
   dueDate?: boolean;
   comments?: boolean;
   assignedToCard?: boolean;
@@ -46,7 +44,6 @@ export async function updateUserSettings({
       name,
       emailVerified,
       userSettings: {
-        isThemeDark,
         language,
         dueDate,
         comments,

@@ -1,11 +1,11 @@
 "use client";
 
 // Next.js Router Hook
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 // Thirdweb React Components
 import { ConnectButton, darkTheme } from "thirdweb/react";
 
-import { api } from "~/trpc/react";
 // Functions for logging in and out, Auth
 import {
   generatePayload,
@@ -17,16 +17,7 @@ import {
 import { chain, client } from "../thirdwebClient";
 
 export function Login() {
-  const utils = api.useUtils();
-
-  const handlePrefetchUser = (walletId: string) => {
-    if (!walletId) {
-      console.error("Wallet ID is undefined or not found in cookies.");
-      return;
-    }
-    void utils.user.byWallet.prefetch({ walletId });
-  };
-
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   return (
@@ -41,15 +32,15 @@ export function Login() {
           },
         })}
         auth={{
-          isLoggedIn: async (address) => {
+          isLoggedIn: async () => {
             const result = await isLoggedIn();
             if (result) {
-              handlePrefetchUser(address);
               router.push("/auth");
             }
             return false;
           },
           doLogin: async (params) => {
+            setLoading(true);
             console.log("logging in!");
             await login(params);
           },
@@ -58,6 +49,9 @@ export function Login() {
             console.log("logging out!");
             await logout();
           },
+        }}
+        signInButton={{
+          label: !loading ? "Sign in" : "Loading...",
         }}
       />
     </>

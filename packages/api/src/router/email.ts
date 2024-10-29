@@ -16,7 +16,7 @@ export const emailRouter = {
     .query(async ({ input }) => {
       try {
         const user = await User.findOne({ walletId: input.walletId });
-        if (!user) {
+        if (!user?.email) {
           return { success: false, message: "User not found" };
         }
 
@@ -41,7 +41,6 @@ export const emailRouter = {
         return { success: false, message: "Failed to send email" };
       }
     }),
-
   sendInvite: publicProcedure
     .input(z.object({ email: z.string() }))
     .mutation(async ({ input }) => {
@@ -64,7 +63,6 @@ export const emailRouter = {
         return { success: false, message: "Failed to send email" };
       }
     }),
-
   verifyCode: protectedProcedure
     .input(z.object({ walletId: z.string(), code: z.string() }))
     .query(async ({ input }) => {

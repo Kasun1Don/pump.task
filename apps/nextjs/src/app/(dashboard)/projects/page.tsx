@@ -96,7 +96,10 @@ export default function ProjectsPage() {
 
   const filteredProjects = projects
     ?.filter((project) => {
-      if (showFilter === "all") return true;
+      if (showFilter === "all") {
+        // Don't show private projects in "all" view
+        return !project.isPrivate;
+      }
       if (showFilter === "Owned") {
         return userMemberships.some(
           (member) =>
@@ -157,7 +160,7 @@ export default function ProjectsPage() {
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
-      router.push(`/tasks?projectId=${newProject.id.toString()}`);
+      router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
 

@@ -162,7 +162,6 @@ export const userRouter = {
         userSettings: z
           .object({
             language: z.string().optional(),
-            isThemeDark: z.boolean().optional(),
             twoFactorAuth: z.boolean().optional(),
             dueDate: z.boolean().optional(),
             comments: z.boolean().optional(),
@@ -191,8 +190,6 @@ export const userRouter = {
           userSettings: {
             language:
               input.userSettings?.language ?? user.userSettings?.language,
-            isThemeDark:
-              input.userSettings?.isThemeDark ?? user.userSettings?.isThemeDark,
             twoFactorAuth:
               input.userSettings?.twoFactorAuth ??
               user.userSettings?.twoFactorAuth,
@@ -260,7 +257,7 @@ export const userRouter = {
       const serializedUser = {
         ...user,
         _id: user._id.toString(),
-        projects: user.projects?.map((project) => ({
+        activeProjects: user.activeProjects?.slice(0, 3).map((project) => ({
           ...project,
           _id: project._id.toString(),
         })),
@@ -270,7 +267,7 @@ export const userRouter = {
         })) as BadgeClass[],
       };
 
-      const activeProjects = serializedUser.projects?.length ?? 0;
+      const activeProjects = serializedUser.activeProjects?.length ?? 0;
       const totalBadges = serializedUser.badges.length;
 
       // Helper function to check if an object is a BadgeClass

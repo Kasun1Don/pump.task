@@ -4,9 +4,6 @@ export class UserSettingsClass {
   @prop({ type: String, default: "English" })
   public language?: string;
 
-  @prop({ type: Boolean, default: true })
-  public isThemeDark?: boolean;
-
   @prop({ type: Boolean, default: false })
   public twoFactorAuth?: boolean;
 
