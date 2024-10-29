@@ -69,17 +69,29 @@ export default function NavProjectDropdown({
   const isError = allActiveProjects.some((query) => query.isError);
 
   useEffect(() => {
-    const allProjectData = allActiveProjects
+    const validatedActiveProjects = allActiveProjects
       .map((project) => {
         const validationResult = ProjectSchema.safeParse(project.data);
+        console.log("Validation Result pre if statement:", validationResult);
         if (validationResult.success) {
+          console.log("Validation Result", validationResult.data);
           return validationResult.data;
         }
       })
       .filter((project): project is Project => project !== undefined);
 
-    setActiveProjects(allProjectData);
-  }, [allActiveProjects]);
+    console.log("Validated Projects:", validatedActiveProjects);
+
+    const projectsChanged =
+      validatedActiveProjects.length !== activeProjects.length ||
+      validatedActiveProjects.some(
+        (newProj, idx) => newProj._id !== activeProjects[idx]?._id,
+      );
+
+    if (projectsChanged) {
+      setActiveProjects(validatedActiveProjects);
+    }
+  }, [allActiveProjects, activeProjects]);
 
   // Handle project change by updating the current project Context
   const handleProjectChange = async (project: Project) => {
