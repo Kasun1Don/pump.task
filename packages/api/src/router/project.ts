@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import mongoose, { Types } from "mongoose";
 import { z } from "zod";
 
-import { Project, Status, Task, User } from "@acme/db";
+import { Member, Project, Status, Task, User } from "@acme/db";
 
 import { adminProcedure, publicProcedure } from "../trpc";
 
@@ -14,53 +14,21 @@ export const projectRouter = {
         name: z.string().min(1, "Project name is required"),
         isPrivate: z.boolean().default(false),
         templateId: z.string().optional(),
-        members: z
-          .array(
-            z.object({
-              user: z.string(),
-              role: z.enum(["Observer", "Admin", "Owner"]),
-              // walletId: z.string(),
-              // email: z.string(),
-            }),
-          )
-          .optional(),
+        members: z.object({
+          user: z.string(),
+          role: z.enum(["Observer", "Admin", "Owner"]),
+        }),
         status: z.array(z.string()).default([]),
       }),
     )
     .mutation(async ({ input }) => {
       try {
-        const members = input.members
-          ? await Promise.all(
-              input.members.map(async (member) => {
-                const user = await User.findOne({ walletId: member.user });
-                return {
-                  user: member.user,
-                  name: user?.name,
-                  role: member.role,
-                  walletId: user?.walletId,
-                  email: user?.email,
-                };
-              }),
-            )
-          : [];
-
-        // assign a default owner if no members are provided
-        // if (members.length === 0) {
-        //   members.push({
-        //     user: new mongoose.Types.ObjectId(), // assign a default or anonymous user ID
-        //     role: "Owner",
-        //     walletId: "0xC3393B32eC70298075FA856df89e9E50FcE772bc",
-        //     email: "intameli@gmail.com",
-        //   });
-        // }
-
         const newProject = new Project({
           name: input.name,
           isPrivate: input.isPrivate,
           templateId: input.templateId
             ? new Types.ObjectId(input.templateId)
             : undefined,
-          members: members,
           status: input.status,
         });
 
@@ -75,6 +43,19 @@ export const projectRouter = {
 
         // Save the new status
         await newStatus.save();
+
+        const user = await User.findOne({ walletId: input.members.user });
+        if (user) {
+          const newMember = new Member({
+            userId: user._id,
+            projectId: savedProject._id,
+            role: input.members.role,
+            walletId: user.walletId,
+          });
+          await newMember.save();
+        } else {
+          throw new Error(`No user found`);
+        }
 
         console.log("Project Created Successfully:", savedProject);
         return {
@@ -128,14 +109,15 @@ export const projectRouter = {
         walletId: user.walletId,
       };
 
-      const project = await Project.findById(input.projectId);
-      const member = project?.members.find((obj) => obj.email === input.email);
-      if (member) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User already on project",
-        });
-      }
+      // const project = await Project.findById(input.projectId);
+      // const member = project?.members.find((obj) => obj.email === input.email);
+      // const member = false;
+      // if (member) {
+      //   throw new TRPCError({
+      //     code: "UNAUTHORIZED",
+      //     message: "User already on project",
+      //   });
+      // }
 
       await Project.updateOne(
         { _id: input.projectId },
