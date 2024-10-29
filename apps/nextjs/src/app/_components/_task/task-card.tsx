@@ -4,6 +4,8 @@
 import type { z } from "zod";
 import { useState } from "react";
 import Image from "next/image";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import type {
   NewTaskCard,
@@ -34,6 +36,13 @@ interface TaskCardProps {
 }
 
 const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: task._id });
+
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const utils = api.useUtils();
@@ -79,7 +88,7 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
   };
 
   return (
-    <>
+    <div {...attributes} ref={setNodeRef} {...listeners} style={style}>
       <TaskCardDialog
         initialValues={task}
         projectId={projectId}
@@ -166,7 +175,7 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 
