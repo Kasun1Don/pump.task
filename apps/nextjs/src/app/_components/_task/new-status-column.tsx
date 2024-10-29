@@ -76,7 +76,7 @@ export default function NewStatusColumn({
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Button
-          className="bg-transparent-[16] flex-start flex h-auto items-start bg-[#00000029] px-2 py-2 font-bold text-white hover:bg-[#27272a]"
+          className="bg-transparent-[16] flex h-auto items-start justify-start bg-[#00000029] px-2 py-2 font-bold text-white hover:bg-[#27272a]"
           style={{
             writingMode: "vertical-rl",
             textOrientation: "mixed",

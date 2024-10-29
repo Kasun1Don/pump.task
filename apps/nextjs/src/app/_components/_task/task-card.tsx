@@ -87,7 +87,7 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
         onSubmit={handleSubmit}
         isEditable={true} // Need to change this to be conditional based on user role
         dialogTrigger={
-          <div className="group relative max-w-md rounded-lg border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">
+          <div className="group relative max-w-[350px] rounded-2xl border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">
             {/* Delete Icon */}
             <button
               className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-300 hover:stroke-rose-500 group-hover:opacity-100"
