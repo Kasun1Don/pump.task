@@ -25,7 +25,7 @@ export default async function UserProfile() {
   return (
     <div className="relative">
       <section
-        className="absolute inset-0 top-[3.7rem] w-full border-t-2"
+        className="absolute inset-0 top-[3.9rem] min-h-screen w-full border-t-2"
         style={{
           backgroundColor: "#050505",
           pointerEvents: "none",
@@ -33,7 +33,7 @@ export default async function UserProfile() {
         }}
       ></section>
 
-      <div className="relative mx-52">
+      <div className="relative mx-52 mt-[10rem]">
         <Image
           src={userData.image ?? "/labrysGreenSphere.png"}
           alt="User Profile Icon"
@@ -47,14 +47,15 @@ export default async function UserProfile() {
             bio={userData.bio}
             walletId={walletId}
             name={userData.name}
+            image={userData.image}
           />
-          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-7 text-sm sm:w-auto">
+          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-4 text-sm sm:w-auto">
             <p>Copy your wallet ID to share.</p>
             <CopyButton textToCopy={`${userData.walletId}`} />
           </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="mb-10 flex gap-4">
           <div className="w-3/5 self-start rounded-lg border border-gray-700 p-5">
             <UserOverview walletId={walletId} />
           </div>
