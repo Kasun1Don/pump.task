@@ -86,7 +86,7 @@ export default function ProjectsPage() {
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
-      router.push(`/tasks?projectId=${newProject.id.toString()}`);
+      router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
 
@@ -172,7 +172,7 @@ export default function ProjectsPage() {
                     className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
                     onClick={() => {
                       document.cookie = `projectId=${project._id.toString()}; path=/;`;
-                      router.push(`/tasks?projectId=${project._id.toString()}`);
+                      router.push(`/tasks/${project._id.toString()}`);
                       router.refresh();
                     }}
                   >
