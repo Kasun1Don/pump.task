@@ -25,7 +25,7 @@ export default async function UserProfile() {
   return (
     <div className="relative">
       <section
-        className="absolute inset-0 top-[3.7rem] w-full border-t-2"
+        className="absolute inset-0 top-[3.9rem] min-h-screen w-full border-t-2"
         style={{
           backgroundColor: "#050505",
           pointerEvents: "none",
@@ -33,7 +33,7 @@ export default async function UserProfile() {
         }}
       ></section>
 
-      <div className="relative mx-52">
+      <div className="relative mx-52 mt-[10rem]">
         <Image
           src={userData.image ?? "/labrysGreenSphere.png"}
           alt="User Profile Icon"
@@ -54,7 +54,7 @@ export default async function UserProfile() {
           </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="mb-10 flex gap-4">
           <div className="w-3/5 self-start rounded-lg border border-gray-700 p-5">
             <UserOverview walletId={walletId} />
           </div>
