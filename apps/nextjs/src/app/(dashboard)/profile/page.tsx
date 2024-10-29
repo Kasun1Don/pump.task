@@ -48,7 +48,7 @@ export default async function UserProfile() {
             walletId={walletId}
             name={userData.name}
           />
-          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-7 text-sm sm:w-auto">
+          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-4 text-sm sm:w-auto">
             <p>Copy your wallet ID to share.</p>
             <CopyButton textToCopy={`${userData.walletId}`} />
           </div>

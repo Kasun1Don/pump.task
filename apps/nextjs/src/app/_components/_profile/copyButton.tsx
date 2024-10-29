@@ -21,9 +21,9 @@ const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
     <div
       className="mx-2 cursor-pointer rounded-sm border hover:bg-gray-700"
       onClick={handleCopyClick}
-      style={{ width: "40px", height: "40px" }}
+      style={{ width: "30px", height: "30px" }}
     >
-      <Image src={imageSrc} alt="Copy text button" width={40} height={40} />
+      <Image src={imageSrc} alt="Copy text button" width={30} height={30} />
     </div>
   );
 };
