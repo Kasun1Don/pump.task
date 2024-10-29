@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 
 import {
@@ -29,23 +29,31 @@ export default function UpdateProfile({
 }) {
   const [bio, setBio] = useState(initialBio ?? "");
   const [name, setName] = useState(initialName ?? "");
-  const [image, setImage] = useState(initialImage ?? "blue.svg");
 
-  const handleNameChange = (newName: string) => {
-    setName(newName);
-  };
+  // Temporary states
+  const [tempName, setTempName] = useState(initialName ?? "");
+  const [tempBio, setTempBio] = useState(initialBio ?? "");
+  const [tempImage, setTempImage] = useState(initialImage ?? "blue.svg");
 
-  const handleBioChange = (newBio: string) => {
-    setBio(newBio);
-  };
+  useEffect(() => {
+    setBio(initialBio ?? "");
+    setName(initialName ?? "");
+    setTempBio(initialBio ?? "");
+    setTempName(initialName ?? "");
+    setTempImage(initialImage ?? "blue.svg");
+  }, [initialBio, initialName, initialImage]);
 
-  const handleImageChange = (newImage: string) => {
-    setImage(newImage);
-  };
-
+  // Handle Save function to update main states with temporary states
   const handleSave = async () => {
     try {
-      await updateUserSettings({ walletId, bio, name, image });
+      await updateUserSettings({
+        walletId,
+        bio: tempBio,
+        name: tempName,
+        image: tempImage,
+      });
+      setName(tempName);
+      setBio(tempBio);
     } catch (error) {
       console.error("Error updating user settings:", error);
     }
@@ -67,7 +75,7 @@ export default function UpdateProfile({
           </button>
         </DialogTrigger>
 
-        <DialogContent className="w-full max-w-md rounded-lg bg-black p-6 text-white shadow-lg">
+        <DialogContent className="w-full max-w-2xl rounded-lg bg-black p-8 text-white shadow-lg">
           <DialogHeader>
             <DialogTitle className="mb-4 text-xl font-bold">
               Edit Profile
@@ -75,18 +83,18 @@ export default function UpdateProfile({
           </DialogHeader>
           <input
             type="text"
-            value={name}
-            onChange={(e) => handleNameChange(e.target.value)}
+            value={tempName}
+            onChange={(e) => setTempName(e.target.value)}
             className="mb-4 w-full rounded border border-gray-400 bg-gray-200 p-2 text-black"
             placeholder="Name"
           />
           <textarea
-            value={bio}
-            onChange={(e) => handleBioChange(e.target.value)}
+            value={tempBio}
+            onChange={(e) => setTempBio(e.target.value)}
             className="h-24 w-full rounded border border-gray-400 bg-gray-200 p-2 text-black"
             placeholder="Bio"
           />
-          <div className="mb-4 flex flex-wrap justify-center gap-2">
+          <div className="mb-4 flex flex-wrap justify-center gap-2 pt-10">
             {[
               "/userIcons/blue.svg",
               "/userIcons/green.svg",
@@ -101,17 +109,13 @@ export default function UpdateProfile({
                 alt="User Icon"
                 width={56}
                 height={56}
-                className={`h-16 w-16 cursor-pointer rounded-full ${image === icon ? "ring-4 ring-blue-500" : ""} max-w-full`}
-                onClick={() => handleImageChange(icon)}
+                className={`h-16 w-16 cursor-pointer rounded-full ${tempImage === icon ? "ring-4 ring-blue-500" : ""} max-w-full`}
+                onClick={() => setTempImage(icon)}
               />
             ))}
           </div>
           <DialogFooter className="mt-4 flex justify-end gap-2">
-            <DialogClose asChild>
-              <button className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-                Cancel
-              </button>
-            </DialogClose>
+            <DialogClose asChild></DialogClose>
             <button
               onClick={handleSave}
               className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
