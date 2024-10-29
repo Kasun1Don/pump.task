@@ -7,11 +7,13 @@ import { sepolia } from "thirdweb/chains";
 import { balanceOf, getOwnedNFTs } from "thirdweb/extensions/erc1155";
 
 import { client } from "~/app/thirdwebClient";
+import LoadingNFTs from "./loadingNFTs";
 
 const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
   const [nfts, setNfts] = useState<
     { image: string; title: string; count: number }[]
   >([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const chain = defineChain(sepolia);
 
@@ -67,20 +69,33 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
         setNfts(nftData);
       } catch (error) {
         console.error("Error fetching NFTs: ", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchNFTs().catch((error) => console.error("Error fetching NFTs: ", error));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walletId]);
+  }, [chain, walletId]);
 
   if (!walletId) {
     return <div>Error: Wallet ID not found.</div>;
   }
 
+  if (loading) {
+    return (
+      <div
+        className="flex w-full items-center justify-center"
+        style={{ height: "400px" }}
+      >
+        <LoadingNFTs />
+      </div>
+    );
+  }
+
   if (nfts.length === 0) {
     return <div>No NFTs found.</div>;
   }
+
   return (
     <div>
       <h1 className="text-3xl font-semibold">Badges Earned</h1>
@@ -98,7 +113,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
             className="m-1 block overflow-hidden rounded-lg border border-gray-700 shadow-lg transition-transform hover:border-gray-300"
             style={{
               width: "150px",
-              height: "270px",
+              height: "225px",
             }}
           >
             <div className="relative">
@@ -110,9 +125,11 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
                 onError={() => console.log(`Image not found: ${nft.image}`)}
               />
             </div>
-            <div className="border-t border-gray-700 bg-black bg-opacity-50 p-2">
-              <h3 className="text-lg font-bold">{nft.title}</h3>
-              <p className="text-right text-xs">x{nft.count}</p>
+            <div className="relative border-t border-gray-700 bg-black bg-opacity-50 p-2">
+              <h3 className="inline-block text-lg font-bold">{nft.title}</h3>
+              <p className="absolute right-0 top-0 mr-2 mt-2 text-xs">
+                x{nft.count}
+              </p>
             </div>
           </a>
         ))}
