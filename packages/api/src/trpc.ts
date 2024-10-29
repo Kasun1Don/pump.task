@@ -130,15 +130,17 @@ export const publicProcedure = t.procedure;
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
-  console.log("----------------ctx-------", ctx);
   if (!ctx.token) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const token = ctx.token.split(" ")[1]!;
-    const verified = await thirdwebAuth.verifyJWT({ jwt: token });
-    if (!verified.valid) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+    try {
+      const token = ctx.token.split(" ")[1] ?? "";
+      const verified = await thirdwebAuth.verifyJWT({ jwt: token });
+      if (!verified.valid) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+    } catch (error) {
+      console.log("Error in protectedProcedure", error);
     }
   }
   return next({
@@ -165,7 +167,6 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
 
   const project = await Project.findById(ctx.projectId);
   const member = project?.members.find((obj) => obj.walletId === walletId);
-  // console.log("--------", member, project, walletId, ctx);
   if (member) {
     if (
       member.role.toLowerCase() !== "admin" &&

@@ -12,7 +12,7 @@ import { Button } from "@acme/ui/button";
 // Import api for trpc backend calls from a client component
 import { api } from "~/trpc/server";
 // Import Client Components
-import HotKeyEventListeners from "../_components/_navbar/HotKeyEventListeners";
+// import HotKeyEventListeners from "../_components/_navbar/HotKeyEventListeners";
 import NavLink from "../_components/_navbar/NavLink";
 import NavProjectDropdown from "../_components/_navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/_navbar/NavUserDropdown";
@@ -39,6 +39,9 @@ export default async function Layout({ children }: { children: ReactNode }) {
   if (!walletId) {
     console.error("Wallet ID is undefined or not found in cookies.");
   }
+
+  //
+  console.log(children);
 
   // Fetch user data with wallet ID
   const response = await api.user.byWallet({ walletId });
@@ -126,12 +129,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
           <NavLink href="/settings">Settings</NavLink>
         </div>
       </div>
-
-      {/* Hotkeys Event Listener */}
-      <HotKeyEventListeners />
-
-      {/* Main content - adjusted margin to avoid overlap with navbar and navlinks */}
-      <main className="pt-48">{children}</main>
     </section>
   );
 }

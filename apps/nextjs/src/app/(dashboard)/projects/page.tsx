@@ -13,6 +13,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@acme/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@acme/ui/pagination";
 import { Switch } from "@acme/ui/switch";
 
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
@@ -38,6 +47,11 @@ export default function ProjectsPage() {
 
   // Modified wallet ID retrieval with cookie fallback
   const [walletId, setWalletId] = useState<string>("");
+
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  // number of projects per page
+  const projectsPerPage = 9;
 
   useEffect(() => {
     // Try to get wallet from activeAccount first
@@ -71,27 +85,67 @@ export default function ProjectsPage() {
       },
     );
 
-  const filteredProjects = projects?.filter((project) => {
-    if (showFilter === "all") return true;
-    if (showFilter === "Owned")
-      return project.members.some(
-        (member) => member.walletId === walletId && member.role === "Owner",
-      );
-    if (showFilter === "my")
-      return project.members.some((member) => member.walletId === walletId);
-    return true;
-  });
+  const filteredProjects = projects
+    ?.filter((project) => {
+      if (showFilter === "all") {
+        // Don't show private projects in "all" view
+        return !project.isPrivate;
+      }
+      if (showFilter === "Owned")
+        return project.members.some(
+          (member) => member.walletId === walletId && member.role === "Owner",
+        );
+      if (showFilter === "my")
+        return project.members.some((member) => member.walletId === walletId);
+      return true;
+    })
+    .reverse(); // reverse here shows newest first
+
+  // Calculate pagination
+  const totalPages = Math.ceil(
+    (filteredProjects?.length ?? 0) / projectsPerPage,
+  );
+  const startIndex = (currentPage - 1) * projectsPerPage;
+  const endIndex = startIndex + projectsPerPage;
+  const currentProjects = filteredProjects?.slice(startIndex, endIndex);
+
+  // function to generate page numbers for pagination
+  const generatePaginationItems = () => {
+    const items = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => setCurrentPage(i)}
+              isActive={currentPage === i}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>,
+        );
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationEllipsis />
+          </PaginationItem>,
+        );
+      }
+    }
+    return items;
+  };
 
   const createProject = api.project.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (newProject) => {
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
-      void refetchProjects();
-    },
-    onError: (error) => {
-      console.error("Error creating project:", error);
+      router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
 
@@ -132,11 +186,17 @@ export default function ProjectsPage() {
     <>
       <div className="m-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="pl-8 pr-8">
-              <h1 className="text-xl font-bold">Your Project Task Boards</h1>
-            </div>
-            <div className="flex overflow-hidden rounded-lg border border-gray-700">
+          <div className="mb-6 flex items-center justify-between px-8">
+            <h1 className="text-xl font-bold">Your Project Task Boards</h1>
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
+            >
+              + Create new project
+            </Button>
+          </div>
+          <div className="flex justify-center">
+            <div className="overflow-hidden rounded-lg border border-gray-700">
               <button
                 className={`px-4 py-2 font-semibold ${
                   showFilter === "all"
@@ -168,70 +228,103 @@ export default function ProjectsPage() {
                 Created by me
               </button>
             </div>
-            <div className="mr-8">
-              <Button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
-              >
-                + Create new project
-              </Button>
-            </div>
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
-            {filteredProjects && filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => {
-                const isOwner = project.members.some(
-                  (member) =>
-                    member.user === walletId && member.role === "Owner",
-                );
+            {currentProjects && currentProjects.length > 0 ? (
+              <>
+                {currentProjects.map((project) => {
+                  const isOwner = project.members.some(
+                    (member) =>
+                      member.walletId === walletId && member.role === "Owner",
+                  );
 
-                return (
-                  <div
-                    key={project._id.toString()}
-                    className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
-                    onClick={async () => {
-                      try {
-                        // Update active projects
-                        await updateActiveProjectsMutation.mutateAsync({
-                          walletId: walletId,
-                          projectId: project._id.toString(),
-                        });
+                  return (
+                    <div
+                      key={project._id.toString()}
+                      className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
+                      onClick={async () => {
+                        try {
+                          // Update active projects
+                          await updateActiveProjectsMutation.mutateAsync({
+                            walletId: walletId,
+                            projectId: project._id.toString(),
+                          });
 
-                        void updateUserSettings({ walletId: walletId });
-                        void utils.project.byId.invalidate();
-                        // void utils.user.byWallet.invalidate();
+                          void updateUserSettings({ walletId: walletId });
+                          void utils.project.byId.invalidate();
+                          // void utils.user.byWallet.invalidate();
 
-                        // Set the cookie
-                        document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                          // Set the cookie
+                          document.cookie = `projectId=${project._id.toString()}; path=/;`;
 
-                        // Navigate to the project's tasks page
-                        router.push(`/tasks/${project._id.toString()}`);
-                      } catch (error) {
-                        console.error("Error updating active projects:", error);
-                      }
-                    }}
-                  >
-                    {isOwner && (
-                      <button
-                        className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-700 hover:stroke-rose-500 group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setProjectToDelete(project._id.toString());
-                          setIsDeleteModalOpen(true);
-                        }}
-                        aria-label="Delete Project"
-                      >
-                        <TrashIcon />
-                      </button>
-                    )}
+                          // Navigate to the project's tasks page
+                          router.push(`/tasks/${project._id.toString()}`);
+                        } catch (error) {
+                          console.error(
+                            "Error updating active projects:",
+                            error,
+                          );
+                        }
+                      }}
+                    >
+                      {isOwner && (
+                        <button
+                          className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-700 hover:stroke-rose-500 group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProjectToDelete(project._id.toString());
+                            setIsDeleteModalOpen(true);
+                          }}
+                          aria-label="Delete Project"
+                        >
+                          <TrashIcon />
+                        </button>
+                      )}
 
-                    <h3 className="p-4 text-white">{project.name}</h3>
-                    <p className="px-4 pb-4 text-sm text-gray-400">
-                      {project.isPrivate ? "Private" : "Public"} project
-                    </p>
+                      <h3 className="p-4 text-white">{project.name}</h3>
+                      <p className="px-4 pb-4 text-sm text-gray-400">
+                        {project.isPrivate ? "Private" : "Public"} project
+                      </p>
+                    </div>
+                  );
+                })}
+                {/* pagination only renders if there are more than 1 page of projects*/}
+                {totalPages > 1 && (
+                  <div className="col-span-3 mt-6">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() =>
+                              setCurrentPage((p) => Math.max(1, p - 1))
+                            }
+                            className={
+                              currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+
+                        {generatePaginationItems()}
+
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() =>
+                              setCurrentPage((p) => Math.min(totalPages, p + 1))
+                            }
+                            className={
+                              currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
                   </div>
-                );
-              })
+                )}
+              </>
             ) : (
               <div className="col-span-3 text-center text-gray-400">
                 <p className="mb-4">No projects found.</p>

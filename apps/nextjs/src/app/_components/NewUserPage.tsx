@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -38,8 +38,8 @@ const formSchema = z.object({
 export default function NewUserPage({ wallet }: { wallet: string }) {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<string>("");
-
-  console.log(wallet);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const form = useForm({
     schema: formSchema,
@@ -51,15 +51,30 @@ export default function NewUserPage({ wallet }: { wallet: string }) {
     },
   });
 
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "email" && error) {
+        setError(null);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, error]);
+
   const createUser = api.user.create.useMutation({
+    onMutate: () => {
+      setLoading(true);
+    },
     onSuccess: () => {
       router.push("/projects");
+      setLoading(false);
     },
     onError: (err) => {
+      setLoading(false);
+      setError("Failed to Create Account, Email Already Exists!");
       toast.error(
         err.data?.code === "UNAUTHORIZED"
           ? "You must be logged in to post"
-          : "Failed to create post",
+          : "Failed to Create Account, Email Already Exists!",
       );
     },
   });
@@ -67,7 +82,6 @@ export default function NewUserPage({ wallet }: { wallet: string }) {
   function onSubmit(data: z.infer<typeof formSchema>) {
     const walletId = wallet;
     const { name, email, bio } = data;
-
     createUser.mutate({
       walletId,
       name,
@@ -107,7 +121,7 @@ export default function NewUserPage({ wallet }: { wallet: string }) {
                 <FormControl>
                   <Input placeholder="Email" className="w-64" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage>{error}</FormMessage>
               </FormItem>
             )}
           />
@@ -164,7 +178,9 @@ export default function NewUserPage({ wallet }: { wallet: string }) {
             )}
           />
 
-          <Button type="submit">Submit</Button>
+          <Button type="submit" className="bg-zesty-green">
+            {loading ? "Loading" : "Submit"}
+          </Button>
         </form>
       </Form>
     </div>
