@@ -140,7 +140,7 @@ export default function ProjectsPage() {
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
-      router.push(`/tasks?projectId=${newProject.id.toString()}`);
+      router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
 
