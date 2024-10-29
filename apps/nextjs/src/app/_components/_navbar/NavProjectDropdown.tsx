@@ -1,11 +1,12 @@
 "use client";
 
 // Import the required libraries
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useActiveAccount } from "thirdweb/react";
 
-// Import ProjectClass from Typegoose models
-import type { ProjectClass } from "@acme/db";
+import type { Project } from "@acme/validators";
 // Import Client Components from @acme/ui
 import {
   DropdownMenu,
@@ -14,10 +15,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
+// Import ProjectClass from Typegoose models
+import { ProjectSchema } from "@acme/validators";
+
+import { api } from "~/trpc/react";
 
 // Define the Props interface
 interface NavProjectDropdownProps {
-  projects: ProjectClass[];
+  projects: string[];
 }
 
 /**
@@ -31,14 +36,80 @@ interface NavProjectDropdownProps {
 export default function NavProjectDropdown({
   projects,
 }: NavProjectDropdownProps) {
-  const [currentProject, setCurrentProject] = useState<string>("");
+  const activeAccount = useActiveAccount();
+  const router = useRouter();
+  const [activeProjects, setActiveProjects] = useState<Project[]>([]);
+  const [currentProject, setCurrentProject] = useState<string | undefined>(
+    undefined,
+  );
+
+  // NEED TO CHANGE THIS
+  const walletId = activeAccount?.address;
+
+  // Initialize the mutation
+  const updateActiveProjectsMutation =
+    api.user.updateActiveProjects.useMutation({
+      onSuccess: (data) => {
+        console.log("Active projects updated:", data.activeProjects);
+      },
+      onError: (error) => {
+        console.error("Error updating active projects:", error);
+        // Optionally, display an error message to the user
+      },
+    });
+
+  // retrieve all
+  const allActiveProjects = api.useQueries((project) =>
+    projects.map((id) => project.project.byId({ id: id })),
+  );
+  console.log("All projects call", allActiveProjects);
+
+  // Check if any project query is loading or has an error
+  const isLoading = allActiveProjects.some((query) => query.isLoading);
+  const isError = allActiveProjects.some((query) => query.isError);
+
+  useEffect(() => {
+    const allProjectData = allActiveProjects
+      .map((project) => {
+        const validationResult = ProjectSchema.safeParse(project.data);
+        if (validationResult.success) {
+          return validationResult.data;
+        }
+      })
+      .filter((project): project is Project => project !== undefined);
+
+    setActiveProjects(allProjectData);
+  }, [allActiveProjects]);
 
   // Handle project change by updating the current project Context
-  const handleProjectChange = (projectName: string) => {
+  const handleProjectChange = async (project: Project) => {
     try {
-      setCurrentProject(projectName);
-    } catch (error) {
-      console.error("Error updating project:", error);
+      // Update active projects array in the state immediately for UI update
+      setActiveProjects((prevProjects) => {
+        // Remove the selected project if it allready exists
+        const updatedProjects = prevProjects.filter(
+          (p) => p._id !== project._id,
+        );
+        // Add the selected project at the end
+        return [...updatedProjects, project];
+      });
+      // Update current project
+      setCurrentProject(project.name);
+
+      // Update active projects on backend
+      await updateActiveProjectsMutation.mutateAsync({
+        walletId: walletId ?? "",
+        projectId: project._id,
+      });
+
+      // Navigate to project
+      router.push(`/tasks/${project._id}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error updating project:", error.message);
+      } else {
+        console.error("Error updating project:", String(error));
+      }
     }
   };
 
@@ -54,7 +125,9 @@ export default function NavProjectDropdown({
             width={12}
             height={12}
           />
-          <h6 className="text-sm">{currentProject}</h6>
+          <h6 className="text-sm">
+            {isLoading ? "Loading..." : currentProject ?? "Select a Project"}
+          </h6>
           <Image
             src="/chevron-down.svg"
             alt="Chevron Down"
@@ -66,12 +139,20 @@ export default function NavProjectDropdown({
 
       {/* A map of the user's Projects */}
       <DropdownMenuContent>
-        {projects.length > 0 ? (
-          projects.map((project) => (
+        {isLoading ? (
+          <DropdownMenuItem className="flex flex-row items-center gap-4">
+            <h1 className="text-sm">Loading Projects...</h1>
+          </DropdownMenuItem>
+        ) : isError ? (
+          <DropdownMenuItem className="flex flex-row items-center gap-4">
+            <h1 className="text-sm text-red-500">Error loading projects</h1>
+          </DropdownMenuItem>
+        ) : activeProjects.length > 0 ? (
+          activeProjects.map((project) => (
             <DropdownMenuItem
-              key={project.name}
+              key={project._id}
               className="flex flex-row items-center gap-4 hover:cursor-pointer"
-              onClick={() => handleProjectChange(project.name)}
+              onClick={() => handleProjectChange(project)}
             >
               <Image
                 className="inline-block h-5 w-5 rounded-full"

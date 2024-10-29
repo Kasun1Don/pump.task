@@ -1,11 +1,12 @@
 // Import React and Next.js modules
+import type { Types } from "mongoose";
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 
 // Import UserClass and ProjectClass from Typegoose models
-import type { ProjectClass, UserClass } from "@acme/db";
+import type { UserClass } from "@acme/db";
 import { Button } from "@acme/ui/button";
 
 // Import api for trpc backend calls from a client component
@@ -15,6 +16,11 @@ import HotKeyEventListeners from "../_components/_navbar/HotKeyEventListeners";
 import NavLink from "../_components/_navbar/NavLink";
 import NavProjectDropdown from "../_components/_navbar/NavProjectDropdown";
 import NavUserDropdown from "../_components/_navbar/NavUserDropdown";
+
+// Define the LeanUser interface
+interface LeanUser extends Omit<UserClass, "activeProjects"> {
+  activeProjects?: Types.ObjectId[];
+}
 
 /**
  * @author Benjamin davies
@@ -26,8 +32,6 @@ import NavUserDropdown from "../_components/_navbar/NavUserDropdown";
  * @returns The Layout Component including the Navbar and the children components.
  */
 export default async function Layout({ children }: { children: ReactNode }) {
-  const projectIdCookie = cookies().get("projectId");
-  const projectId = projectIdCookie?.value;
   // Get wallet ID from cookies
   const walletId: string = cookies().get("wallet")?.value ?? "";
 
@@ -39,12 +43,25 @@ export default async function Layout({ children }: { children: ReactNode }) {
   // Fetch user data with wallet ID
   const response = await api.user.byWallet({ walletId });
 
-  // Destructure user data from response
-  const userData: UserClass | null = response as unknown as UserClass;
+  // // Destructure user data from response
+  // const userData: UserClass | null = response as unknown as UserClass;
+
+  // Cast response to LeanUser
+  const userData: LeanUser = response as LeanUser;
+
+  if (!userData.activeProjects) {
+    return <div>No user found</div>;
+  }
 
   // Check if the user has any active projects
-  const hasActiveProjects =
-    userData.activeProjects && userData.activeProjects.length > 0;
+  const hasActiveProjects = userData.activeProjects.length > 0;
+
+  // Map activeProjects ObjectId[] to string[]
+  const activeProjectIds = userData.activeProjects.map((id) =>
+    id.toHexString(),
+  );
+
+  const projectId = activeProjectIds[activeProjectIds.length - 1];
 
   return (
     <section className="bg-custom-bg min-h-screen bg-cover bg-center">
@@ -71,10 +88,8 @@ export default async function Layout({ children }: { children: ReactNode }) {
           {/* Navbar section right-hand side */}
           <div className="mt-1 flex max-h-8 gap-10 hover:cursor-pointer">
             {/* Pass projects to Project dropdown make sure to add ProjectClass */}
-            {userData.projects ? (
-              <NavProjectDropdown
-                projects={userData.projects as ProjectClass[]}
-              />
+            {hasActiveProjects ? (
+              <NavProjectDropdown projects={activeProjectIds} />
             ) : (
               <Link href="/projects">
                 <Button className="hover:bg-zesty-green h-fit rounded-md bg-zinc-800 px-8 py-[0.375em] text-sm text-lime-500 hover:bg-opacity-50 hover:text-white">

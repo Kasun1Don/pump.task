@@ -16,6 +16,7 @@ import {
 import { Switch } from "@acme/ui/switch";
 
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
+import { updateUserSettings } from "~/app/actions/handleUserUpdate";
 import { api } from "~/trpc/react";
 
 const templates = [
@@ -25,6 +26,7 @@ const templates = [
 ];
 
 export default function ProjectsPage() {
+  const utils = api.useUtils();
   const activeAccount = useActiveAccount();
   const [showOwnedOnly, _setShowOwnedOnly] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -195,6 +197,10 @@ export default function ProjectsPage() {
                           projectId: project._id.toString(),
                         });
 
+                        void updateUserSettings({ walletId: walletId });
+                        void utils.project.byId.invalidate();
+                        // void utils.user.byWallet.invalidate();
+
                         // Set the cookie
                         document.cookie = `projectId=${project._id.toString()}; path=/;`;
 
@@ -202,11 +208,7 @@ export default function ProjectsPage() {
                         router.push(`/tasks/${project._id.toString()}`);
                       } catch (error) {
                         console.error("Error updating active projects:", error);
-                        // Optionally, display an error message to the user
                       }
-                      //document.cookie = `projectId=${project._id.toString()}; path=/;`;
-                      //router.push(`/tasks/${project._id.toString()}`);
-                      // router.refresh();
                     }}
                   >
                     {isOwner && (

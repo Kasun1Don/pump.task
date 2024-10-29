@@ -16,16 +16,11 @@ export default function TasksPage({
 }: {
   params: { projectId: string };
 }) {
-  // const [tasks, setTasks] = useState<TaskCardData[]>([]);
-  // const [project, setProject] = useState<Project>();
   const [statusColumns, setStatusColumns] = useState<StatusColumn[]>([]);
   const [projectId, setProjectId] = useState<ObjectIdString | null>(
     params.projectId as ObjectIdString,
   );
   const [validationError, setValidationError] = useState<string | null>(null);
-
-  // // Retrieve projectId from URL
-  // const rawProjectId = searchParams.get("projectId");
 
   // Validate projectId inside useEffect
   useEffect(() => {
@@ -49,21 +44,6 @@ export default function TasksPage({
     { id: projectId as string },
     { enabled: Boolean(projectId) },
   );
-
-  // useEffect(() => {
-  //   if (projectData) {
-  //     // Validate projectData using Zod schema
-  //     const validationResult = ProjectSchema.safeParse(projectData);
-
-  //     if (validationResult.success) {
-  //       console.log("current project:", validationResult.data);
-  //       setProject(validationResult.data);
-  //     } else {
-  //       console.error("Validation error:", validationResult.error.errors);
-  //       setValidationError("Invalid project data");
-  //     }
-  //   }
-  // }, [projectData]);
 
   // Retrieve status columns
   const {
