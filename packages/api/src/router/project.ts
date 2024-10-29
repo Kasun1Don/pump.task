@@ -1,11 +1,10 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-import { TRPCError } from "@trpc/server";
 import mongoose, { Types } from "mongoose";
 import { z } from "zod";
 
 import { Member, Project, Status, Task, User } from "@acme/db";
 
-import { adminProcedure, publicProcedure } from "../trpc";
+import { publicProcedure } from "../trpc";
 
 export const projectRouter = {
   create: publicProcedure
@@ -53,6 +52,10 @@ export const projectRouter = {
             walletId: user.walletId,
           });
           await newMember.save();
+          await User.updateOne(
+            { email: user.email },
+            { $push: { projects: savedProject._id } },
+          );
         } else {
           throw new Error(`No user found`);
         }
@@ -78,66 +81,6 @@ export const projectRouter = {
       }
 
       return project;
-    }),
-  editMembers: adminProcedure
-    .input(
-      z.object({
-        email: z.string(),
-        projectId: z.string(),
-        role: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const user = await User.findOne({ email: input.email });
-      if (user === null) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "No user with that email",
-        });
-      }
-
-      await User.updateOne(
-        { email: input.email },
-        { $push: { projects: input.projectId } },
-      );
-
-      const newMember = {
-        // user: new mongoose.Types.ObjectId(),
-        role: input.role,
-        name: user.name,
-        email: input.email,
-        walletId: user.walletId,
-      };
-
-      // const project = await Project.findById(input.projectId);
-      // const member = project?.members.find((obj) => obj.email === input.email);
-      // const member = false;
-      // if (member) {
-      //   throw new TRPCError({
-      //     code: "UNAUTHORIZED",
-      //     message: "User already on project",
-      //   });
-      // }
-
-      await Project.updateOne(
-        { _id: input.projectId },
-        { $push: { members: newMember } },
-      );
-      return {
-        email: input.email,
-      };
-    }),
-  removeMember: adminProcedure
-    .input(z.object({ walletId: z.string(), projectId: z.string() }))
-    .mutation(async ({ input }) => {
-      await Project.updateOne(
-        { _id: input.projectId },
-        { $pull: { members: { walletId: input.walletId } } },
-      );
-      await User.updateOne(
-        { walletId: input.walletId },
-        { $pull: { projects: input.projectId } },
-      );
     }),
   getAll: publicProcedure
     .input(
