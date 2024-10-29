@@ -273,7 +273,9 @@ export const userRouter = {
       const activeProjects = serializedUser.projects?.length ?? 0;
       const totalBadges = serializedUser.badges?.length ?? 0;
 
-      const isBadgeClass = (badge: unknown): badge is BadgeClass & { skill: Skill } => {
+      const isBadgeClass = (
+        badge: unknown,
+      ): badge is BadgeClass & { skill: Skill } => {
         if (typeof badge !== "object" || badge === null) {
           return false;
         }
@@ -319,7 +321,7 @@ export const userRouter = {
 
       serializedUser.badges?.forEach((badge) => {
         if (isBadgeClass(badge)) {
-          badgeCounts[badge.skill as Skill]++;
+          badgeCounts[badge.skill]++;
         }
       });
 
