@@ -91,7 +91,7 @@ const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
 
   return (
     <div
-      className="bg-transparent-[16] group/status-column relative flex w-fit flex-col gap-5 rounded-lg bg-[#00000029] p-3"
+      className="bg-transparent-[16] group/status-column relative flex min-w-[350px] flex-col gap-5 rounded-lg bg-[#0000004a] p-3"
       onMouseLeave={() => setIsOptionsVisible(false)} // Hide menu when mouse leaves
     >
       {/* Menu in the top right corner */}
@@ -99,22 +99,22 @@ const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
         onClick={toggleOptions}
         className="group/menu-button absolute right-2 top-2 z-50 flex cursor-pointer items-center space-x-2 opacity-0 transition-opacity duration-300 group-hover/status-column:opacity-100"
       >
-        <div aria-label="Options" className="flex">
-          <div className="h-1.5 w-1.5 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
-          <div className="h-1.5 w-1.5 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
-          <div className="h-1.5 w-1.5 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+        <div aria-label="Options" className="flex gap-0.5 p-1">
+          <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+          <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+          <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
         </div>
       </div>
 
       {/* Options (delete and rename) */}
       {isOptionsVisible && (
         <div
-          className="absolute right-2 top-4 z-50 flex flex-col gap-2 rounded bg-gray-800 stroke-gray-500 p-2 shadow-lg"
+          className="border-1 absolute right-2 top-4 z-50 flex flex-col gap-4 rounded border-white border-opacity-30 bg-black stroke-gray-500 p-2 shadow-lg"
           onMouseLeave={() => setIsOptionsVisible(false)}
         >
           {/* Rename option */}
           <button
-            className="flex items-center text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
+            className="flex items-center gap-2 text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
             onClick={() => {
               console.log("Rename column");
               setIsOptionsVisible(false); // Close the menu after rename
@@ -126,7 +126,7 @@ const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
           {/* Delete option */}
           {statusColumn.isProtected === false && (
             <button
-              className="flex items-center text-gray-500 hover:stroke-red-500 hover:text-red-500"
+              className="flex items-center gap-2 text-gray-500 hover:stroke-red-500 hover:text-red-500"
               onClick={() => {
                 setIsDeleteModalOpen(true);
                 setIsOptionsVisible(false); // Close the menu after clicking delete
@@ -139,7 +139,7 @@ const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
       )}
 
       {/* Status name centered below the menu */}
-      <h2 className="flex justify-center text-lg font-extrabold">
+      <h2 className="flex justify-between text-lg font-extrabold">
         {statusColumn.name}
       </h2>
       {tasks.map((task) => (

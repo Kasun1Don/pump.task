@@ -1,8 +1,8 @@
 "use client";
 
 // Current testing URL for project board
-// http://localhost:3000/tasks?projectId=66fefc58ae1f45bac2056575
-import React, { useState } from "react";
+// http://localhost:3000/tasks/6720293fcbf4d733c85b5975
+import { useState } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -194,15 +194,15 @@ const TaskCardDialog = ({
     <Dialog>
       <DialogTrigger asChild>
         {dialogTrigger ?? (
-          <Button className="max-h-[40px] w-full bg-transparent text-white hover:bg-[#27272a]">
+          <Button className="text-xxl max-h-[40px] w-full justify-start bg-transparent text-white hover:bg-[#27272a]">
             {dialogButtonText}
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="flex max-h-[90vh] max-w-[50vw] flex-col overflow-auto rounded-lg bg-gray-900 p-6 text-white">
-        <DialogHeader className="flex w-full items-center justify-between">
-          <DialogTitle className="text-lg font-semibold">
-            {initialValues?.title}
+      <DialogContent className="flex max-h-[90vh] max-w-[800px] flex-col overflow-auto rounded-lg bg-black p-6 text-white">
+        <DialogHeader className="flex w-full items-start justify-center">
+          <DialogTitle className="text-2xl font-semibold">
+            {initialValues?.title ?? "New Task"}
             {/* Add an Edit button to toggle edit mode */}
             {!isNewTask && isEditable && (
               <button
@@ -217,17 +217,17 @@ const TaskCardDialog = ({
 
         {/* Tags */}
         <div className="mb-4 flex-shrink-0">
-          <h3 className="mb-2">TAGS</h3>
+          <h3 className="mb-2 text-xs font-semibold text-slate-400">TAGS</h3>
           <div className="flex flex-wrap gap-2">
             {/* Preset Tags (Cannot be deleted) */}
             {defaultTags.map((tag) => (
               <Button
                 key={tag}
                 onClick={() => toggleTagSelection(tag)}
-                className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
+                className={`border-1 h-fit w-fit cursor-pointer rounded-md border-white border-opacity-30 bg-black bg-transparent px-2 py-1 text-xs text-white hover:bg-[#27272a] ${
                   selectedTags.defaultTags.includes(tag)
-                    ? "bg-zesty-green text-black"
-                    : "bg-gray-700 text-white"
+                    ? "bg-zesty-green hover:bg-zesty-green text-black"
+                    : "text-white"
                 }`}
                 disabled={!isEditMode} // Disable tag selection if not in edit mode
               >
@@ -241,10 +241,10 @@ const TaskCardDialog = ({
                 <Button
                   onClick={() => toggleTagSelection(tag)}
                   disabled={!isEditMode}
-                  className={`cursor-pointer rounded-md px-3 py-1 text-sm ${
+                  className={`bg-zesty-green border-1 h-fit w-fit cursor-pointer rounded-md border-white border-opacity-30 px-2 py-1 text-xs hover:bg-[#27272a] ${
                     selectedTags.userGeneratedTags.includes(tag)
-                      ? "bg-zesty-green text-black"
-                      : "bg-gray-700 text-white"
+                      ? "bg-zesty-green hover:bg-zesty-green text-black"
+                      : "text-white"
                   }`}
                 >
                   {tag}
@@ -264,7 +264,7 @@ const TaskCardDialog = ({
             {isEditMode && (
               <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="ml-2 rounded-md bg-blue-400 px-3 py-1 text-sm text-black">
+                  <Button className="border-1 ml-2 h-fit w-fit cursor-pointer rounded-md border-white border-opacity-30 bg-blue-400 bg-transparent px-1 py-1 text-xs text-white hover:bg-[#27272a]">
                     + Add Tag
                   </Button>
                 </DialogTrigger>
@@ -286,7 +286,10 @@ const TaskCardDialog = ({
                     }}
                   />
                   <DialogFooter>
-                    <Button onClick={handleAddTag} className="bg-zesty-green">
+                    <Button
+                      onClick={handleAddTag}
+                      className="bg-zesty-green hover:bg-zesty-green"
+                    >
                       Add Tag
                     </Button>
                   </DialogFooter>
@@ -298,14 +301,12 @@ const TaskCardDialog = ({
             <p className="text-red-500">{errors.tags.defaultTags.message}</p>
           )}
         </div>
-
         {/* Title */}
         {isEditMode && (
           <div className="mb-4 flex-grow">
-            <h3 className="mb-2">TITLE</h3>
+            <h3 className="mb-2 text-xs font-semibold text-slate-400">TITLE</h3>
             <Input
               placeholder="Enter short task title."
-              className="h-24"
               {...register("title")}
             />
             {errors.title?.message && (
@@ -313,10 +314,13 @@ const TaskCardDialog = ({
             )}
           </div>
         )}
-
         {/* Description */}
         <div className="mb-4 flex-grow">
-          {isEditMode && <h3 className="mb-2">DESCRIPTION</h3>}
+          {isEditMode && (
+            <h3 className="mb-2 text-xs font-semibold text-slate-400">
+              DESCRIPTION
+            </h3>
+          )}
           <Textarea
             placeholder="Enter detailed task description."
             disabled={!isEditMode}
@@ -327,10 +331,11 @@ const TaskCardDialog = ({
             <p className="text-red-500">{String(errors.description.message)}</p>
           )}
         </div>
-
         {/* Due Date */}
         <div className="mb4 flex-shrink-0">
-          <h3 className="mb2">DUE DATE</h3>
+          <h3 className="mb-2 text-xs font-semibold text-slate-400">
+            DUE DATE
+          </h3>
           <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -373,12 +378,13 @@ const TaskCardDialog = ({
             <p className="text-red-500">{String(errors.dueDate.message)}</p>
           )}
         </div>
-
         {/* Status and Assignee */}
         <div className="mb-6 flex flex-shrink-0 gap-4">
           {/* Status */}
           <div className="w-1/2">
-            <h3 className="mb-2">STATUS</h3>
+            <h3 className="mb-2 text-xs font-semibold text-slate-400">
+              STATUS
+            </h3>
             {isStatusesLoading ? (
               <p>Loading statuses...</p>
             ) : statusesError ? (
@@ -413,7 +419,9 @@ const TaskCardDialog = ({
 
           {/* Assignee */}
           <div className="w-1/2">
-            <h3 className="mb-2">ASSIGNEE</h3>
+            <h3 className="mb-2 text-xs font-semibold text-slate-400">
+              ASSIGNEE
+            </h3>
             <Select
               value={watch("assigneeId") ?? "unassigned"}
               onValueChange={(value: ObjectIdString) => {
@@ -439,14 +447,15 @@ const TaskCardDialog = ({
             )}
           </div>
         </div>
-
         {/* Extra Fields */}
         {fields.length > 0 && (
           <div className="mb-4">
-            <h3 className="mb-2">CUSTOM FIELDS</h3>
+            <h3 className="mb-2 text-xs font-semibold text-slate-400">
+              CUSTOM FIELDS
+            </h3>
             {fields.map((field, index) => (
               <div key={field.id} className="mb-2 flex items-center gap-2">
-                <span className="w-1/4">{field.fieldName}</span>
+                <span className="w-1/4 text-sm">{field.fieldName}</span>
                 <Input
                   className="w-full"
                   {...register(`customFields.${index}.fieldValue`, {
@@ -470,7 +479,6 @@ const TaskCardDialog = ({
             ))}
           </div>
         )}
-
         {/* Add Extra Fields Button */}
         {isEditMode && (
           <div className="mb-4 flex-shrink-0">
@@ -479,7 +487,7 @@ const TaskCardDialog = ({
               onOpenChange={setIsFieldDialogOpen}
             >
               <DialogTrigger asChild>
-                <Button className="w-auto rounded-md bg-blue-400 px-3 py-1 text-sm text-black">
+                <Button className="border-1 ml-2 h-fit w-fit cursor-pointer rounded-md border-white border-opacity-30 bg-blue-400 bg-transparent px-2 py-2 text-xs text-white hover:bg-[#27272a]">
                   + Add Custom Field
                 </Button>
               </DialogTrigger>
@@ -504,7 +512,7 @@ const TaskCardDialog = ({
                   <DialogTrigger asChild>
                     <Button
                       onClick={handleAddCustomField}
-                      className="bg-zesty-green"
+                      className="bg-zesty-green hover:bg-zesty-green"
                     >
                       Add Field
                     </Button>
@@ -514,7 +522,6 @@ const TaskCardDialog = ({
             </Dialog>
           </div>
         )}
-
         {/* Submit Button */}
         <DialogFooter>
           <Button
@@ -533,7 +540,7 @@ const TaskCardDialog = ({
                 onSubmit(updatedTaskData as TaskCard);
               }
             })}
-            className="bg-zesty-green w-full text-black"
+            className="bg-zesty-green hover:bg-zesty-green w-full text-black"
           >
             {submitButtonText}
           </Button>

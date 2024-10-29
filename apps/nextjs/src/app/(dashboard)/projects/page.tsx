@@ -85,7 +85,10 @@ export default function ProjectsPage() {
 
   const filteredProjects = projects
     ?.filter((project) => {
-      if (showFilter === "all") return true;
+      if (showFilter === "all") {
+        // Don't show private projects in "all" view
+        return !project.isPrivate;
+      }
       if (showFilter === "Owned")
         return project.members.some(
           (member) => member.walletId === walletId && member.role === "Owner",
@@ -140,7 +143,7 @@ export default function ProjectsPage() {
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
-      router.push(`/tasks?projectId=${newProject.id.toString()}`);
+      router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
 
@@ -230,7 +233,7 @@ export default function ProjectsPage() {
                 {currentProjects.map((project) => {
                   const isOwner = project.members.some(
                     (member) =>
-                      member.user === walletId && member.role === "Owner",
+                      member.walletId === walletId && member.role === "Owner",
                   );
 
                   return (

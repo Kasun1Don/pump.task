@@ -10,7 +10,7 @@ describe("User Account Lanuage", () => {
   test("renders", () => {
     render(
       <Layout>
-        <AccountSettings walletId="12345" language="English" theme={true} />,
+        <AccountSettings walletId="12345" language="English" />,
       </Layout>,
     );
     expect(screen.findAllByTitle("header")).toBeDefined();
