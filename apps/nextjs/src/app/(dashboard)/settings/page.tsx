@@ -27,7 +27,6 @@ export default function Page() {
     <section className="flex flex-col items-center justify-center gap-4 py-48">
       <AccountSettings
         language={userData.userSettings?.language}
-        theme={userData.userSettings?.isThemeDark}
         walletId={walletId}
       />
       <EmailNotifications
