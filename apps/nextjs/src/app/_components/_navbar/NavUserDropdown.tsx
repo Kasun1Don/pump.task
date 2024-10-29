@@ -15,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
 
-// Import logout function
 import { logout } from "~/app/actions/authFront";
 
 /**

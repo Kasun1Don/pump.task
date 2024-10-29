@@ -1,6 +1,5 @@
 "use client";
 
-import type { Wallet } from "thirdweb/wallets";
 import type { z } from "zod";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,10 +42,10 @@ export default function DeleteAccount({
 
   const router = useRouter();
 
-  const { disconnect } = useDisconnect();
-  const wallet = useActiveWallet() as Wallet;
-
   const mutation = api.user.delete.useMutation();
+
+  const { disconnect } = useDisconnect();
+  const wallet = useActiveWallet();
 
   const onDeleteConfirm = async () => {
     try {
@@ -57,10 +56,14 @@ export default function DeleteAccount({
       if (response instanceof Error) {
         throw response;
       }
-
-      await logout();
-      disconnect(wallet);
-      router.push("/");
+      if (wallet) {
+        disconnect(wallet);
+        await logout();
+        router.push("/");
+      } else {
+        await logout();
+        router.push("/");
+      }
     } catch (error) {
       toast.error("Error deleting account");
       console.error("Error deleting account:", error);
@@ -97,7 +100,7 @@ export default function DeleteAccount({
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        className="bg-zesty-green"
+                        className="bg-red-600 hover:bg-red-700"
                         onClick={onDeleteConfirm}
                       >
                         Continue
