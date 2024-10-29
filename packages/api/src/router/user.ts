@@ -162,7 +162,6 @@ export const userRouter = {
         userSettings: z
           .object({
             language: z.string().optional(),
-            isThemeDark: z.boolean().optional(),
             twoFactorAuth: z.boolean().optional(),
             dueDate: z.boolean().optional(),
             comments: z.boolean().optional(),
@@ -191,8 +190,6 @@ export const userRouter = {
           userSettings: {
             language:
               input.userSettings?.language ?? user.userSettings?.language,
-            isThemeDark:
-              input.userSettings?.isThemeDark ?? user.userSettings?.isThemeDark,
             twoFactorAuth:
               input.userSettings?.twoFactorAuth ??
               user.userSettings?.twoFactorAuth,

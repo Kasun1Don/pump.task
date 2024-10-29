@@ -27,7 +27,6 @@ export default async function Page() {
     <section className="flex flex-col items-center justify-center gap-4">
       <AccountSettings
         language={userData.userSettings?.language}
-        theme={userData.userSettings?.isThemeDark}
         walletId={walletId}
       />
       <EmailNotifications
