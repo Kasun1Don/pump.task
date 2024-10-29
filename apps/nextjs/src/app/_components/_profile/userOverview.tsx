@@ -59,8 +59,8 @@ export default async function UserOverview({ walletId }: userOverviewProps) {
         </div>
       </>
     );
-  } catch (error) {
-    toast.error(`Error fetching user data: ${error.message}`);
+  } catch {
+    toast.error("Error fetching user data.");
     return null;
   }
 }
