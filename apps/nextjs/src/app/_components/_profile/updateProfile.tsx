@@ -70,7 +70,7 @@ export default function UpdateProfile({
 
       <Dialog>
         <DialogTrigger asChild>
-          <button className="justify-content h-7 stroke-amber-300 p-1 hover:stroke-green-400">
+          <button className="justify-content h-7 stroke-gray-400 p-1 hover:stroke-amber-300">
             <EditIcon />
           </button>
         </DialogTrigger>
