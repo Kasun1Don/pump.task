@@ -20,6 +20,12 @@ export default {
         sans: ["var(--font-geist-sans)", ...fontFamily.sans],
         mono: ["var(--font-geist-mono)", ...fontFamily.mono],
       },
+      borderWidth: {
+        1: "0.5px",
+      },
+      gap: {
+        0.5: "2px",
+      },
       colors: {
         "zesty-green": "#72D524",
         "labrys-s": "#ffff00",

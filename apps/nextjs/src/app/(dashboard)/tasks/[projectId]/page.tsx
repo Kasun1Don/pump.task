@@ -143,19 +143,14 @@ export default function TasksPage({
   }
 
   return (
-    <div>
+    <div className="overflow-x-auto">
       <h1 className="mb-3 flex justify-center text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg">
         {project.name}
       </h1>
-      <div className="flex flex-row gap-3 p-6">
+      <div className="flex justify-center gap-6 p-6">
         {statusColumns.map((status) => (
-          <TaskStatusColumn
-            key={status._id}
-            // project={projectData}
-            statusColumn={status}
-          />
+          <TaskStatusColumn key={status._id} statusColumn={status} />
         ))}
-
         <NewStatusColumn
           projectId={projectId}
           onStatusCreated={handleNewStatusCreated}
