@@ -144,7 +144,7 @@ export default function TasksPage({
 
   // responsive scrolling for the task board
   return (
-    <div className="flex h-screen w-full flex-col">
+    <div className="flex h-full flex-col">
       <h1 className="mb-3 flex justify-center text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg">
         {project.name}
       </h1>

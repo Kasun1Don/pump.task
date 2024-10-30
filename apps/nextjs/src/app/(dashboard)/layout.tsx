@@ -15,9 +15,9 @@ import Navbar from "../_components/_navbar/Navbar";
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <>
-      <div className="bg-custom-bg min-h-screen bg-cover bg-center">
+      <div className="min-h-screen bg-custom-bg bg-cover bg-center">
         <Navbar />
-        <main className="pt-32">{children}</main>
+        <main className="h-[calc(100vh-8rem)] pt-32">{children}</main>
       </div>
     </>
   );
