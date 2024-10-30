@@ -377,7 +377,7 @@ export default function ProjectsPage() {
                 }}
               >
                 <h3 className="p-4 text-center text-white">{template.name}</h3>
-                <p className="px-4 text-center text-gray-400">
+                <p className="px-3 text-center text-gray-400">
                   {template.description}
                 </p>
               </div>
