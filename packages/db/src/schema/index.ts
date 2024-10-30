@@ -8,3 +8,4 @@ export * from "./Member";
 export * from "./Status";
 export * from "./TwoFacCode";
 export * from "./Tag";
+export * from "./Template";

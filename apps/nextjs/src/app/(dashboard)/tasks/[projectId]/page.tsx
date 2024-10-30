@@ -122,19 +122,22 @@ export default function TasksPage({
     return <p>Error fetching project: {project.error}</p>;
   }
 
+  // responsive scrolling for the task board
   return (
-    <div className="overflow-x-auto">
+    <div className="flex h-full flex-col">
       <h1 className="mb-3 flex justify-center text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg">
         {project.name}
       </h1>
-      <div className="flex justify-center gap-6 p-6">
-        {statusColumns.map((status) => (
-          <TaskStatusColumn key={status._id} statusColumn={status} />
-        ))}
-        <NewStatusColumn
-          projectId={projectId}
-          onStatusCreated={handleNewStatusCreated}
-        />
+      <div className="flex-1 overflow-x-auto">
+        <div className="flex min-w-max gap-6 p-6">
+          {statusColumns.map((status) => (
+            <TaskStatusColumn key={status._id} statusColumn={status} />
+          ))}
+          <NewStatusColumn
+            projectId={projectId}
+            onStatusCreated={handleNewStatusCreated}
+          />
+        </div>
       </div>
     </div>
   );

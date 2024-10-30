@@ -1,11 +1,10 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-import { TRPCError } from "@trpc/server";
 import mongoose, { Types } from "mongoose";
 import { z } from "zod";
 
-import { Project, Status, Task, User } from "@acme/db";
+import { Member, Project, Status, Task, Template, User } from "@acme/db";
 
-import { adminProcedure, publicProcedure } from "../trpc";
+import { publicProcedure } from "../trpc";
 
 export const projectRouter = {
   create: publicProcedure
@@ -14,67 +13,72 @@ export const projectRouter = {
         name: z.string().min(1, "Project name is required"),
         isPrivate: z.boolean().default(false),
         templateId: z.string().optional(),
-        members: z
-          .array(
-            z.object({
-              user: z.string(),
-              role: z.enum(["Observer", "Admin", "Owner"]),
-              // walletId: z.string(),
-              // email: z.string(),
-            }),
-          )
-          .optional(),
+        members: z.object({
+          user: z.string(),
+          role: z.enum(["Observer", "Admin", "Owner"]),
+        }),
         status: z.array(z.string()).default([]),
       }),
     )
     .mutation(async ({ input }) => {
       try {
-        const members = input.members
-          ? await Promise.all(
-              input.members.map(async (member) => {
-                const user = await User.findOne({ walletId: member.user });
-                return {
-                  user: member.user,
-                  name: user?.name,
-                  role: member.role,
-                  walletId: user?.walletId,
-                  email: user?.email,
-                };
-              }),
-            )
-          : [];
-
-        // assign a default owner if no members are provided
-        // if (members.length === 0) {
-        //   members.push({
-        //     user: new mongoose.Types.ObjectId(), // assign a default or anonymous user ID
-        //     role: "Owner",
-        //     walletId: "0xC3393B32eC70298075FA856df89e9E50FcE772bc",
-        //     email: "intameli@gmail.com",
-        //   });
-        // }
-
         const newProject = new Project({
           name: input.name,
           isPrivate: input.isPrivate,
           templateId: input.templateId
             ? new Types.ObjectId(input.templateId)
             : undefined,
-          members: members,
           status: input.status,
         });
 
         const savedProject = await newProject.save();
 
-        const newStatus = new Status({
-          name: "Approved", // The default column
+        // Create all status columns in order
+        const statusColumns = [];
+
+        // Always add Approved as the first column
+        statusColumns.push({
+          name: "Approved",
           projectId: savedProject._id,
           order: 0,
           isProtected: true, // This column is protected and cannot be removed
         });
 
-        // Save the new status
-        await newStatus.save();
+        // if a template was selected, create additional status columns
+        if (input.templateId) {
+          const template = await Template.findById(input.templateId);
+          if (template) {
+            template.statusColumns.forEach((column, index) => {
+              // loop through each column, adding 1 to the order
+              statusColumns.push({
+                name: column.name,
+                projectId: savedProject._id,
+                order: index + 1, // ordering starting after Approved
+                isProtected: column.isProtected,
+              });
+            });
+          }
+        }
+
+        // create all status columns at once to maintain order
+        await Status.insertMany(statusColumns);
+
+        const user = await User.findOne({ walletId: input.members.user });
+        if (user) {
+          const newMember = new Member({
+            userId: user._id,
+            projectId: savedProject._id,
+            role: input.members.role,
+            walletId: user.walletId,
+          });
+          await newMember.save();
+          await User.updateOne(
+            { email: user.email },
+            { $push: { projects: savedProject._id } },
+          );
+        } else {
+          throw new Error(`No user found`);
+        }
 
         console.log("Project Created Successfully:", savedProject);
         return {
@@ -97,65 +101,6 @@ export const projectRouter = {
       }
 
       return project;
-    }),
-  editMembers: adminProcedure
-    .input(
-      z.object({
-        email: z.string(),
-        projectId: z.string(),
-        role: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const user = await User.findOne({ email: input.email });
-      if (user === null) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "No user with that email",
-        });
-      }
-
-      await User.updateOne(
-        { email: input.email },
-        { $push: { projects: input.projectId } },
-      );
-
-      const newMember = {
-        // user: new mongoose.Types.ObjectId(),
-        role: input.role,
-        name: user.name,
-        email: input.email,
-        walletId: user.walletId,
-      };
-
-      const project = await Project.findById(input.projectId);
-      const member = project?.members.find((obj) => obj.email === input.email);
-      if (member) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User already on project",
-        });
-      }
-
-      await Project.updateOne(
-        { _id: input.projectId },
-        { $push: { members: newMember } },
-      );
-      return {
-        email: input.email,
-      };
-    }),
-  removeMember: adminProcedure
-    .input(z.object({ walletId: z.string(), projectId: z.string() }))
-    .mutation(async ({ input }) => {
-      await Project.updateOne(
-        { _id: input.projectId },
-        { $pull: { members: { walletId: input.walletId } } },
-      );
-      await User.updateOne(
-        { walletId: input.walletId },
-        { $pull: { projects: input.projectId } },
-      );
     }),
   getAll: publicProcedure
     .input(

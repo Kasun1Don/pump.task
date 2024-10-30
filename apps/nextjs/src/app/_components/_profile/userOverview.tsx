@@ -1,3 +1,5 @@
+import { toast } from "@acme/ui/toast";
+
 import { api } from "~/trpc/server";
 
 // Define the interface for the user overview data
@@ -15,8 +17,8 @@ interface userOverviewProps {
 
 export default async function UserOverview({ walletId }: userOverviewProps) {
   if (!walletId) {
-    console.error("Wallet ID is undefined or not found on cookies.");
-    return <div>Error: Wallet ID is required.</div>;
+    toast.error("Wallet ID is undefined or not found on cookies.");
+    return null;
   }
 
   try {
@@ -57,8 +59,8 @@ export default async function UserOverview({ walletId }: userOverviewProps) {
         </div>
       </>
     );
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    return <div>Error fetching user data.</div>;
+  } catch {
+    toast.error("Error fetching user data.");
+    return null;
   }
 }

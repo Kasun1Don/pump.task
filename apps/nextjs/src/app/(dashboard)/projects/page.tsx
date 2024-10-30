@@ -25,17 +25,10 @@ import {
 import { Switch } from "@acme/ui/switch";
 
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
-import { updateUserSettings } from "~/app/actions/handleUserUpdate";
+import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
-const templates = [
-  { id: "60d5f484f8d2e30d8c4e4b0a", name: "DevOps Pipeline Template" },
-  { id: "60d5f484f8d2e30d8c4e4b0b", name: "Kanban Template" },
-  { id: "60d5f484f8d2e30d8c4e4b0c", name: "Agile Sprint Board Template" },
-];
-
 export default function ProjectsPage() {
-  const utils = api.useUtils();
   const activeAccount = useActiveAccount();
   const [showOwnedOnly, _setShowOwnedOnly] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,7 +39,13 @@ export default function ProjectsPage() {
   const router = useRouter();
 
   // Modified wallet ID retrieval with cookie fallback
-  const [walletId, setWalletId] = useState<string>("");
+  const [walletId2, setWalletId] = useState<string>("");
+  console.log(walletId2);
+  const cookieWallet = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("wallet="))
+    ?.split("=")[1];
+  const walletId = cookieWallet ?? "";
 
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -85,18 +84,29 @@ export default function ProjectsPage() {
       },
     );
 
+  const user = api.user.byWallet.useSuspenseQuery({ walletId });
+  const [userMemberships] = api.member.byUserId.useSuspenseQuery({
+    userId: user[0]._id,
+  });
+
   const filteredProjects = projects
     ?.filter((project) => {
       if (showFilter === "all") {
         // Don't show private projects in "all" view
         return !project.isPrivate;
       }
-      if (showFilter === "Owned")
-        return project.members.some(
-          (member) => member.walletId === walletId && member.role === "Owner",
+      if (showFilter === "Owned") {
+        return userMemberships.some(
+          (member) =>
+            member.projectId === project._id.toString() &&
+            member.role === "Owner",
         );
-      if (showFilter === "my")
-        return project.members.some((member) => member.walletId === walletId);
+      }
+      if (showFilter === "my") {
+        return userMemberships.some(
+          (member) => member.projectId === project._id.toString(),
+        );
+      }
       return true;
     })
     .reverse(); // reverse here shows newest first
@@ -140,11 +150,13 @@ export default function ProjectsPage() {
   };
 
   const createProject = api.project.create.useMutation({
-    onSuccess: (newProject) => {
+    onSuccess: async (newProject) => {
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
+      document.cookie = `projectId=${newProject.id}; path=/;`;
+      await revalidate("/");
       router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
@@ -181,6 +193,9 @@ export default function ProjectsPage() {
         // Optionally, display an error message to the user
       },
     });
+
+  // fetch templates
+  const { data: templates = [] } = api.template.getAll.useQuery();
 
   return (
     <>
@@ -233,9 +248,10 @@ export default function ProjectsPage() {
             {currentProjects && currentProjects.length > 0 ? (
               <>
                 {currentProjects.map((project) => {
-                  const isOwner = project.members.some(
+                  const isOwner = userMemberships.some(
                     (member) =>
-                      member.walletId === walletId && member.role === "Owner",
+                      member.projectId === project._id.toString() &&
+                      member.role === "Owner",
                   );
 
                   return (
@@ -250,21 +266,22 @@ export default function ProjectsPage() {
                             projectId: project._id.toString(),
                           });
 
-                          void updateUserSettings({ walletId: walletId });
-                          void utils.project.byId.invalidate();
-                          // void utils.user.byWallet.invalidate();
-
                           // Set the cookie
                           document.cookie = `projectId=${project._id.toString()}; path=/;`;
 
                           // Navigate to the project's tasks page
+                          await revalidate("/");
                           router.push(`/tasks/${project._id.toString()}`);
                         } catch (error) {
                           console.error(
                             "Error updating active projects:",
                             error,
                           );
+                          // Optionally, display an error message to the user
                         }
+                        //document.cookie = `projectId=${project._id.toString()}; path=/;`;
+                        //router.push(`/tasks/${project._id.toString()}`);
+                        // router.refresh();
                       }}
                     >
                       {isOwner && (
@@ -280,7 +297,6 @@ export default function ProjectsPage() {
                           <TrashIcon />
                         </button>
                       )}
-
                       <h3 className="p-4 text-white">{project.name}</h3>
                       <p className="px-4 pb-4 text-sm text-gray-400">
                         {project.isPrivate ? "Private" : "Public"} project
@@ -353,10 +369,17 @@ export default function ProjectsPage() {
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
             {templates.map((template) => (
               <div
-                key={template.id}
-                className="min-h-32 overflow-hidden rounded-lg border border-gray-700 bg-[#18181B] font-bold"
+                key={template._id.toString()}
+                className="min-h-32 cursor-pointer overflow-hidden rounded-lg border border-gray-700 bg-[#18181B] font-bold hover:bg-[#27272A]"
+                onClick={() => {
+                  setSelectedTemplate(template._id.toString());
+                  setIsModalOpen(true);
+                }}
               >
                 <h3 className="p-4 text-center text-white">{template.name}</h3>
+                <p className="px-3 text-center text-gray-400">
+                  {template.description}
+                </p>
               </div>
             ))}
           </div>
@@ -387,7 +410,10 @@ export default function ProjectsPage() {
                 >
                   <option value="">Select a template (optional)</option>
                   {templates.map((template) => (
-                    <option key={template.id} value={template.id}>
+                    <option
+                      key={template._id.toString()}
+                      value={template._id.toString()}
+                    >
                       {template.name}
                     </option>
                   ))}
@@ -419,13 +445,13 @@ export default function ProjectsPage() {
                     name: newProjectName,
                     isPrivate: isPrivate,
                     templateId: selectedTemplate || undefined,
-                    members: [{ user: walletId, role: "Owner" }],
+                    userMemberships: [{ user: walletId, role: "Owner" }],
                   });
                   createProject.mutate({
                     name: newProjectName,
                     isPrivate: isPrivate,
                     templateId: selectedTemplate || undefined,
-                    members: [{ user: walletId, role: "Owner" }],
+                    members: { user: walletId, role: "Owner" },
                   });
                 }}
                 className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
