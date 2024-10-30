@@ -370,10 +370,14 @@ export default function ProjectsPage() {
             {templates.map((template) => (
               <div
                 key={template._id.toString()}
-                className="min-h-32 overflow-hidden rounded-lg border border-gray-700 bg-[#18181B] font-bold"
+                className="min-h-32 cursor-pointer overflow-hidden rounded-lg border border-gray-700 bg-[#18181B] font-bold hover:bg-[#27272A]"
+                onClick={() => {
+                  setSelectedTemplate(template._id.toString());
+                  setIsModalOpen(true);
+                }}
               >
                 <h3 className="p-4 text-center text-white">{template.name}</h3>
-                <p className="px-4 text-sm text-gray-400">
+                <p className="px-4 text-center text-gray-400">
                   {template.description}
                 </p>
               </div>
