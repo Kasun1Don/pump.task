@@ -25,6 +25,7 @@ import {
 import { Switch } from "@acme/ui/switch";
 
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
+import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
 const templates = [
@@ -44,7 +45,13 @@ export default function ProjectsPage() {
   const router = useRouter();
 
   // Modified wallet ID retrieval with cookie fallback
-  const [walletId, setWalletId] = useState<string>("");
+  const [walletId2, setWalletId] = useState<string>("");
+  console.log(walletId2);
+  const cookieWallet = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("wallet="))
+    ?.split("=")[1];
+  const walletId = cookieWallet ?? "";
 
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,18 +90,29 @@ export default function ProjectsPage() {
       },
     );
 
+  const user = api.user.byWallet.useSuspenseQuery({ walletId });
+  const [userMemberships] = api.member.byUserId.useSuspenseQuery({
+    userId: user[0]._id,
+  });
+
   const filteredProjects = projects
     ?.filter((project) => {
       if (showFilter === "all") {
         // Don't show private projects in "all" view
         return !project.isPrivate;
       }
-      if (showFilter === "Owned")
-        return project.members.some(
-          (member) => member.walletId === walletId && member.role === "Owner",
+      if (showFilter === "Owned") {
+        return userMemberships.some(
+          (member) =>
+            member.projectId === project._id.toString() &&
+            member.role === "Owner",
         );
-      if (showFilter === "my")
-        return project.members.some((member) => member.walletId === walletId);
+      }
+      if (showFilter === "my") {
+        return userMemberships.some(
+          (member) => member.projectId === project._id.toString(),
+        );
+      }
       return true;
     })
     .reverse(); // reverse here shows newest first
@@ -138,11 +156,13 @@ export default function ProjectsPage() {
   };
 
   const createProject = api.project.create.useMutation({
-    onSuccess: (newProject) => {
+    onSuccess: async (newProject) => {
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
+      document.cookie = `projectId=${newProject.id}; path=/;`;
+      await revalidate("/");
       router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
@@ -231,9 +251,10 @@ export default function ProjectsPage() {
             {currentProjects && currentProjects.length > 0 ? (
               <>
                 {currentProjects.map((project) => {
-                  const isOwner = project.members.some(
+                  const isOwner = userMemberships.some(
                     (member) =>
-                      member.walletId === walletId && member.role === "Owner",
+                      member.projectId === project._id.toString() &&
+                      member.role === "Owner",
                   );
 
                   return (
@@ -252,6 +273,7 @@ export default function ProjectsPage() {
                           document.cookie = `projectId=${project._id.toString()}; path=/;`;
 
                           // Navigate to the project's tasks page
+                          await revalidate("/");
                           router.push(`/tasks/${project._id.toString()}`);
                         } catch (error) {
                           console.error(
@@ -278,7 +300,6 @@ export default function ProjectsPage() {
                           <TrashIcon />
                         </button>
                       )}
-
                       <h3 className="p-4 text-white">{project.name}</h3>
                       <p className="px-4 pb-4 text-sm text-gray-400">
                         {project.isPrivate ? "Private" : "Public"} project
@@ -417,13 +438,13 @@ export default function ProjectsPage() {
                     name: newProjectName,
                     isPrivate: isPrivate,
                     templateId: selectedTemplate || undefined,
-                    members: [{ user: walletId, role: "Owner" }],
+                    userMemberships: [{ user: walletId, role: "Owner" }],
                   });
                   createProject.mutate({
                     name: newProjectName,
                     isPrivate: isPrivate,
                     templateId: selectedTemplate || undefined,
-                    members: [{ user: walletId, role: "Owner" }],
+                    members: { user: walletId, role: "Owner" },
                   });
                 }}
                 className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"

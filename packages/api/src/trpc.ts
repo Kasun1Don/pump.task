@@ -15,7 +15,7 @@ import { ZodError } from "zod";
 
 import type { Session } from "@acme/auth";
 import { auth, validateToken } from "@acme/auth";
-import { Project } from "@acme/db";
+import { Member } from "@acme/db";
 import dbConnect from "@acme/db/dbConnect";
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -165,8 +165,8 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
     walletId = verified.parsedJWT.sub;
   }
 
-  const project = await Project.findById(ctx.projectId);
-  const member = project?.members.find((obj) => obj.walletId === walletId);
+  const members = await Member.find({ projectId: ctx.projectId });
+  const member = members.find((member) => member.walletId === walletId);
   if (member) {
     if (
       member.role.toLowerCase() !== "admin" &&
