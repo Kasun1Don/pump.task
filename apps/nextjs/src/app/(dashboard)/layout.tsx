@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <>
       <div className="bg-custom-bg min-h-screen bg-cover bg-center">
         <Navbar />
-        <main className="pt-32">{children}</main>
+        <main className="h-[calc(100vh-8rem)] pt-32">{children}</main>
       </div>
     </>
   );

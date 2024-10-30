@@ -28,12 +28,6 @@ import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
 import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
-const templates = [
-  { id: "60d5f484f8d2e30d8c4e4b0a", name: "DevOps Pipeline Template" },
-  { id: "60d5f484f8d2e30d8c4e4b0b", name: "Kanban Template" },
-  { id: "60d5f484f8d2e30d8c4e4b0c", name: "Agile Sprint Board Template" },
-];
-
 export default function ProjectsPage() {
   const activeAccount = useActiveAccount();
   const [showOwnedOnly, _setShowOwnedOnly] = useState(false);
@@ -199,6 +193,9 @@ export default function ProjectsPage() {
         // Optionally, display an error message to the user
       },
     });
+
+  // fetch templates
+  const { data: templates = [] } = api.template.getAll.useQuery();
 
   return (
     <>
@@ -372,10 +369,17 @@ export default function ProjectsPage() {
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
             {templates.map((template) => (
               <div
-                key={template.id}
-                className="min-h-32 overflow-hidden rounded-lg border border-gray-700 bg-[#18181B] font-bold"
+                key={template._id.toString()}
+                className="min-h-32 cursor-pointer overflow-hidden rounded-lg border border-gray-700 bg-[#18181B] font-bold hover:bg-[#27272A]"
+                onClick={() => {
+                  setSelectedTemplate(template._id.toString());
+                  setIsModalOpen(true);
+                }}
               >
                 <h3 className="p-4 text-center text-white">{template.name}</h3>
+                <p className="px-3 text-center text-gray-400">
+                  {template.description}
+                </p>
               </div>
             ))}
           </div>
@@ -406,7 +410,10 @@ export default function ProjectsPage() {
                 >
                   <option value="">Select a template (optional)</option>
                   {templates.map((template) => (
-                    <option key={template.id} value={template.id}>
+                    <option
+                      key={template._id.toString()}
+                      value={template._id.toString()}
+                    >
                       {template.name}
                     </option>
                   ))}
