@@ -2,7 +2,7 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import mongoose, { Types } from "mongoose";
 import { z } from "zod";
 
-import { Member, Project, Status, Task, User, Template } from "@acme/db";
+import { Member, Project, Status, Task, Template, User } from "@acme/db";
 
 import { publicProcedure } from "../trpc";
 
@@ -48,7 +48,8 @@ export const projectRouter = {
         if (input.templateId) {
           const template = await Template.findById(input.templateId);
           if (template) {
-            template.statusColumns.forEach((column, index) => { // loop through each column, adding 1 to the order
+            template.statusColumns.forEach((column, index) => {
+              // loop through each column, adding 1 to the order
               statusColumns.push({
                 name: column.name,
                 projectId: savedProject._id,

@@ -17,7 +17,7 @@ import { ProjectClass } from "./Projects";
 })
 export class StatusClass {
   // Status Name (e.g., "To Do", "In Progress", "Done")
-  @prop({ required: true, type: String }) 
+  @prop({ required: true, type: String })
   public name!: string;
 
   // Reference to the Project ID (Which project this status belongs to)

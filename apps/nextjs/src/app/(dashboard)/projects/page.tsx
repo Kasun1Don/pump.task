@@ -373,7 +373,9 @@ export default function ProjectsPage() {
                 className="min-h-32 overflow-hidden rounded-lg border border-gray-700 bg-[#18181B] font-bold"
               >
                 <h3 className="p-4 text-center text-white">{template.name}</h3>
-                <p className="px-4 text-sm text-gray-400">{template.description}</p>
+                <p className="px-4 text-sm text-gray-400">
+                  {template.description}
+                </p>
               </div>
             ))}
           </div>
@@ -404,7 +406,10 @@ export default function ProjectsPage() {
                 >
                   <option value="">Select a template (optional)</option>
                   {templates.map((template) => (
-                    <option key={template._id.toString()} value={template._id.toString()}>
+                    <option
+                      key={template._id.toString()}
+                      value={template._id.toString()}
+                    >
                       {template.name}
                     </option>
                   ))}
