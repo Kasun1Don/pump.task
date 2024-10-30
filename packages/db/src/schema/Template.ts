@@ -15,23 +15,13 @@ import { StatusClass } from "./Status";
   },
 })
 export class TemplateClass {
-  @prop({ required: true })
+  @prop({ required: true, type: String })
   public name!: string;
 
   @prop({ type: String })
   public description?: string;
 
-  @prop({
-    type: () => [
-      {
-        name: String,
-        order: Number,
-        isProtected: Boolean,
-      },
-    ],
-    required: true,
-  })
-  // reuse the status schema but only pick the fields we need
+  @prop({ type: () => [StatusClass], required: true })
   public statusColumns!: Pick<StatusClass, "name" | "order" | "isProtected">[];
 }
 

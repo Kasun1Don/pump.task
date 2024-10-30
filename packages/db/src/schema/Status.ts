@@ -17,7 +17,7 @@ import { ProjectClass } from "./Projects";
 })
 export class StatusClass {
   // Status Name (e.g., "To Do", "In Progress", "Done")
-  @prop({ required: true })
+  @prop({ required: true, type: String }) 
   public name!: string;
 
   // Reference to the Project ID (Which project this status belongs to)
@@ -29,7 +29,7 @@ export class StatusClass {
   public projectId!: Ref<ProjectClass>;
 
   // Order of the status column (used to arrange location of status columns)
-  @prop({ required: true })
+  @prop({ required: true, type: Number })
   public order!: number;
 
   @prop({ type: Boolean, default: false })
