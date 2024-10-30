@@ -25,7 +25,7 @@ export function EditMember({
 }) {
   const router = useRouter();
 
-  const removeMember = api.project.removeMember.useMutation({
+  const removeMember = api.member.delete.useMutation({
     onSuccess: async () => {
       await revalidate(`/users/${projectId}`);
     },
