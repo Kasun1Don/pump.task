@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   closestCenter,
   DndContext,
-  PointerSensor,
+  MouseSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -119,14 +119,13 @@ const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
     });
   };
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        delay: 100,
-        tolerance: 10,
-      },
-    }),
-  );
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 5,
+    },
+  });
+
+  const sensors = useSensors(mouseSensor);
 
   return (
     <div
