@@ -2,7 +2,7 @@
 
 // Current testing URL for project board
 // http://localhost:3000/tasks/6720293fcbf4d733c85b5975
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -85,12 +85,28 @@ const TaskCardDialog = ({
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState<boolean>(false);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [isUserAdminOrOwner, setIsUserAdminOrOwner] = useState<boolean>(false);
 
   const [newFieldName, setNewFieldName] = useState("");
+
+  const cookieWallet = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("wallet="))
+    ?.split("=")[1];
 
   const taskAssignee = members?.find((member) => {
     return member.userData.walletId === initialValues?.assigneeId;
   });
+
+  const user = members?.find(
+    (member) => member.userData.walletId === cookieWallet,
+  );
+
+  useEffect(() => {
+    if (user) {
+      setIsUserAdminOrOwner(user.role === "Owner" || user.role === "Admin");
+    }
+  }, [user, members]);
 
   // Setup form with React Hook Form and Zod validation
   const {
@@ -109,7 +125,7 @@ const TaskCardDialog = ({
       description: "",
       dueDate: new Date(NaN),
       statusId: statusId,
-      assigneeId: taskAssignee?.userData.name ?? undefined,
+      assigneeId: taskAssignee?.userData.name ?? "unassigned",
       projectId: projectId,
       order: 0,
       tags: {
@@ -426,7 +442,10 @@ const TaskCardDialog = ({
                 <SelectContent>
                   {statuses?.map((status, index) => (
                     <SelectItem
-                      // key={status._id}
+                      className="hover:cursor-pointer"
+                      disabled={
+                        status.name === "Approved" && !isUserAdminOrOwner
+                      }
                       key={index}
                       value={status._id}
                     >
@@ -457,7 +476,7 @@ const TaskCardDialog = ({
               }}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Unassigned" />
+                <SelectValue placeholder="unassigned" />
               </SelectTrigger>
               <SelectContent>
                 {members?.map((member) => (

@@ -107,6 +107,8 @@ const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
     (member) => member.userData.walletId === task.assigneeId,
   )?.userData;
 
+  console.log("TaskCard members", assignee);
+
   return (
     <>
       <TaskCardDialog
@@ -159,13 +161,21 @@ const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
 
             <div className="mt-4 flex items-center justify-between">
               <div className="flex items-center space-x-1">
-                <Image
-                  src={`${assignee?.image}`}
-                  alt="Assignee Avatar"
-                  width={12}
-                  height={12}
-                />
-                <span className="text-sm">{assignee?.name}</span>
+                {assignee?.image && (
+                  <Image
+                    src={assignee.image}
+                    alt="Assignee Avatar"
+                    width={12}
+                    height={12}
+                    onError={(e) => {
+                      console.log("Error loading image", e);
+                      e.currentTarget.src = "/userIcons/green.png";
+                    }}
+                  />
+                )}
+                <span className="text-sm">
+                  {assignee?.name ?? "Unnassigned"}
+                </span>
               </div>
               <div className="flex items-center space-x-1 text-sm text-gray-400">
                 <FaClock />
