@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
 
@@ -14,6 +15,12 @@ import {
   DialogTitle,
 } from "@acme/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@acme/ui/dropdown-menu";
+import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
@@ -23,13 +30,6 @@ import {
   PaginationPrevious,
 } from "@acme/ui/pagination";
 import { Switch } from "@acme/ui/switch";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@acme/ui/dropdown-menu";
-import Image from "next/image";
 import { toast } from "@acme/ui/toast";
 
 import { revalidate } from "~/app/actions/revalidate";
@@ -44,7 +44,9 @@ export default function ProjectsPage() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [showFilter, setShowFilter] = useState("all");
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
-const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string | null>(null);
+  const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<
+    string | null
+  >(null);
   const router = useRouter();
 
   // Modified wallet ID retrieval with cookie fallback
@@ -94,9 +96,10 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
     );
 
   const user = api.user.byWallet.useSuspenseQuery({ walletId });
-  const [userMemberships, { refetch: refetchMemberships }] = api.member.byUserId.useSuspenseQuery({
-    userId: user[0]._id,
-  });
+  const [userMemberships, { refetch: refetchMemberships }] =
+    api.member.byUserId.useSuspenseQuery({
+      userId: user[0]._id,
+    });
 
   const filteredProjects = projects
     ?.filter((project) => {
@@ -206,13 +209,9 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
   // fetch templates
   const { data: templates = [] } = api.template.getAll.useQuery();
 
- 
   const leaveProject = api.member.removeSelf.useMutation({
     onSuccess: async () => {
-      await Promise.all([
-        refetchProjects(),
-        refetchMemberships()
-      ]);
+      await Promise.all([refetchProjects(), refetchMemberships()]);
     },
     onError: (error) => {
       console.error("Error leaving project:", error);
@@ -220,12 +219,11 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
   });
 
   const { data: memberCounts } = api.member.getProjectMemberCounts.useQuery(
-    projects?.map(p => p._id.toString()) ?? []
+    projects?.map((p) => p._id.toString()) ?? [],
   );
 
-
   const { data: projectTags } = api.task.getProjectTags.useQuery(
-    projects?.map(p => p._id.toString()) ?? []
+    projects?.map((p) => p._id.toString()) ?? [],
   );
 
   return (
@@ -251,7 +249,7 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
                 } hover:bg-[#27272A]`}
                 onClick={() => setShowFilter("all")}
               >
-               Public Projects
+                Public Projects
               </button>
               <button
                 className={`px-4 py-2 font-semibold ${
@@ -286,10 +284,11 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
                   );
 
                   const isMember = userMemberships.some(
-                    (member) => member.projectId === project._id.toString()
+                    (member) => member.projectId === project._id.toString(),
                   );
 
-                  const memberCount = memberCounts?.[project._id.toString()] ?? 0;
+                  const memberCount =
+                    memberCounts?.[project._id.toString()] ?? 0;
 
                   return (
                     <div
@@ -328,7 +327,7 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
                             alt="Options"
                             width={2}
                             height={10}
-                            className="h-6 w-6 mt-1 hover:brightness-50 hover:[filter:invert(48%)_sepia(79%)_saturate(2476%)_hue-rotate(86deg)_brightness(118%)_contrast(119%)]"
+                            className="mt-1 h-6 w-6 hover:brightness-50 hover:[filter:invert(48%)_sepia(79%)_saturate(2476%)_hue-rotate(86deg)_brightness(118%)_contrast(119%)]"
                           />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
@@ -343,7 +342,9 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              setSelectedProjectForBadges(project._id.toString());
+                              setSelectedProjectForBadges(
+                                project._id.toString(),
+                              );
                               setIsBadgeModalOpen(true);
                             }}
                           >
@@ -372,14 +373,14 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
                                           label: "Cancel",
                                           onClick: () => resolve(false),
                                         },
-                                      }
+                                      },
                                     );
                                   }),
                                   {
                                     loading: "Leaving project...",
                                     success: "Successfully left project",
                                     error: "Failed to leave project",
-                                  }
+                                  },
                                 );
                               }}
                               className="text-red-500"
@@ -402,13 +403,17 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <h3 className="p-4 text-white">{project.name}</h3>
-                      <div className="px-4 pb-4 flex justify-between items-center">
+                      <div className="flex items-center justify-between px-4 pb-4">
                         <div className="flex gap-4 text-sm text-gray-400">
-                          <p>{project.isPrivate ? "Private" : "Public"} project</p>
+                          <p>
+                            {project.isPrivate ? "Private" : "Public"} project
+                          </p>
                           <p className="flex items-center gap-1">
-                            Available Badges: {projectTags?.[project._id.toString()]?.length ?? 0}
+                            Available Badges:{" "}
+                            {projectTags?.[project._id.toString()]?.length ?? 0}
                             {/* only show badge icon if there are available badges */}
-                            {(projectTags?.[project._id.toString()]?.length ?? 0) > 0 && (
+                            {(projectTags?.[project._id.toString()]?.length ??
+                              0) > 0 && (
                               <Image
                                 src="/CheckoutVector.svg"
                                 alt="Badges"
@@ -623,25 +628,29 @@ const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<string 
             <DialogTitle>Available Badges</DialogTitle>
           </DialogHeader>
           <div className="flex flex-wrap gap-4 p-4">
-            {selectedProjectForBadges && projectTags?.[selectedProjectForBadges]?.map((tag) => {
-              // Remove spaces from tag name to match image filenames
-              const imageTag = tag.replace(/\s+/g, '').toLowerCase();
-              return (
-                <div key={tag} className="flex flex-col items-center">
-                  <Image
-                    src={`/nfts/${imageTag}.png`}
-                    alt={tag}
-                    width={100}
-                    height={100}
-                    className="rounded-lg"
-                  />
-                  <span className="mt-2 text-sm text-gray-400">{tag}</span>
-                </div>
-              );
-            })}
+            {selectedProjectForBadges &&
+              projectTags?.[selectedProjectForBadges]?.map((tag) => {
+                // Remove spaces from tag name to match image filenames
+                const imageTag = tag.replace(/\s+/g, "").toLowerCase();
+                return (
+                  <div key={tag} className="flex flex-col items-center">
+                    <Image
+                      src={`/nfts/${imageTag}.png`}
+                      alt={tag}
+                      width={100}
+                      height={100}
+                      className="rounded-lg"
+                    />
+                    <span className="mt-2 text-sm text-gray-400">{tag}</span>
+                  </div>
+                );
+              })}
           </div>
           <DialogFooter>
-            <Button onClick={() => setIsBadgeModalOpen(false)} className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]">
+            <Button
+              onClick={() => setIsBadgeModalOpen(false)}
+              className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
+            >
               Close
             </Button>
           </DialogFooter>

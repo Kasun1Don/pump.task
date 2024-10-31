@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { toast } from "@acme/ui/toast";
 
 import type { ObjectIdString, StatusColumn } from "@acme/validators";
+import { toast } from "@acme/ui/toast";
 import { StatusSchema, validateObjectIdString } from "@acme/validators";
 
 import NewStatusColumn from "~/app/_components/_task/new-status-column";
 import TaskStatusColumn from "~/app/_components/_task/task-status-column";
 import TaskBoardSkeleton from "~/app/_components/_task/TaskBoardLoader";
-
 import { api } from "~/trpc/react";
 
 export default function TasksPage({
@@ -173,7 +172,7 @@ export default function TasksPage({
               if (editedName.trim() && editedName !== project.name) {
                 updateProjectName.mutate({
                   projectId: projectId as string,
-                  name: editedName.trim()
+                  name: editedName.trim(),
                 });
               } else {
                 setIsEditing(false);
@@ -181,20 +180,20 @@ export default function TasksPage({
               }
             }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 e.currentTarget.blur();
-              } else if (e.key === 'Escape') {
+              } else if (e.key === "Escape") {
                 setIsEditing(false);
                 setEditedName(project.name);
               }
             }}
-            className="bg-transparent text-5xl font-extrabold text-white text-center border-b border-gray-500 focus:border-[#72D524] outline-none"
+            className="border-b border-gray-500 bg-transparent text-center text-5xl font-extrabold text-white outline-none focus:border-[#72D524]"
             autoFocus
           />
         ) : (
-          <h1 
+          <h1
             onDoubleClick={() => setIsEditing(true)}
-            className="text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg cursor-pointer hover:opacity-80"
+            className="cursor-pointer text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg hover:opacity-80"
           >
             {project.name}
           </h1>

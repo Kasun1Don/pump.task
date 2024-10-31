@@ -13,6 +13,11 @@ interface MemberWithUserData {
   userData: UserClass;
 }
 
+interface MemberCountResult {
+  _id: mongoose.Types.ObjectId;
+  count: number;
+}
+
 export const memberRouter = {
   create: adminProcedure
     .input(
@@ -112,10 +117,12 @@ export const memberRouter = {
       );
     }),
   removeSelf: publicProcedure
-    .input(z.object({ 
-      projectId: z.string(),
-      walletId: z.string()
-    }))
+    .input(
+      z.object({
+        projectId: z.string(),
+        walletId: z.string(),
+      }),
+    )
     .mutation(async ({ input }) => {
       // Delete member record
       await Member.deleteOne({
@@ -131,29 +138,29 @@ export const memberRouter = {
 
       return { success: true };
     }),
-    
+
   getProjectMemberCounts: publicProcedure
     .input(z.array(z.string()))
     .query(async ({ input }) => {
-      const counts = await Member.aggregate([
-        { 
-          $match: { 
-            projectId: { 
-              $in: input.map(id => new mongoose.Types.ObjectId(id)) 
-            } 
-          } 
+      const counts = await Member.aggregate<MemberCountResult>([
+        {
+          $match: {
+            projectId: {
+              $in: input.map((id) => new mongoose.Types.ObjectId(id)),
+            },
+          },
         },
-        { 
-          $group: { 
-            _id: "$projectId", 
-            count: { $sum: 1 } 
-          } 
-        }
+        {
+          $group: {
+            _id: "$projectId",
+            count: { $sum: 1 },
+          },
+        },
       ]);
-      
-      return counts.reduce((acc, curr) => {
+
+      return counts.reduce<Record<string, number>>((acc, curr) => {
         acc[curr._id.toString()] = curr.count;
         return acc;
-      }, {} as Record<string, number>);
+      }, {});
     }),
 } satisfies TRPCRouterRecord;

@@ -164,15 +164,17 @@ export const projectRouter = {
     }),
 
   updateName: publicProcedure
-    .input(z.object({
-      projectId: z.string(),
-      name: z.string().min(1)
-    }))
+    .input(
+      z.object({
+        projectId: z.string(),
+        name: z.string().min(1),
+      }),
+    )
     .mutation(async ({ input }) => {
       const updatedProject = await Project.findByIdAndUpdate(
         input.projectId,
         { name: input.name },
-        { new: true }
+        { new: true },
       );
 
       if (!updatedProject) {
