@@ -60,7 +60,35 @@ export const memberRouter = {
         email: input.email,
       };
     }),
-  byProjectId: memberProcedure
+  byProjectId: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      console.log(input);
+      const members = await Member.aggregate<MemberWithUserData>([
+        {
+          $match: { projectId: new mongoose.Types.ObjectId(input.projectId) },
+        },
+        {
+          $lookup: {
+            from: "users", // The collection to join
+            localField: "userId", // Field in collection
+            foreignField: "_id",
+            as: "userData", // Output array with data
+          },
+        },
+        // Unwind the arrays to get single object
+        { $unwind: "$userData" },
+      ]);
+      return members.map((member) => ({
+        role: member.role,
+        userData: member.userData,
+      }));
+    }),
+  byProjectIdProtected: memberProcedure
     .input(
       z.object({
         projectId: z.string(),

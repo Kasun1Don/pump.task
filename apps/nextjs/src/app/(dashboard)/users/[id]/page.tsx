@@ -16,7 +16,7 @@ export default async function UsersPage({
   const projectData: ProjectClass | null = response as ProjectClass;
   let members: MembersType = [];
   try {
-    members = await api.member.byProjectId({ projectId: params.id });
+    members = await api.member.byProjectIdProtected({ projectId: params.id });
   } catch (err) {
     console.log(err);
     return <p>You are not authorized to view the members of this project</p>;
