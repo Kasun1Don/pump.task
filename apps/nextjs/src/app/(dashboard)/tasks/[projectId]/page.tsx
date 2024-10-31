@@ -17,8 +17,6 @@ export default function TasksPage({
 }: {
   params: { projectId: string };
 }) {
-  // const [tasks, setTasks] = useState<TaskCardData[]>([]);
-  // const [project, setProject] = useState<Project>();
   const [statusColumns, setStatusColumns] = useState<StatusColumn[]>([]);
   const [projectId, setProjectId] = useState<ObjectIdString | null>(
     params.projectId as ObjectIdString,
@@ -53,21 +51,6 @@ export default function TasksPage({
     { enabled: Boolean(projectId) },
   );
 
-  // useEffect(() => {
-  //   if (projectData) {
-  //     // Validate projectData using Zod schema
-  //     const validationResult = ProjectSchema.safeParse(projectData);
-
-  //     if (validationResult.success) {
-  //       console.log("current project:", validationResult.data);
-  //       setProject(validationResult.data);
-  //     } else {
-  //       console.error("Validation error:", validationResult.error.errors);
-  //       setValidationError("Invalid project data");
-  //     }
-  //   }
-  // }, [projectData]);
-
   // Retrieve status columns
   const {
     data: statusData,
@@ -79,6 +62,15 @@ export default function TasksPage({
     },
     {
       enabled: Boolean(projectId), // Only run query if projectId is valid
+    },
+  );
+
+  const { data: members } = api.member.byProjectId.useQuery(
+    {
+      projectId: projectId as string,
+    },
+    {
+      enabled: Boolean(projectId),
     },
   );
 
@@ -202,7 +194,11 @@ export default function TasksPage({
       <div className="flex-1 overflow-x-auto">
         <div className="flex min-w-max gap-6 p-6">
           {statusColumns.map((status) => (
-            <TaskStatusColumn key={status._id} statusColumn={status} />
+            <TaskStatusColumn
+              key={status._id}
+              statusColumn={status}
+              members={members}
+            />
           ))}
           <NewStatusColumn
             projectId={projectId}

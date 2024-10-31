@@ -9,7 +9,6 @@ import {
 import { Project, ProjectClass } from "./Projects";
 import { StatusClass } from "./Status";
 import { TagClass } from "./Tag";
-import { UserClass } from "./User";
 
 // Custom field name & values (Used when user adds a custom field to the task form)
 class CustomField {
@@ -58,8 +57,8 @@ export class TaskClass {
   public dueDate!: Date;
 
   // Assignee (User assigned to the task)
-  @prop({ ref: () => UserClass })
-  public assigneeId?: Ref<UserClass>;
+  @prop({ type: String, required: false })
+  public assigneeId?: string;
 
   // Custom Fields for additional information
   @prop({ type: () => [CustomField], required: false })

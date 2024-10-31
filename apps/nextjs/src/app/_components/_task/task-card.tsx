@@ -1,10 +1,11 @@
 "use client";
 
-// http://localhost:3000/tasks?projectId=670e203762de6de8e32ed93b
 import type { z } from "zod";
 import { useState } from "react";
 import Image from "next/image";
+import { FaClock } from "react-icons/fa";
 
+import type { UserClass } from "@acme/db";
 import type {
   NewTaskCard,
   ObjectIdString,
@@ -20,10 +21,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@acme/ui/dialog";
+import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/react";
 import TrashIcon from "./icons/TrashIcon";
 import TaskCardDialog from "./task-card-dialog";
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short" })
+    .format(date)
+    .replace(" ", "-");
+};
 
 type TaskCardData = z.infer<typeof TaskCardSchema>;
 
@@ -31,23 +39,33 @@ interface TaskCardProps {
   task: TaskCardData;
   projectId: ObjectIdString;
   statusId: ObjectIdString;
+  members:
+    | {
+        role: string;
+        userData: UserClass;
+      }[]
+    | undefined;
 }
 
-const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
+const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [submitButtonText, setSubmitButtonText] = useState("Submit");
 
   const utils = api.useUtils();
 
   const deleteTask = api.task.deleteTask.useMutation({
-    onSuccess: () => {
+    onSuccess: (task) => {
       console.log("Task deleted successfully");
       void utils.task.getTaskByStatusId.invalidate();
+      toast.success(`Task ${task.task.title} deleted successfully`);
     },
     onError: (error) => {
       if (error instanceof Error) {
         console.error("Error deleting task:", error.message);
+        toast.error("Error deleting task");
       } else {
         console.error("Unknown error deleting task");
+        toast.error("Unknown error deleting task");
       }
     },
   });
@@ -56,10 +74,17 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
     onSuccess: (updatedTask) => {
       // Handle success
       console.log("Task updated successfully", updatedTask);
+      setSubmitButtonText("Updated");
       void utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
+      if (String(updatedTask.statusId) !== statusId) {
+        toast.success(`Task moved to new status`);
+      } else {
+        toast.success(`Task ${updatedTask.title} updated successfully`);
+      }
     },
     onError: (error) => {
       console.error("Error creating task:", error);
+      toast.error("Error creating task");
     },
   }); // Initialize your mutation
 
@@ -78,13 +103,23 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
     }
   };
 
+  const assignee = members?.find(
+    (member) => member.userData.walletId === task.assigneeId,
+  )?.userData;
+
+  console.log("TaskCard members", assignee);
+
   return (
     <>
       <TaskCardDialog
+        members={members}
+        loading={updateTaskMutation.isPending}
         initialValues={task}
         projectId={projectId}
         statusId={statusId}
         onSubmit={handleSubmit}
+        submitButtonText={submitButtonText}
+        setSubmitButtonTextState={setSubmitButtonText}
         isEditable={true} // Need to change this to be conditional based on user role
         dialogTrigger={
           <div className="group relative max-w-[350px] rounded-2xl border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">
@@ -126,17 +161,27 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
 
             <div className="mt-4 flex items-center justify-between">
               <div className="flex items-center space-x-1">
-                <Image
-                  src="/userProfileIcon.png"
-                  alt="Assignee Avatar"
-                  width={12}
-                  height={12}
-                />
-                <span className="text-sm">{task.assigneeId}</span>
+                {assignee?.image && (
+                  <Image
+                    src={assignee.image}
+                    alt="Assignee Avatar"
+                    width={12}
+                    height={12}
+                    onError={(e) => {
+                      console.log("Error loading image", e);
+                      e.currentTarget.src = "/userIcons/green.png";
+                    }}
+                  />
+                )}
+                <span className="text-sm">
+                  {assignee?.name ?? "Unnassigned"}
+                </span>
               </div>
               <div className="flex items-center space-x-1 text-sm text-gray-400">
-                <span>🕒</span>
-                <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                <FaClock />
+                <span className="text-white">
+                  {formatDate(new Date(task.dueDate))}
+                </span>
               </div>
             </div>
           </div>
