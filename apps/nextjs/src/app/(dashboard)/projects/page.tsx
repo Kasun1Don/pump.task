@@ -461,7 +461,7 @@ export default function ProjectsPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent 
+        <DialogContent
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
