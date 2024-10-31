@@ -136,6 +136,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
       </div>
     );
   }
+
   return (
     <div>
       <h1 className="text-3xl font-semibold">Badges Earned</h1>
