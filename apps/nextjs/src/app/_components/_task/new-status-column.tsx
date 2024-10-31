@@ -115,7 +115,7 @@ export default function NewStatusColumn({
         <DialogFooter>
           <Button
             onClick={handleCreateStatus}
-            className="bg-zesty-green rounded px-4 py-2 text-black"
+            className="bg-zesty-green hover:bg-zesty-green rounded px-4 py-2 text-black hover:bg-opacity-80"
           >
             Create Status
           </Button>

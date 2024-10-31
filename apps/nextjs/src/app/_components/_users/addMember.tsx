@@ -44,7 +44,7 @@ export function AddMember({ projectId }: { projectId: string }) {
     },
   });
 
-  const updateMembers = api.project.editMembers.useMutation({
+  const updateMembers = api.member.create.useMutation({
     onSuccess: async (data) => {
       sendEmail.mutate({ email: data.email });
       await revalidate(`/users/${projectId}`);

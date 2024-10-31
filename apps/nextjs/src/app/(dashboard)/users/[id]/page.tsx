@@ -1,8 +1,10 @@
-import type { ProjectClass } from "@acme/db";
+import type { ProjectClass, UserClass } from "@acme/db";
 
 import { AddMember } from "~/app/_components/_users/addMember";
 import { EditMember } from "~/app/_components/_users/editMember";
 import { api } from "~/trpc/server";
+
+type MembersType = { role: string; userData: UserClass }[];
 
 export default async function UsersPage({
   params,
@@ -12,6 +14,13 @@ export default async function UsersPage({
   const response = await api.project.byId({ id: params.id });
   // Destructure user data from response
   const projectData: ProjectClass | null = response as ProjectClass;
+  let members: MembersType = [];
+  try {
+    members = await api.member.byProjectIdProtected({ projectId: params.id });
+  } catch (err) {
+    console.log(err);
+    return <p>You are not authorized to view the members of this project</p>;
+  }
 
   return (
     <div className="mx-20 mt-3 flex flex-col gap-3">
@@ -28,16 +37,14 @@ export default async function UsersPage({
           <span>Role</span>
           <span></span>
         </div>
-        {projectData.members.map((member, index) => (
+        {members.map((member, index) => (
           <>
-            <span>{member.name ? member.name : "not available"}</span>
-            <span>{member.email ? member.email : "not available"}</span>
-            <span className="col-span-2">
-              {member.walletId ? member.walletId : "not available"}
-            </span>
+            <span>{member.userData.name}</span>
+            <span>{member.userData.email}</span>
+            <span className="col-span-2">{member.userData.walletId}</span>
             <span>{member.role}</span>
             <EditMember
-              walletId={member.walletId ?? ""}
+              walletId={member.userData.walletId ?? ""}
               projectId={params.id}
               isOwner={!index}
             />

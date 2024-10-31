@@ -15,7 +15,7 @@ import { ZodError } from "zod";
 
 import type { Session } from "@acme/auth";
 import { auth, validateToken } from "@acme/auth";
-import { Project } from "@acme/db";
+import { Member, User } from "@acme/db";
 import dbConnect from "@acme/db/dbConnect";
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -64,7 +64,6 @@ export const createTRPCContext = async (opts: {
   session: Session | null;
 }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
-  const projectId = opts.headers.get("projectId") ?? null;
   const session = await isomorphicGetSession(opts.headers);
 
   await dbConnect();
@@ -72,7 +71,6 @@ export const createTRPCContext = async (opts: {
   return {
     session,
     token: authToken,
-    projectId: projectId,
   };
 };
 
@@ -164,9 +162,13 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
     }
     walletId = verified.parsedJWT.sub;
   }
-
-  const project = await Project.findById(ctx.projectId);
-  const member = project?.members.find((obj) => obj.walletId === walletId);
+  const user = await User.findOne({ walletId });
+  if (!user?.activeProjects) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  const projectId = user.activeProjects.at(-1)?.toString();
+  const members = await Member.find({ projectId: projectId });
+  const member = members.find((member) => member.walletId === walletId);
   if (member) {
     if (
       member.role.toLowerCase() !== "admin" &&
@@ -175,6 +177,38 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
   } else {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session },
+    },
+  });
+});
+
+export const memberProcedure = t.procedure.use(async ({ ctx, next }) => {
+  let walletId = "";
+  if (!ctx.token) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const token = ctx.token.split(" ")[1]!;
+    const verified = await thirdwebAuth.verifyJWT({ jwt: token });
+    if (!verified.valid) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    walletId = verified.parsedJWT.sub;
+  }
+  const user = await User.findOne({ walletId });
+  if (!user?.activeProjects) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  const projectId = user.activeProjects.at(-1)?.toString();
+  const members = await Member.find({ projectId: projectId });
+  const member = members.find((member) => member.walletId === walletId);
+  if (!member) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 

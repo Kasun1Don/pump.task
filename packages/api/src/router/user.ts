@@ -257,7 +257,7 @@ export const userRouter = {
       const serializedUser = {
         ...user,
         _id: user._id.toString(),
-        activeProjects: user.activeProjects?.slice(0, 3).map((project) => ({
+        projects: user.projects?.map((project) => ({
           ...project,
           _id: project._id.toString(),
         })),
@@ -267,7 +267,7 @@ export const userRouter = {
         })) as BadgeClass[],
       };
 
-      const activeProjects = serializedUser.activeProjects?.length ?? 0;
+      const activeProjects = serializedUser.projects?.length ?? 0;
       const totalBadges = serializedUser.badges.length;
 
       // Helper function to check if an object is a BadgeClass
@@ -343,35 +343,35 @@ export const userRouter = {
         }
 
         // Get the activeProjects array or initialize it if empty
-        const activeProjects = user.activeProjects ?? [];
+        const activeProjects = (user.activeProjects ?? []).map((id) =>
+          String(id),
+        );
 
-        if (activeProjects.length > 0) {
-          // Remove the project if it already exists in active projects
-          const projectIndex = activeProjects.indexOf(
-            new mongoose.Types.ObjectId(input.projectId),
-          );
-          if (projectIndex !== -1) {
-            activeProjects.splice(projectIndex, 1);
-          }
+        // Remove the project if it already exists in active projects
+        const projectIdStr = input.projectId.toString();
+        const projectIndex = activeProjects.indexOf(projectIdStr);
+        if (projectIndex !== -1) {
+          activeProjects.splice(projectIndex, 1);
         }
 
         // Add the project to the end (making it the most recent)
-        activeProjects.push(new mongoose.Types.ObjectId(input.projectId));
+        activeProjects.push(projectIdStr);
 
         // Ensure the array contains a maximum of 3 projects
         if (activeProjects.length > 3) {
           activeProjects.shift(); // Remove the oldest project (first item)
         }
 
-        // Build the updatedData object
-        const updatedData = {
-          activeProjects: activeProjects,
-        };
-
         // Update the user using findByIdAndUpdate
         const updatedUser = await User.findByIdAndUpdate(
           user._id,
-          { $set: updatedData },
+          {
+            $set: {
+              activeProjects: activeProjects.map(
+                (id) => new mongoose.Types.ObjectId(id),
+              ),
+            },
+          },
           { new: true },
         );
 
