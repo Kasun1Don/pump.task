@@ -82,6 +82,14 @@ export default function TasksPage({
       },
     );
 
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 5,
+    },
+  });
+
+  const sensors = useSensors(mouseSensor);
+
   useEffect(() => {
     if (statusData) {
       const validationResult = StatusSchema.array().safeParse(statusData);
@@ -124,14 +132,6 @@ export default function TasksPage({
       </p>
     );
   }
-
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 5,
-    },
-  });
-
-  const sensors = useSensors(mouseSensor);
 
   if (validationError) return <p>{validationError}</p>;
   if (isLoading) return <TaskBoardSkeleton />;

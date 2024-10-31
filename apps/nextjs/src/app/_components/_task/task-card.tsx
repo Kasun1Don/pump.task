@@ -49,7 +49,7 @@ interface TaskCardProps {
     | undefined;
 }
 
-const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
+const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: task._id });
 
@@ -115,8 +115,6 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
   const assignee = members?.find(
     (member) => member.userData.walletId === task.assigneeId,
   )?.userData;
-
-  console.log("TaskCard members", assignee);
 
   return (
     <div {...attributes} ref={setNodeRef} {...listeners} style={style}>
