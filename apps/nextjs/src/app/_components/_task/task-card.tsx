@@ -1,9 +1,9 @@
 "use client";
 
-// http://localhost:3000/tasks?projectId=670e203762de6de8e32ed93b
 import type { z } from "zod";
 import { useState } from "react";
 import Image from "next/image";
+import { FaClock } from "react-icons/fa";
 
 import type {
   NewTaskCard,
@@ -25,6 +25,12 @@ import { toast } from "@acme/ui/toast";
 import { api } from "~/trpc/react";
 import TrashIcon from "./icons/TrashIcon";
 import TaskCardDialog from "./task-card-dialog";
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short" })
+    .format(date)
+    .replace(" ", "-");
+};
 
 type TaskCardData = z.infer<typeof TaskCardSchema>;
 
@@ -150,8 +156,10 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
                 <span className="text-sm">{task.assigneeId}</span>
               </div>
               <div className="flex items-center space-x-1 text-sm text-gray-400">
-                <span>🕒</span>
-                <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                <FaClock />
+                <span className="text-white">
+                  {formatDate(new Date(task.dueDate))}
+                </span>
               </div>
             </div>
           </div>
