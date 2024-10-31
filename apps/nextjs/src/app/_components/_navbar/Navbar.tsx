@@ -1,5 +1,5 @@
 // Import React and Next.js modules
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Image from "next/image";
 
 // Import UserClass and ProjectClass from Typegoose models
@@ -38,6 +38,12 @@ export default async function Navbar() {
   // Destructure user data from response
   const userData: UserClass | null = response as unknown as UserClass;
 
+  const headersList = headers();
+  const protocol = headersList.get("x-forwarded-proto") ?? "http";
+  const host = headersList.get("host");
+  const pathname = "/projects";
+  const url = `${protocol}://${host}${pathname}`;
+
   // Extract the active project IDs
   const activeProjectIds = userData.activeProjects
     ? userData.activeProjects.map((id) => String(id))
@@ -54,10 +60,10 @@ export default async function Navbar() {
     <>
       {/* Navbar section */}
       <div className="fixed left-0 right-0 top-0 z-10 w-screen">
-        <div className="flex flex-row justify-between gap-4 bg-zinc-950 px-12 pb-2 pt-5">
+        <div className="flex flex-row justify-between gap-2 bg-zinc-950 px-6 pb-2 pt-5">
           {/* Logo and title */}
-          <NavLink href="/projects">
-            <div className="flex cursor-pointer flex-row items-center justify-center gap-8">
+          <a href={url}>
+            <div className="flex cursor-pointer flex-row items-center justify-center gap-4">
               <div className="flex flex-row gap-4 text-xl">
                 <Image
                   src="/pump.taskLogo.png"
@@ -68,11 +74,14 @@ export default async function Navbar() {
                 />
                 <h1 className="text-2xl font-bold">pump.task</h1>
               </div>
-              <h5 className="text-zesty-green h-fit rounded-md bg-zinc-800 px-2 py-1 text-xs">
+              <h5
+                className="text-zesty-green h-fit rounded-md px-1 py-1 text-xs"
+                style={{ backgroundColor: "#72D5240F" }}
+              >
                 Web3 Project Tracker
               </h5>
             </div>
-          </NavLink>
+          </a>
 
           {/* Navbar section right-hand side */}
           <div className="mt-1 flex max-h-8 gap-10 hover:cursor-pointer">

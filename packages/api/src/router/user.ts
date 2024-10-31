@@ -257,7 +257,7 @@ export const userRouter = {
       const serializedUser = {
         ...user,
         _id: user._id.toString(),
-        activeProjects: user.activeProjects?.slice(0, 3).map((project) => ({
+        projects: user.projects?.map((project) => ({
           ...project,
           _id: project._id.toString(),
         })),
@@ -267,7 +267,7 @@ export const userRouter = {
         })) as BadgeClass[],
       };
 
-      const activeProjects = serializedUser.activeProjects?.length ?? 0;
+      const activeProjects = serializedUser.projects?.length ?? 0;
       const totalBadges = serializedUser.badges.length;
 
       // Helper function to check if an object is a BadgeClass
