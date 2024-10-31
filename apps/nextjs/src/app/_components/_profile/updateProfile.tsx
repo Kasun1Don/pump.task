@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@acme/ui/dialog";
+import { toast } from "@acme/ui/toast";
 
 import { updateUserSettings } from "~/app/actions/handleUserUpdate";
 import EditIcon from "../_task/icons/EditIcon";
@@ -54,8 +55,8 @@ export default function UpdateProfile({
       });
       setName(tempName);
       setBio(tempBio);
-    } catch (error) {
-      console.error("Error updating user settings:", error);
+    } catch {
+      toast.error("Error updating user settings:");
     }
   };
 

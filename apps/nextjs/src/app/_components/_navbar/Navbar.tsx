@@ -95,6 +95,7 @@ export default async function Navbar() {
           {hasActiveProjects && (
             <NavLink href={`/tasks/${projectId}`}>Tasks</NavLink>
           )}
+
           <NavLink href="/profile">My Profile</NavLink>
           {hasActiveProjects && (
             <NavLink
