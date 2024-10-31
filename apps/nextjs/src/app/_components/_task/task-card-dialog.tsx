@@ -546,7 +546,6 @@ const TaskCardDialog = ({
                 onSubmit(newTaskData);
 
                 setIsDialogOpen(false);
-
               } else {
                 const updatedTaskData = {
                   ...taskData,
@@ -556,7 +555,6 @@ const TaskCardDialog = ({
                 onSubmit(updatedTaskData as TaskCard);
 
                 setIsDialogOpen(false);
-
               }
             })}
             className="bg-zesty-green hover:bg-zesty-green w-full text-black"

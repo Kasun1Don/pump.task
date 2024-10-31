@@ -144,13 +144,13 @@ export default function NavProjectDropdown({
       {/* The Current selected Project */}
       <DropdownMenuTrigger className="relative flex cursor-default select-none items-center rounded-md border px-4 py-2 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
         <div className="flex flex-row items-center gap-4">
-          <Image
+          {/* <Image
             className="inline-block h-4 w-4 rounded-full"
             src="/badge.png"
             alt="badge"
             width={12}
             height={12}
-          />
+          /> */}
           <h6 className="text-sm">{currentProject}</h6>
           <Image
             src="/chevron-down.svg"
@@ -172,7 +172,7 @@ export default function NavProjectDropdown({
             <h1 className="text-sm text-red-500">Error loading projects</h1>
           </DropdownMenuItem>
         ) : projectData.length > 0 ? (
-          projectData.map((project) => (
+          projectData.reverse().map((project) => (
             <DropdownMenuItem
               key={project._id}
               className="flex flex-row items-center gap-4 hover:cursor-pointer"
@@ -184,13 +184,13 @@ export default function NavProjectDropdown({
                 }
               }}
             >
-              <Image
+              {/* <Image
                 className="inline-block h-5 w-5 rounded-full"
                 src={project.image ?? "/default-project-image.png"}
                 alt={project.name}
                 width={20}
                 height={20}
-              />
+              /> */}
               <h1 className="text-sm">{project.name}</h1>
             </DropdownMenuItem>
           ))
