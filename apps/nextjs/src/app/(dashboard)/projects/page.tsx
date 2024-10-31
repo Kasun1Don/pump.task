@@ -155,6 +155,11 @@ export default function ProjectsPage() {
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
+      // Update active projects
+      await updateActiveProjectsMutation.mutateAsync({
+        walletId: walletId,
+        projectId: newProject.id.toString(),
+      });
       document.cookie = `projectId=${newProject.id}; path=/;`;
       await revalidate("/");
       router.push(`/tasks/${newProject.id.toString()}`);

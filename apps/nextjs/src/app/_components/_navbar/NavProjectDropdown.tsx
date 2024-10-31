@@ -1,11 +1,12 @@
 "use client";
 
 // Import the required libraries
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
+import type { Project } from "@acme/validators";
 // Import ProjectClass from Typegoose models
-import type { ProjectClass } from "@acme/db";
 // Import Client Components from @acme/ui
 import {
   DropdownMenu,
@@ -15,10 +16,17 @@ import {
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
 
+import { revalidate } from "~/app/actions/revalidate";
+import { api } from "~/trpc/react";
+
 // Define the Props interface
 interface NavProjectDropdownProps {
-  projects: ProjectClass[];
+  projects: string[];
+  walletId: string;
 }
+
+// Define a union type for project result
+type ProjectResult = Project | { error: string };
 
 /**
  * @description
@@ -30,17 +38,106 @@ interface NavProjectDropdownProps {
  */
 export default function NavProjectDropdown({
   projects,
+  walletId,
 }: NavProjectDropdownProps) {
+  const router = useRouter();
   const [currentProject, setCurrentProject] = useState<string>("");
 
-  // Handle project change by updating the current project Context
-  const handleProjectChange = (projectName: string) => {
+  // Use `api.useQueries` to fetch data for each project ID
+  const projectQueries = api.useQueries((t) =>
+    projects.map((id) => t.project.byId({ id })),
+  );
+
+  // Initialize the mutation
+  const updateActiveProjectsMutation =
+    api.user.updateActiveProjects.useMutation({
+      onSuccess: (data) => {
+        console.log("Active projects updated:", data.activeProjects);
+      },
+      onError: (error) => {
+        console.error("Error updating active projects:", error);
+        // Optionally, display an error message to the user
+      },
+    });
+
+  // Check if any of the queries are loading or have errors
+  const isLoading = projectQueries.some((query) => query.isLoading);
+  const isError = projectQueries.some((query) => query.isError);
+
+  // Extract and process project data from the queries
+  // const projectData = projectQueries
+  //   .map((query) => {
+  //     if (query.data) {
+  //       const project = query.data;
+  //       // Process the project data to match ProjectSchema
+  //       const processedProject = {
+  //         ...project,
+  //         _id: project._id.toString(), // Convert _id to string
+  //         // Optionally, convert date fields to strings or desired format
+  //         // If your ProjectSchema expects dates as strings, convert them:
+  //         // createdAt: project.createdAt.toISOString(),
+  //         // updatedAt: project.updatedAt.toISOString(),
+  //       };
+  //       return processedProject;
+  //     }
+  //     return undefined;
+  //   })
+  //   .filter((project): project is Project => project !== undefined);
+
+  // Extract and process project data from the queries
+  const projectData = projectQueries
+    .map((query) => {
+      const data = query.data as ProjectResult | undefined;
+      if (!data) {
+        return undefined;
+      }
+      if ("error" in data) {
+        console.error("Error fetching project:", data.error);
+        return undefined;
+      } else {
+        const project = data;
+        // Process the project data to match ProjectSchema
+        const processedProject: Project = {
+          ...project,
+          _id: project._id.toString() as string & { __brand: "ObjectIdString" },
+          // Optionally, convert date fields if needed
+        };
+        return processedProject;
+      }
+    })
+    .filter((project): project is Project => project !== undefined);
+
+  // Handle project change by updating the current project state
+  const handleProjectChange = async (project: Project) => {
     try {
-      setCurrentProject(projectName);
+      setCurrentProject(project.name);
+      await updateActiveProjectsMutation.mutateAsync({
+        walletId: walletId,
+        projectId: project._id.toString(),
+      });
+
+      await revalidate("/");
+      // Navigate to the project's task page
+      router.push(`/tasks/${project._id}`);
     } catch (error) {
       console.error("Error updating project:", error);
     }
   };
+
+  // UseEffect to set the current project when data is loaded
+  useEffect(() => {
+    if (!isLoading && projectData.length > 0) {
+      // The currently active project ID is the last item in the projects array
+      const activeProjectId = projects[projects.length - 1];
+      // Find the project with this ID in projectData
+      const activeProject = projectData.find(
+        (project) => project._id === activeProjectId,
+      );
+      if (activeProject) {
+        setCurrentProject(activeProject.name);
+      }
+    }
+  }, [isLoading, projectData, projects]);
 
   return (
     <DropdownMenu>
@@ -66,16 +163,30 @@ export default function NavProjectDropdown({
 
       {/* A map of the user's Projects */}
       <DropdownMenuContent>
-        {projects.length > 0 ? (
-          projects.map((project) => (
+        {isLoading ? (
+          <DropdownMenuItem className="flex flex-row items-center gap-4">
+            <h1 className="text-sm">Loading Projects...</h1>
+          </DropdownMenuItem>
+        ) : isError ? (
+          <DropdownMenuItem className="flex flex-row items-center gap-4">
+            <h1 className="text-sm text-red-500">Error loading projects</h1>
+          </DropdownMenuItem>
+        ) : projectData.length > 0 ? (
+          projectData.map((project) => (
             <DropdownMenuItem
-              key={project.name}
+              key={project._id}
               className="flex flex-row items-center gap-4 hover:cursor-pointer"
-              onClick={() => handleProjectChange(project.name)}
+              onClick={async () => {
+                try {
+                  await handleProjectChange(project);
+                } catch (error) {
+                  console.log(error);
+                }
+              }}
             >
               <Image
                 className="inline-block h-5 w-5 rounded-full"
-                src={project.image ?? ""}
+                src={project.image ?? "/default-project-image.png"}
                 alt={project.name}
                 width={20}
                 height={20}
@@ -85,7 +196,7 @@ export default function NavProjectDropdown({
           ))
         ) : (
           <DropdownMenuItem className="flex flex-row items-center gap-4">
-            <h1 className="text-sm">No Projects Available</h1>
+            <h1 className="text-sm">No selected project</h1>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
