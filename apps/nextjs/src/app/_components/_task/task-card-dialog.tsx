@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useFieldArray, useForm } from "react-hook-form";
 
+import type { UserClass } from "@acme/db";
 import type { NewTaskCard, ObjectIdString, TaskCard } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
@@ -37,6 +38,12 @@ import EditIcon from "./icons/EditIcon";
 
 // TaskDialogProps updated to accept Zod form inputs
 export interface TaskCardDialogProps {
+  members:
+    | {
+        role: string;
+        userData: UserClass;
+      }[]
+    | undefined;
   initialValues?: TaskCard;
   onSubmit: (taskData: TaskCard | NewTaskCard) => void;
   dialogTrigger?: React.ReactNode;
@@ -48,6 +55,7 @@ export interface TaskCardDialogProps {
 }
 
 const TaskCardDialog = ({
+  members,
   initialValues,
   onSubmit,
   dialogTrigger,
@@ -75,6 +83,10 @@ const TaskCardDialog = ({
 
   const [newFieldName, setNewFieldName] = useState("");
 
+  const taskAssignee = members?.find((member) => {
+    return member.userData.walletId === initialValues?.assigneeId;
+  });
+
   // Setup form with React Hook Form and Zod validation
   const {
     control,
@@ -92,7 +104,7 @@ const TaskCardDialog = ({
       description: "",
       dueDate: new Date(NaN),
       statusId: statusId,
-      assigneeId: undefined,
+      assigneeId: taskAssignee?.userData.name ?? undefined,
       projectId: projectId,
       order: 0,
       tags: {
@@ -190,6 +202,7 @@ const TaskCardDialog = ({
     void trigger("customFields");
   };
 
+  console.log("TaskCardDialog.tsx: members", members);
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -401,9 +414,10 @@ const TaskCardDialog = ({
                   <SelectValue placeholder="Select Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  {statuses?.map((status) => (
+                  {statuses?.map((status, index) => (
                     <SelectItem
                       // key={status._id}
+                      key={index}
                       value={status._id}
                     >
                       {status.name}
@@ -424,7 +438,7 @@ const TaskCardDialog = ({
             </h3>
             <Select
               value={watch("assigneeId") ?? "unassigned"}
-              onValueChange={(value: ObjectIdString) => {
+              onValueChange={(value: string) => {
                 setValue(
                   "assigneeId",
                   value === "unassigned" ? undefined : value,
@@ -436,7 +450,14 @@ const TaskCardDialog = ({
                 <SelectValue placeholder="Unassigned" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {members?.map((member) => (
+                  <SelectItem
+                    key={member.userData.walletId ?? "unknown"}
+                    value={member.userData.walletId ?? "unknown"}
+                  >
+                    {member.userData.name}
+                  </SelectItem>
+                ))}
                 {/* Add options for available assignees */}
               </SelectContent>
             </Select>
