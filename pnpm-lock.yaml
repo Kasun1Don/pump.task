@@ -22,7 +22,13 @@ catalogs:
     '@types/react':
       specifier: ^18.3.3
       version: 18.3.3
+    '@types/react-dom':
+      specifier: ^18.3.0
+      version: 18.3.0
     react:
+      specifier: 18.3.1
+      version: 18.3.1
+    react-dom:
       specifier: 18.3.1
       version: 18.3.1
 
@@ -435,6 +441,9 @@ importers:
       react-hook-form:
         specifier: ^7.52.1
         version: 7.52.1(react@18.3.1)
+      react-icons:
+        specifier: ^5.3.0
+        version: 5.3.0(react@18.3.1)
       sonner:
         specifier: ^1.5.0
         version: 1.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -520,7 +529,7 @@ importers:
         version: 7.34.3(eslint@9.6.0)
       eslint-plugin-react-hooks:
         specifier: rc
-        version: 5.1.0-rc-69d4b800-20241021(eslint@9.6.0)
+        version: 5.1.0-rc-603e6108-20241029(eslint@9.6.0)
       eslint-plugin-turbo:
         specifier: ^2.0.6
         version: 2.0.6(eslint@9.6.0)
@@ -4670,8 +4679,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
 
-  eslint-plugin-react-hooks@5.1.0-rc-69d4b800-20241021:
-    resolution: {integrity: sha512-BlHwxPe59W888jvcwa2dRJXzJf2DWJm9ZMwlpaeobPzW1gaghptM+ISk/E2UK/PTVuDmdkuqZ4je/9v3QE99Gg==}
+  eslint-plugin-react-hooks@5.1.0-rc-603e6108-20241029:
+    resolution: {integrity: sha512-btivWAKpwyymHoOUyoc3evCcmAWSZw+qlDe/nhtFKDs0agXQrqfLBfmfwZb7sY1VWiKVaqEKPhhK19WNOxssNw==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -6925,6 +6934,11 @@ packages:
     engines: {node: '>=12.22.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
+
+  react-icons@5.3.0:
+    resolution: {integrity: sha512-DnUk8aFbTyQPSkCfF8dbX6kQjXA9DktMeJqfjrg6cK9vwQVMxmcA3BfP4QoiztVmEHtwlTgLFsPuH2NskKT6eg==}
+    peerDependencies:
+      react: '*'
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -14029,7 +14043,7 @@ snapshots:
       safe-regex-test: 1.0.3
       string.prototype.includes: 2.0.0
 
-  eslint-plugin-react-hooks@5.1.0-rc-69d4b800-20241021(eslint@9.6.0):
+  eslint-plugin-react-hooks@5.1.0-rc-603e6108-20241029(eslint@9.6.0):
     dependencies:
       eslint: 9.6.0
 
@@ -16668,6 +16682,10 @@ snapshots:
       react: 18.3.1
 
   react-hook-form@7.52.1(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+
+  react-icons@5.3.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
