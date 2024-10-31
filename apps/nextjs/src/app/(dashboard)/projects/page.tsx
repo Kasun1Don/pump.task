@@ -343,16 +343,12 @@ export default function ProjectsPage() {
               </>
             ) : (
               <div className="col-span-3 text-center text-gray-400">
-                <p className="mb-4">No projects found.</p>
                 <p>
                   {showFilter === "all"
                     ? "You are not associated with any projects yet."
                     : showFilter === "my"
                       ? "You are not a member of any projects."
                       : "You haven't created any projects yet."}
-                </p>
-                <p className="mt-4">
-                  Click the "Create new project" button to get started!
                 </p>
               </div>
             )}
@@ -465,12 +461,24 @@ export default function ProjectsPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent>
+        <DialogContent 
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleDelete();
+            }
+          }}
+          tabIndex={0}
+          role="alertdialog"
+        >
           <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
+            <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
+            <DialogDescription id="delete-dialog-description">
               <p>Are you sure you want to remove this project?</p>
               <p>(This action cannot be undone)</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Press Enter to confirm or Escape to cancel
+              </p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
