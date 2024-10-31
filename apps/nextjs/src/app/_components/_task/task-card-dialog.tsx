@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useFieldArray, useForm } from "react-hook-form";
 
+import type { UserClass } from "@acme/db";
 import type { NewTaskCard, ObjectIdString, TaskCard } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
@@ -37,6 +38,12 @@ import EditIcon from "./icons/EditIcon";
 
 // TaskDialogProps updated to accept Zod form inputs
 export interface TaskCardDialogProps {
+  members:
+    | {
+        role: string;
+        userData: UserClass;
+      }[]
+    | undefined;
   initialValues?: TaskCard;
   onSubmit: (taskData: TaskCard | NewTaskCard) => void;
   dialogTrigger?: React.ReactNode;
@@ -45,9 +52,12 @@ export interface TaskCardDialogProps {
   projectId: ObjectIdString;
   statusId: ObjectIdString;
   isEditable?: boolean;
+  loading: boolean;
+  setSubmitButtonTextState?: (text: string) => void;
 }
 
 const TaskCardDialog = ({
+  members,
   initialValues,
   onSubmit,
   dialogTrigger,
@@ -56,6 +66,8 @@ const TaskCardDialog = ({
   projectId,
   statusId,
   isEditable = false,
+  loading,
+  setSubmitButtonTextState,
 }: TaskCardDialogProps) => {
   const defaultTags = [
     "Frontend",
@@ -72,8 +84,13 @@ const TaskCardDialog = ({
   const [isTagDialogOpen, setIsTagDialogOpen] = useState<boolean>(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState<boolean>(false);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
   const [newFieldName, setNewFieldName] = useState("");
+
+  const taskAssignee = members?.find((member) => {
+    return member.userData.walletId === initialValues?.assigneeId;
+  });
 
   // Setup form with React Hook Form and Zod validation
   const {
@@ -92,7 +109,7 @@ const TaskCardDialog = ({
       description: "",
       dueDate: new Date(NaN),
       statusId: statusId,
-      assigneeId: undefined,
+      assigneeId: taskAssignee?.userData.name ?? undefined,
       projectId: projectId,
       order: 0,
       tags: {
@@ -191,10 +208,13 @@ const TaskCardDialog = ({
   };
 
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         {dialogTrigger ?? (
-          <Button className="text-xxl max-h-[40px] w-full justify-start bg-transparent text-white hover:bg-[#27272a]">
+          <Button
+            className="text-xxl max-h-[40px] w-full justify-start bg-transparent text-white hover:bg-[#27272a]"
+            onClick={() => setIsDialogOpen(true)}
+          >
             {dialogButtonText}
           </Button>
         )}
@@ -206,7 +226,10 @@ const TaskCardDialog = ({
             {/* Add an Edit button to toggle edit mode */}
             {!isNewTask && isEditable && (
               <button
-                onClick={() => setIsEditMode(!isEditMode)}
+                onClick={() => {
+                  setIsEditMode(!isEditMode);
+                  setSubmitButtonTextState?.("Submit");
+                }}
                 className={`ml-4 mt-2 ${isEditMode ? "stroke-amber-300 hover:stroke-green-400" : "stroke-gray-400 hover:stroke-amber-300"}`}
               >
                 <EditIcon />
@@ -288,7 +311,7 @@ const TaskCardDialog = ({
                   <DialogFooter>
                     <Button
                       onClick={handleAddTag}
-                      className="bg-zesty-green hover:bg-zesty-green"
+                      className="bg-zesty-green hover:bg-zesty-green hover:bg-opacity-80"
                     >
                       Add Tag
                     </Button>
@@ -324,7 +347,7 @@ const TaskCardDialog = ({
           <Textarea
             placeholder="Enter detailed task description."
             disabled={!isEditMode}
-            className="h-24"
+            className="h-24 hover:cursor-default"
             {...register("description")}
           />
           {errors.description?.message && (
@@ -401,9 +424,10 @@ const TaskCardDialog = ({
                   <SelectValue placeholder="Select Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  {statuses?.map((status) => (
+                  {statuses?.map((status, index) => (
                     <SelectItem
                       // key={status._id}
+                      key={index}
                       value={status._id}
                     >
                       {status.name}
@@ -424,7 +448,7 @@ const TaskCardDialog = ({
             </h3>
             <Select
               value={watch("assigneeId") ?? "unassigned"}
-              onValueChange={(value: ObjectIdString) => {
+              onValueChange={(value: string) => {
                 setValue(
                   "assigneeId",
                   value === "unassigned" ? undefined : value,
@@ -436,7 +460,14 @@ const TaskCardDialog = ({
                 <SelectValue placeholder="Unassigned" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {members?.map((member) => (
+                  <SelectItem
+                    key={member.userData.walletId ?? "unknown"}
+                    value={member.userData.walletId ?? "unknown"}
+                  >
+                    {member.userData.name}
+                  </SelectItem>
+                ))}
                 {/* Add options for available assignees */}
               </SelectContent>
             </Select>
@@ -512,7 +543,7 @@ const TaskCardDialog = ({
                   <DialogTrigger asChild>
                     <Button
                       onClick={handleAddCustomField}
-                      className="bg-zesty-green hover:bg-zesty-green"
+                      className="bg-zesty-green hover:bg-zesty-green hover:bg-opacity-80"
                     >
                       Add Field
                     </Button>
@@ -531,6 +562,8 @@ const TaskCardDialog = ({
               if (isNewTask) {
                 const newTaskData: NewTaskCard = taskData;
                 onSubmit(newTaskData);
+
+                setIsDialogOpen(false);
               } else {
                 const updatedTaskData = {
                   ...taskData,
@@ -538,11 +571,13 @@ const TaskCardDialog = ({
                 };
 
                 onSubmit(updatedTaskData as TaskCard);
+
+                setIsDialogOpen(false);
               }
             })}
-            className="bg-zesty-green hover:bg-zesty-green w-full text-black"
+            className="bg-zesty-green hover:bg-zesty-green w-full text-black hover:bg-opacity-80"
           >
-            {submitButtonText}
+            {loading ? "Updating" : submitButtonText}
           </Button>
         </DialogFooter>
       </DialogContent>

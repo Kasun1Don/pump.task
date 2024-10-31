@@ -20,15 +20,14 @@ export const taskRouter = {
         // Convert string IDs to ObjectId instances
         const statusObjectId = new mongoose.Types.ObjectId(input.statusId);
         const projectObjectId = new mongoose.Types.ObjectId(input.projectId);
-        const assigneeObjectId = input.assigneeId
-          ? new mongoose.Types.ObjectId(input.assigneeId)
-          : undefined;
+        const assigneeWalletId = input.assigneeId;
+        console.log("Assignee ID:", assigneeWalletId);
 
         const newTask = new Task({
           title: input.title,
           description: input.description,
           dueDate: input.dueDate,
-          assigneeId: assigneeObjectId,
+          assigneeId: assigneeWalletId,
           statusId: statusObjectId,
           projectId: projectObjectId,
           order: input.order,
@@ -57,7 +56,7 @@ export const taskRouter = {
         title: z.string().optional(), // Fields to update (all are optional)
         description: z.string().optional(),
         dueDate: z.date().optional(),
-        assigneeId: objectIdStringSchema("assigneeId").optional(),
+        assigneeId: z.string().optional(),
         statusId: objectIdStringSchema("statusId").optional(),
         tags: z
           .object({
@@ -160,9 +159,7 @@ export const taskRouter = {
         const tasksWithObjectIdStrings = tasks.map((task) => ({
           ...task,
           _id: validateObjectIdString(task._id.toString(), "taskId"),
-          assigneeId: task.assigneeId
-            ? validateObjectIdString(String(task.assigneeId), "assigneeId")
-            : undefined,
+          assigneeId: task.assigneeId,
           projectId: validateObjectIdString(
             String(task.projectId),
             "projectId",

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import type { UserClass } from "@acme/db";
 import type { StatusColumn, TaskCard as TaskCardData } from "@acme/validators";
 import { Button } from "@acme/ui/button";
 import {
@@ -23,9 +24,15 @@ import TaskCard from "./task-card";
 interface TaskStatusColumnProps {
   // project: Project;
   statusColumn: StatusColumn;
+  members:
+    | {
+        role: string;
+        userData: UserClass;
+      }[]
+    | undefined;
 }
 
-const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
+const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
   const [tasks, setTasks] = useState<TaskCardData[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false); // State to control options visibility
@@ -59,6 +66,9 @@ const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
   const handleTaskCreated = (newTask: TaskCardData) => {
     if (newTask.statusId === statusColumn._id) {
       setTasks((prevTasks) => [...prevTasks, newTask]);
+    }
+    if (statusColumn.isProtected) {
+      console.log("Task is protected");
     }
   };
 
@@ -144,6 +154,7 @@ const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
       </h2>
       {tasks.map((task) => (
         <TaskCard
+          members={members}
           key={task._id}
           projectId={statusColumn.projectId}
           statusId={statusColumn._id}
@@ -152,6 +163,7 @@ const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
       ))}
       {statusColumn.isProtected === false && (
         <NewTaskCard
+          members={members}
           statusId={statusColumn._id}
           projectId={statusColumn.projectId}
           onTaskCreated={handleTaskCreated}

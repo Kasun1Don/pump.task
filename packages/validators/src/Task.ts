@@ -28,7 +28,7 @@ export const TaskCardSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   dueDate: z.date(),
-  assigneeId: objectIdStringSchema("assigneeId").optional(),
+  assigneeId: z.string().default("unassigned").optional(),
   statusId: objectIdStringSchema("statusId"),
   projectId: objectIdStringSchema("projectId"),
   order: z.number().int().nonnegative("Order must be a non-negative integer"),
