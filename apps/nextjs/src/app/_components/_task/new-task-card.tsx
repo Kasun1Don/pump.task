@@ -2,6 +2,7 @@
 
 import React from "react";
 
+import type { UserClass } from "@acme/db";
 import type { NewTaskCard, ObjectIdString, TaskCard } from "@acme/validators";
 import { toast } from "@acme/ui/toast";
 
@@ -13,12 +14,19 @@ interface NewTaskCardProps {
   projectId: ObjectIdString;
   statusId: ObjectIdString;
   onTaskCreated: (newTask: TaskCard) => void;
+  members:
+    | {
+        role: string;
+        userData: UserClass;
+      }[]
+    | undefined;
 }
 
 const NewTaskCard = ({
   projectId,
   statusId,
   onTaskCreated,
+  members,
 }: NewTaskCardProps) => {
   const utils = api.useUtils();
 
@@ -52,6 +60,7 @@ const NewTaskCard = ({
     <div>
       {/* Render the TaskCardDialog to create a new task */}
       <TaskCardDialog
+        members={members}
         loading={addTaskMutation.isPending}
         onSubmit={handleSubmit}
         dialogButtonText="+ New task"

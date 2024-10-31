@@ -46,7 +46,7 @@ export default async function UserProfile({
           className="mb-4"
         />
 
-        <div className="relative mb-4 flex h-auto justify-between">
+        <div className="relative mb-4 flex h-auto justify-between gap-2">
           <div className="w-7/10 justify-start" style={{ maxWidth: "70%" }}>
             <h1 className="text-2xl font-bold">{userData.name}</h1>
             <p className="w-96 flex-1 p-1 text-sm text-gray-400">
