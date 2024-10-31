@@ -212,21 +212,25 @@ export default function ProjectsPage() {
             </Button>
           </div>
           <div className="flex justify-center">
-            <Tabs defaultValue="all" onValueChange={(value) => setShowFilter(value)} className="w-[300px] sm:w-[400px] md:w-[500px]">
-              <TabsList className="bg-[#18181B] grid w-full grid-cols-3">
-                <TabsTrigger 
-                  value="all" 
+            <Tabs
+              defaultValue="all"
+              onValueChange={(value) => setShowFilter(value)}
+              className="w-[300px] sm:w-[400px] md:w-[500px]"
+            >
+              <TabsList className="grid w-full grid-cols-3 bg-[#18181B]">
+                <TabsTrigger
+                  value="all"
                   className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
                 >
                   All Projects
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="my"
                   className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
                 >
                   My Projects
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="Owned"
                   className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
                 >
