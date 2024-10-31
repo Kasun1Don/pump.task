@@ -111,4 +111,49 @@ export const memberRouter = {
         { $pull: { projects: input.projectId } },
       );
     }),
+  removeSelf: publicProcedure
+    .input(z.object({ 
+      projectId: z.string(),
+      walletId: z.string()
+    }))
+    .mutation(async ({ input }) => {
+      // Delete member record
+      await Member.deleteOne({
+        walletId: input.walletId,
+        projectId: new mongoose.Types.ObjectId(input.projectId),
+      });
+
+      // Remove project from user's projects array
+      await User.updateOne(
+        { walletId: input.walletId },
+        { $pull: { projects: input.projectId } },
+      );
+
+      return { success: true };
+    }),
+    
+  getProjectMemberCounts: publicProcedure
+    .input(z.array(z.string()))
+    .query(async ({ input }) => {
+      const counts = await Member.aggregate([
+        { 
+          $match: { 
+            projectId: { 
+              $in: input.map(id => new mongoose.Types.ObjectId(id)) 
+            } 
+          } 
+        },
+        { 
+          $group: { 
+            _id: "$projectId", 
+            count: { $sum: 1 } 
+          } 
+        }
+      ]);
+      
+      return counts.reduce((acc, curr) => {
+        acc[curr._id.toString()] = curr.count;
+        return acc;
+      }, {} as Record<string, number>);
+    }),
 } satisfies TRPCRouterRecord;

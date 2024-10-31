@@ -321,4 +321,36 @@ export const taskRouter = {
         }
       },
     ),
+
+    // get all the tags (NFTs) associated with a project
+  getProjectTags: publicProcedure
+    .input(z.array(objectIdStringSchema("projectId")))
+    .query(async ({ input: projectIds }) => {
+      try {
+        const projectTagsMap: Record<string, string[]> = {};
+        
+        // Get tags for each project
+        await Promise.all(
+          projectIds.map(async (projectId) => {
+            const tasks = await Task.find(
+              { projectId: new mongoose.Types.ObjectId(projectId) },
+              { "tags.defaultTags": 1 }
+            ).lean();
+            
+            const uniqueTags = [...new Set(
+              tasks
+                .map((task) => task.tags.defaultTags)
+                .flat()
+            )];
+            
+            projectTagsMap[projectId] = uniqueTags;
+          })
+        );
+
+        return projectTagsMap;
+      } catch (error) {
+        console.error("Error fetching project tags:", error);
+        throw new Error("Failed to fetch project tags");
+      }
+    }),
 } satisfies TRPCRouterRecord;

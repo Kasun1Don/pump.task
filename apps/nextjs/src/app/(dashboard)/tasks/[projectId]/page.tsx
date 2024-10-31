@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import { toast } from "@acme/ui/toast";
 
 import type { ObjectIdString, StatusColumn } from "@acme/validators";
 import { StatusSchema, validateObjectIdString } from "@acme/validators";
@@ -9,6 +10,7 @@ import { StatusSchema, validateObjectIdString } from "@acme/validators";
 import NewStatusColumn from "~/app/_components/_task/new-status-column";
 import TaskStatusColumn from "~/app/_components/_task/task-status-column";
 import TaskBoardSkeleton from "~/app/_components/_task/TaskBoardLoader";
+
 import { api } from "~/trpc/react";
 
 export default function TasksPage({
@@ -23,6 +25,8 @@ export default function TasksPage({
     params.projectId as ObjectIdString,
   );
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState("");
 
   // // Retrieve projectId from URL
   // const rawProjectId = searchParams.get("projectId");
@@ -121,6 +125,20 @@ export default function TasksPage({
     });
   };
 
+  const utils = api.useUtils();
+
+  const updateProjectName = api.project.updateName.useMutation({
+    onSuccess: () => {
+      setIsEditing(false);
+      // refresh the data by invalidating the old project query
+      void utils.project.byId.invalidate({ id: projectId as string });
+      toast.success("Project name updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update project name: ${error.message}`);
+    },
+  });
+
   if (validationError) {
     return <p>{validationError}</p>;
   }
@@ -145,9 +163,43 @@ export default function TasksPage({
   // responsive scrolling for the task board
   return (
     <div className="flex h-full flex-col">
-      <h1 className="mb-3 flex justify-center text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg">
-        {project.name}
-      </h1>
+      <div className="mb-3 flex justify-center">
+        {isEditing ? (
+          <input
+            type="text"
+            value={editedName}
+            onChange={(e) => setEditedName(e.target.value)}
+            onBlur={() => {
+              if (editedName.trim() && editedName !== project.name) {
+                updateProjectName.mutate({
+                  projectId: projectId as string,
+                  name: editedName.trim()
+                });
+              } else {
+                setIsEditing(false);
+                setEditedName(project.name);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.currentTarget.blur();
+              } else if (e.key === 'Escape') {
+                setIsEditing(false);
+                setEditedName(project.name);
+              }
+            }}
+            className="bg-transparent text-5xl font-extrabold text-white text-center border-b border-gray-500 focus:border-[#72D524] outline-none"
+            autoFocus
+          />
+        ) : (
+          <h1 
+            onDoubleClick={() => setIsEditing(true)}
+            className="text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg cursor-pointer hover:opacity-80"
+          >
+            {project.name}
+          </h1>
+        )}
+      </div>
       <div className="flex-1 overflow-x-auto">
         <div className="flex min-w-max gap-6 p-6">
           {statusColumns.map((status) => (
