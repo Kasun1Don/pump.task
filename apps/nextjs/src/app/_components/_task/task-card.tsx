@@ -20,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@acme/ui/dialog";
+import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/react";
 import TrashIcon from "./icons/TrashIcon";
@@ -40,15 +41,18 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
   const utils = api.useUtils();
 
   const deleteTask = api.task.deleteTask.useMutation({
-    onSuccess: () => {
+    onSuccess: (task) => {
       console.log("Task deleted successfully");
       void utils.task.getTaskByStatusId.invalidate();
+      toast.success(`Task ${task.task.title} deleted successfully`);
     },
     onError: (error) => {
       if (error instanceof Error) {
         console.error("Error deleting task:", error.message);
+        toast.error("Error deleting task");
       } else {
         console.error("Unknown error deleting task");
+        toast.error("Unknown error deleting task");
       }
     },
   });
@@ -59,9 +63,15 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
       console.log("Task updated successfully", updatedTask);
       setSubmitButtonText("Updated");
       void utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
+      if (String(updatedTask.statusId) !== statusId) {
+        toast.success(`Task moved to new status`);
+      } else {
+        toast.success(`Task ${updatedTask.title} updated successfully`);
+      }
     },
     onError: (error) => {
       console.error("Error creating task:", error);
+      toast.error("Error creating task");
     },
   }); // Initialize your mutation
 
