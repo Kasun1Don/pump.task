@@ -1,8 +1,10 @@
-import type { ProjectClass } from "@acme/db";
+import type { ProjectClass, UserClass } from "@acme/db";
 
 import { AddMember } from "~/app/_components/_users/addMember";
 import { EditMember } from "~/app/_components/_users/editMember";
 import { api } from "~/trpc/server";
+
+type MembersType = { role: string; userData: UserClass }[];
 
 export default async function UsersPage({
   params,
@@ -12,7 +14,13 @@ export default async function UsersPage({
   const response = await api.project.byId({ id: params.id });
   // Destructure user data from response
   const projectData: ProjectClass | null = response as ProjectClass;
-  const members = await api.member.byProjectId({ projectId: params.id });
+  let members: MembersType = [];
+  try {
+    members = await api.member.byProjectIdProtected({ projectId: params.id });
+  } catch (err) {
+    console.log(err);
+    return <p>You are not authorized to view the members of this project</p>;
+  }
 
   return (
     <div className="mx-20 mt-3 flex flex-col gap-3">

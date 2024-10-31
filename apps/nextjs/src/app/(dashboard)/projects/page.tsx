@@ -160,7 +160,6 @@ export default function ProjectsPage() {
         walletId: walletId,
         projectId: newProject.id.toString(),
       });
-      document.cookie = `projectId=${newProject.id}; path=/;`;
       await revalidate("/");
       router.push(`/tasks/${newProject.id.toString()}`);
     },
@@ -225,7 +224,7 @@ export default function ProjectsPage() {
                 } hover:bg-[#27272A]`}
                 onClick={() => setShowFilter("all")}
               >
-                All projects
+                Public projects
               </button>
               <button
                 className={`px-4 py-2 font-semibold ${
@@ -270,9 +269,6 @@ export default function ProjectsPage() {
                             walletId: walletId,
                             projectId: project._id.toString(),
                           });
-
-                          // Set the cookie
-                          document.cookie = `projectId=${project._id.toString()}; path=/;`;
 
                           // Navigate to the project's tasks page
                           await revalidate("/");
