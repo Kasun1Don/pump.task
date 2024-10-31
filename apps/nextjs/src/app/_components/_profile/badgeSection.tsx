@@ -6,6 +6,8 @@ import { defineChain, getContract } from "thirdweb";
 import { sepolia } from "thirdweb/chains";
 import { balanceOf, getOwnedNFTs } from "thirdweb/extensions/erc1155";
 
+import { toast } from "@acme/ui/toast";
+
 import { client } from "~/app/thirdwebClient";
 import LoadingNFTs from "./loadingNFTs";
 
@@ -67,14 +69,14 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
         const nftData = await Promise.all(nftDataPromises);
 
         setNfts(nftData);
-      } catch (error) {
-        console.error("Error fetching NFTs: ", error);
+      } catch {
+        toast.error("Error fetching Badges:: ");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNFTs().catch((error) => console.error("Error fetching NFTs: ", error));
+    fetchNFTs().catch(() => toast.error("Error fetching NFTs: "));
   }, [chain, walletId]);
 
   if (!walletId) {
@@ -122,7 +124,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
                 alt="NFT Media"
                 width={150}
                 height={130}
-                onError={() => console.log(`Image not found: ${nft.image}`)}
+                onError={() => toast.error(`Image not found: ${nft.image}`)}
               />
             </div>
             <div className="relative border-t border-gray-700 bg-black bg-opacity-50 p-2">
