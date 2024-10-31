@@ -164,7 +164,6 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
     }
     walletId = verified.parsedJWT.sub;
   }
-
   const members = await Member.find({ projectId: ctx.projectId });
   const member = members.find((member) => member.walletId === walletId);
   if (member) {
@@ -175,6 +174,33 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
   } else {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session },
+    },
+  });
+});
+
+export const memberProcedure = t.procedure.use(async ({ ctx, next }) => {
+  let walletId = "";
+  if (!ctx.token) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const token = ctx.token.split(" ")[1]!;
+    const verified = await thirdwebAuth.verifyJWT({ jwt: token });
+    if (!verified.valid) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    walletId = verified.parsedJWT.sub;
+  }
+  const members = await Member.find({ projectId: ctx.projectId });
+  const member = members.find((member) => member.walletId === walletId);
+  if (!member) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 

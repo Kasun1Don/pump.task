@@ -14,10 +14,12 @@ import { createQueryClient } from "./query-client";
  */
 const createContext = cache(async () => {
   const token: string = cookies().get("jwt")?.value ?? "";
+  const projectId: string = cookies().get("projectId")?.value ?? "";
 
   const heads = new Headers(headers());
   heads.set("x-trpc-source", "react server component");
   heads.set("Authorization", `Bearer ${token}`);
+  heads.set("projectId", projectId);
 
   return createTRPCContext({
     session: await auth(),

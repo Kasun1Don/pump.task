@@ -6,7 +6,7 @@ import { z } from "zod";
 import type { UserClass } from "@acme/db";
 import { Member, User } from "@acme/db";
 
-import { adminProcedure, publicProcedure } from "../trpc";
+import { adminProcedure, memberProcedure, publicProcedure } from "../trpc";
 
 interface MemberWithUserData {
   role: string;
@@ -60,7 +60,7 @@ export const memberRouter = {
         email: input.email,
       };
     }),
-  byProjectId: publicProcedure
+  byProjectId: memberProcedure
     .input(
       z.object({
         projectId: z.string(),
