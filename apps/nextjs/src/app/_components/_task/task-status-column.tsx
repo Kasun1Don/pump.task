@@ -60,6 +60,9 @@ const TaskStatusColumn = ({ statusColumn }: TaskStatusColumnProps) => {
     if (newTask.statusId === statusColumn._id) {
       setTasks((prevTasks) => [...prevTasks, newTask]);
     }
+    if (statusColumn.isProtected) {
+      console.log("Task is protected");
+    }
   };
 
   // Deletion mutation for the status column

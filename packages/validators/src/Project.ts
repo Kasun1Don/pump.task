@@ -1,37 +1,25 @@
 import { z } from "zod";
 
-import { objectIdStringSchema } from "./ObjectIdString"; // Assuming you have this schema already
+import { objectIdStringSchema } from "./ObjectIdString"; // Adjust the path accordingly
 
-// Zod schema for MemberSchema
-const MemberSchema = z.object({
-  user: z.string().min(1, "user is required"),
-  wallet: z.string().min(1, "Invalid wallet ID").optional(),
-  email: z.string().min(1, "Invalid email").optional(),
-  memberId: z.string().min(1, "member id is required"), //objectIdStringSchema("memberId"), // Adjust field names as needed
-  name: z.string().min(1, "Member name is required"),
-  role: z.string().min(1, "Role is required"),
-});
-
-// Zod schema for ProjectClass
+// Define the ProjectSchema for existing projects
 export const ProjectSchema = z.object({
+  _id: objectIdStringSchema("projectId"), // Project ID as a string
   name: z.string().min(1, "Project name is required"),
-  image: z.string().optional(), // image is optional
+  image: z.string().optional(), // Optional image URL or path
   isPrivate: z.boolean(),
-  members: z.array(MemberSchema).default([]), // Array of MemberSchema
-  templateId: z.string().optional(), // templateId is optional
-  _id: objectIdStringSchema("projectId"), // Project ID schema
+  templateId: z.string().optional(),
+  createdAt: z.date().optional(), // Date when the project was created
+  updatedAt: z.date().optional(), // Date when the project was last updated
 });
 
-// Define the schema for creating a new project, omitting the _id since it is generated automatically
+// Define the NewProjectSchema for creating new projects
 export const NewProjectSchema = ProjectSchema.omit({
   _id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
-// Infer the TypeScript types from the Zod schemas
+// Infer the TypeScript types from the schemas
 export type Project = z.infer<typeof ProjectSchema>;
 export type NewProject = z.infer<typeof NewProjectSchema>;
-
-// Function to create a new project using the schema
-export const createProject = (input: z.infer<typeof ProjectSchema>) => {
-  return ProjectSchema.parse(input);
-};
