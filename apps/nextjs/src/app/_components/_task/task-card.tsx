@@ -35,6 +35,7 @@ interface TaskCardProps {
 
 const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [submitButtonText, setSubmitButtonText] = useState("Submit");
 
   const utils = api.useUtils();
 
@@ -56,6 +57,7 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
     onSuccess: (updatedTask) => {
       // Handle success
       console.log("Task updated successfully", updatedTask);
+      setSubmitButtonText("Updated");
       void utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
     },
     onError: (error) => {
@@ -81,10 +83,13 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
   return (
     <>
       <TaskCardDialog
+        loading={updateTaskMutation.isPending}
         initialValues={task}
         projectId={projectId}
         statusId={statusId}
         onSubmit={handleSubmit}
+        submitButtonText={submitButtonText}
+        setSubmitButtonTextState={setSubmitButtonText}
         isEditable={true} // Need to change this to be conditional based on user role
         dialogTrigger={
           <div className="group relative max-w-[350px] rounded-2xl border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">

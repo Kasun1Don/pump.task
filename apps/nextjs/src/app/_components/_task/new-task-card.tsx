@@ -49,6 +49,7 @@ const NewTaskCard = ({
     <div>
       {/* Render the TaskCardDialog to create a new task */}
       <TaskCardDialog
+        loading={addTaskMutation.isPending}
         onSubmit={handleSubmit}
         dialogButtonText="+ New task"
         submitButtonText="Create task"
