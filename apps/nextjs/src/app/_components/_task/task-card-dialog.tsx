@@ -45,6 +45,8 @@ export interface TaskCardDialogProps {
   projectId: ObjectIdString;
   statusId: ObjectIdString;
   isEditable?: boolean;
+  loading: boolean;
+  setSubmitButtonTextState?: (text: string) => void;
 }
 
 const TaskCardDialog = ({
@@ -56,6 +58,8 @@ const TaskCardDialog = ({
   projectId,
   statusId,
   isEditable = false,
+  loading,
+  setSubmitButtonTextState,
 }: TaskCardDialogProps) => {
   const defaultTags = [
     "Frontend",
@@ -190,6 +194,8 @@ const TaskCardDialog = ({
     void trigger("customFields");
   };
 
+  console.log("loading", loading);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -206,7 +212,10 @@ const TaskCardDialog = ({
             {/* Add an Edit button to toggle edit mode */}
             {!isNewTask && isEditable && (
               <button
-                onClick={() => setIsEditMode(!isEditMode)}
+                onClick={() => {
+                  setIsEditMode(!isEditMode);
+                  setSubmitButtonTextState?.("Submit");
+                }}
                 className={`ml-4 mt-2 ${isEditMode ? "stroke-amber-300 hover:stroke-green-400" : "stroke-gray-400 hover:stroke-amber-300"}`}
               >
                 <EditIcon />
@@ -531,6 +540,7 @@ const TaskCardDialog = ({
               if (isNewTask) {
                 const newTaskData: NewTaskCard = taskData;
                 onSubmit(newTaskData);
+                setIsEditMode(false);
               } else {
                 const updatedTaskData = {
                   ...taskData,
@@ -538,11 +548,12 @@ const TaskCardDialog = ({
                 };
 
                 onSubmit(updatedTaskData as TaskCard);
+                setIsEditMode(false);
               }
             })}
             className="bg-zesty-green hover:bg-zesty-green w-full text-black"
           >
-            {submitButtonText}
+            {loading ? "Updating" : submitButtonText}
           </Button>
         </DialogFooter>
       </DialogContent>
