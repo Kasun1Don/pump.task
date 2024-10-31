@@ -81,7 +81,7 @@ export default async function Navbar() {
         {/* Navigation links */}
         <div className="top-24 z-40 flex flex-wrap border-b-2 bg-zinc-950">
           <NavLink href="/projects">Projects</NavLink>
-          <NavLink href="/tasks">Tasks</NavLink>
+          <NavLink href={`/tasks/${projectId}`}>Tasks</NavLink>
           <NavLink href="/profile">My Profile</NavLink>
           <NavLink href={projectId ? `/users/${projectId}` : "/missingproject"}>
             Users
