@@ -228,7 +228,7 @@ export default function Security({
                             </div>
                             <div className="flex flex-col items-center gap-4">
                               {successMessage ? (
-                                <p className="text-green-500">Success!</p>
+                                <p className="text-zesty-green">Success!</p>
                               ) : (
                                 <>
                                   <FormItem className="flex flex-col items-center justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm">

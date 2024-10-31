@@ -56,21 +56,23 @@ export default async function Navbar() {
       <div className="fixed left-0 right-0 top-0 z-10 w-screen">
         <div className="flex flex-row justify-between gap-4 bg-zinc-950 px-12 pb-2 pt-5">
           {/* Logo and title */}
-          <div className="flex flex-row items-center justify-center gap-8">
-            <div className="flex flex-row gap-4 text-xl">
-              <Image
-                src="/pump.taskLogo.png"
-                alt="Pump Task Logo"
-                width={26}
-                height={18}
-                className="h-auto w-auto"
-              />
-              <h1 className="text-2xl font-bold">pump.task</h1>
+          <NavLink href="/projects">
+            <div className="flex cursor-pointer flex-row items-center justify-center gap-8">
+              <div className="flex flex-row gap-4 text-xl">
+                <Image
+                  src="/pump.taskLogo.png"
+                  alt="Pump Task Logo"
+                  width={26}
+                  height={18}
+                  className="h-auto w-auto"
+                />
+                <h1 className="text-2xl font-bold">pump.task</h1>
+              </div>
+              <h5 className="text-zesty-green h-fit rounded-md bg-zinc-800 px-2 py-1 text-xs">
+                Web3 Project Tracker
+              </h5>
             </div>
-            <h5 className="h-fit rounded-md bg-zinc-800 px-2 py-1 text-xs text-lime-500">
-              Web3 Project Tracker
-            </h5>
-          </div>
+          </NavLink>
 
           {/* Navbar section right-hand side */}
           <div className="mt-1 flex max-h-8 gap-10 hover:cursor-pointer">

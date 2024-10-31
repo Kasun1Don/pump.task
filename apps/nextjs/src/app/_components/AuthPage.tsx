@@ -181,7 +181,7 @@ export default function UserLoginClient({
                   render={() => (
                     <FormItem className="flex flex-col items-center justify-between rounded-lg border bg-zinc-950 p-3 shadow-sm">
                       {successMessage ? (
-                        <p className="text-green-500">Success!</p>
+                        <p className="text-zesty-green">Success!</p>
                       ) : !loading ? (
                         <>
                           <FormLabel>Code</FormLabel>
