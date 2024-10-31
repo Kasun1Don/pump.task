@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@acme/ui/dialog";
+import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/react";
 import TrashIcon from "./icons/TrashIcon";
@@ -42,19 +43,23 @@ interface TaskCardProps {
 
 const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [submitButtonText, setSubmitButtonText] = useState("Submit");
 
   const utils = api.useUtils();
 
   const deleteTask = api.task.deleteTask.useMutation({
-    onSuccess: () => {
+    onSuccess: (task) => {
       console.log("Task deleted successfully");
       void utils.task.getTaskByStatusId.invalidate();
+      toast.success(`Task ${task.task.title} deleted successfully`);
     },
     onError: (error) => {
       if (error instanceof Error) {
         console.error("Error deleting task:", error.message);
+        toast.error("Error deleting task");
       } else {
         console.error("Unknown error deleting task");
+        toast.error("Unknown error deleting task");
       }
     },
   });
@@ -63,10 +68,17 @@ const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
     onSuccess: (updatedTask) => {
       // Handle success
       console.log("Task updated successfully", updatedTask);
+      setSubmitButtonText("Updated");
       void utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
+      if (String(updatedTask.statusId) !== statusId) {
+        toast.success(`Task moved to new status`);
+      } else {
+        toast.success(`Task ${updatedTask.title} updated successfully`);
+      }
     },
     onError: (error) => {
       console.error("Error creating task:", error);
+      toast.error("Error creating task");
     },
   }); // Initialize your mutation
 
@@ -93,10 +105,13 @@ const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
     <>
       <TaskCardDialog
         members={members}
+        loading={updateTaskMutation.isPending}
         initialValues={task}
         projectId={projectId}
         statusId={statusId}
         onSubmit={handleSubmit}
+        submitButtonText={submitButtonText}
+        setSubmitButtonTextState={setSubmitButtonText}
         isEditable={true} // Need to change this to be conditional based on user role
         dialogTrigger={
           <div className="group relative max-w-[350px] rounded-2xl border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">

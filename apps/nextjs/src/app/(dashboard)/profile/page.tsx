@@ -1,5 +1,5 @@
 import React from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Image from "next/image";
 
 import type { UserClass } from "@acme/db";
@@ -21,6 +21,12 @@ export default async function UserProfile() {
   const response = await api.user.byWallet({ walletId });
 
   const userData: UserClass | null = response as UserClass;
+
+  const headersList = headers();
+  const protocol = headersList.get("x-forwarded-proto") ?? "http";
+  const host = headersList.get("host");
+  const pathname = "/profile";
+  const url = `${protocol}://${host}${pathname}/${walletId}`;
 
   return (
     <div className="relative">
@@ -50,8 +56,8 @@ export default async function UserProfile() {
             image={userData.image}
           />
           <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-4 text-sm sm:w-auto">
-            <p>Copy your wallet ID to share.</p>
-            <CopyButton textToCopy={`${userData.walletId}`} />
+            <p>Copy profile link</p>
+            <CopyButton textToCopy={url} />
           </div>
         </div>
 

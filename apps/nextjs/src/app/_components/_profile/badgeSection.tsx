@@ -75,7 +75,8 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
     };
 
     fetchNFTs().catch((error) => console.error("Error fetching NFTs: ", error));
-  }, [chain, walletId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletId]);
 
   if (!walletId) {
     return <div>Error: Wallet ID not found.</div>;
@@ -95,7 +96,6 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
   if (nfts.length === 0) {
     return <div>No NFTs found.</div>;
   }
-
   return (
     <div>
       <h1 className="text-3xl font-semibold">Badges Earned</h1>
