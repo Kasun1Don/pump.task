@@ -5,6 +5,7 @@ import type { z } from "zod";
 import { useState } from "react";
 import Image from "next/image";
 
+import type { UserClass } from "@acme/db";
 import type {
   NewTaskCard,
   ObjectIdString,
@@ -32,9 +33,15 @@ interface TaskCardProps {
   task: TaskCardData;
   projectId: ObjectIdString;
   statusId: ObjectIdString;
+  members:
+    | {
+        role: string;
+        userData: UserClass;
+      }[]
+    | undefined;
 }
 
-const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
+const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [submitButtonText, setSubmitButtonText] = useState("Submit");
 
@@ -90,9 +97,14 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
     }
   };
 
+  const assignee = members?.find(
+    (member) => member.userData.walletId === task.assigneeId,
+  )?.userData;
+
   return (
     <>
       <TaskCardDialog
+        members={members}
         loading={updateTaskMutation.isPending}
         initialValues={task}
         projectId={projectId}
@@ -142,12 +154,12 @@ const TaskCard = ({ task, projectId, statusId }: TaskCardProps) => {
             <div className="mt-4 flex items-center justify-between">
               <div className="flex items-center space-x-1">
                 <Image
-                  src="/userProfileIcon.png"
+                  src={`${assignee?.image}`}
                   alt="Assignee Avatar"
                   width={12}
                   height={12}
                 />
-                <span className="text-sm">{task.assigneeId}</span>
+                <span className="text-sm">{assignee?.name}</span>
               </div>
               <div className="flex items-center space-x-1 text-sm text-gray-400">
                 <span>🕒</span>

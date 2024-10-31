@@ -59,6 +59,16 @@ export default function TasksPage({
     },
   );
 
+  const { data: members, error: membersError } =
+    api.member.byProjectId.useQuery(
+      {
+        projectId: projectId as string,
+      },
+      {
+        enabled: Boolean(projectId), // Only run query if projectId is valid
+      },
+    );
+
   useEffect(() => {
     if (statusData) {
       const validationResult = StatusSchema.array().safeParse(statusData);
@@ -101,6 +111,15 @@ export default function TasksPage({
     });
   };
 
+  if (membersError) {
+    return (
+      <p>
+        Error fetching members:{" "}
+        {membersError instanceof Error ? membersError.message : "Unknown error"}
+      </p>
+    );
+  }
+
   if (validationError) {
     return <p>{validationError}</p>;
   }
@@ -131,7 +150,11 @@ export default function TasksPage({
       <div className="flex-1 overflow-x-auto">
         <div className="flex min-w-max gap-6 p-6">
           {statusColumns.map((status) => (
-            <TaskStatusColumn key={status._id} statusColumn={status} />
+            <TaskStatusColumn
+              key={status._id}
+              statusColumn={status}
+              members={members}
+            />
           ))}
           <NewStatusColumn
             projectId={projectId}
