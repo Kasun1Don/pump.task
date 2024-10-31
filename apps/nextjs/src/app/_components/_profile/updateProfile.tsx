@@ -75,26 +75,33 @@ export default function UpdateProfile({
           </button>
         </DialogTrigger>
 
-        <DialogContent className="w-full max-w-2xl rounded-lg bg-black p-8 text-white shadow-lg">
-          <DialogHeader>
-            <DialogTitle className="mb-4 text-xl font-bold">
+        <DialogContent className="flex max-h-[90vh] max-w-[800px] flex-col overflow-auto rounded-lg bg-black p-6 text-white">
+          <DialogHeader className="flex w-full items-start justify-center">
+            <DialogTitle className="text-2xl font-semibold">
               Edit Profile
             </DialogTitle>
           </DialogHeader>
+          <h3 className="text-xs font-semibold text-slate-400">Update Name</h3>
           <input
             type="text"
             value={tempName}
             onChange={(e) => setTempName(e.target.value)}
-            className="mb-4 w-full rounded border border-gray-400 bg-gray-200 p-2 text-black"
-            placeholder="Name"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="Enter your updated name..."
           />
+          <h3 className="text-xs font-semibold text-slate-400">
+            Update Your Bio
+          </h3>
           <textarea
             value={tempBio}
             onChange={(e) => setTempBio(e.target.value)}
-            className="h-24 w-full rounded border border-gray-400 bg-gray-200 p-2 text-black"
-            placeholder="Bio"
+            className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="Enter your updated bio..."
           />
-          <div className="mb-4 flex flex-wrap justify-center gap-2 pt-10">
+          <h3 className="flex flex-wrap justify-center pt-10 text-xs font-semibold text-slate-400">
+            Update Profile Image
+          </h3>
+          <div className="mb-4 flex flex-wrap justify-center gap-2 pt-4">
             {[
               "/userIcons/blue.svg",
               "/userIcons/green.svg",
@@ -109,7 +116,7 @@ export default function UpdateProfile({
                 alt="User Icon"
                 width={56}
                 height={56}
-                className={`h-16 w-16 cursor-pointer rounded-full ${tempImage === icon ? "ring-4 ring-blue-500" : ""} max-w-full`}
+                className={`h-16 w-16 cursor-pointer rounded-full ${tempImage === icon ? "ring-zesty-green ring-4" : ""} max-w-full`}
                 onClick={() => setTempImage(icon)}
               />
             ))}
@@ -118,9 +125,9 @@ export default function UpdateProfile({
             <DialogClose asChild></DialogClose>
             <button
               onClick={handleSave}
-              className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              className="bg-zesty-green rounded px-4 py-2 text-black"
             >
-              Save
+              Update Profile
             </button>
           </DialogFooter>
         </DialogContent>
