@@ -5,7 +5,6 @@ import Link from "next/link";
 
 // Import UserClass and ProjectClass from Typegoose models
 import type { ProjectClass, UserClass } from "@acme/db";
-import { Button } from "@acme/ui/button";
 
 // Import api for trpc backend calls from a client component
 import { api } from "~/trpc/server";
@@ -59,7 +58,7 @@ export default async function Navbar() {
                 />
                 <h1 className="text-2xl font-bold">pump.task</h1>
               </div>
-              <h5 className="h-fit rounded-md bg-zinc-800 px-2 py-1 text-xs text-lime-500">
+              <h5 className="text-zesty-green h-fit rounded-md bg-zinc-800 px-2 py-1 text-xs">
                 Web3 Project Tracker
               </h5>
             </div>
@@ -68,17 +67,9 @@ export default async function Navbar() {
           {/* Navbar section right-hand side */}
           <div className="mt-1 flex max-h-8 gap-10 hover:cursor-pointer">
             {/* Pass projects to Project dropdown make sure to add ProjectClass */}
-            {userData.projects ? (
-              <NavProjectDropdown
-                projects={userData.projects as ProjectClass[]}
-              />
-            ) : (
-              <Link href="/projects">
-                <Button className="hover:bg-zesty-green h-fit rounded-md bg-zinc-800 px-8 py-[0.375em] text-sm text-lime-500 hover:bg-opacity-50 hover:text-white">
-                  Start a Project...
-                </Button>
-              </Link>
-            )}
+            <NavProjectDropdown
+              projects={userData.projects as ProjectClass[]}
+            />
             {/* Pass user data to User dropdown */}
             <NavUserDropdown
               username={userData.name ?? ""}
