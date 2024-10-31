@@ -301,7 +301,7 @@ const TaskCardDialog = ({
                   <DialogFooter>
                     <Button
                       onClick={handleAddTag}
-                      className="bg-zesty-green hover:bg-zesty-green"
+                      className="bg-zesty-green hover:bg-zesty-green hover:bg-opacity-80"
                     >
                       Add Tag
                     </Button>
@@ -337,7 +337,7 @@ const TaskCardDialog = ({
           <Textarea
             placeholder="Enter detailed task description."
             disabled={!isEditMode}
-            className="h-24"
+            className="h-24 hover:cursor-default"
             {...register("description")}
           />
           {errors.description?.message && (
@@ -525,7 +525,7 @@ const TaskCardDialog = ({
                   <DialogTrigger asChild>
                     <Button
                       onClick={handleAddCustomField}
-                      className="bg-zesty-green hover:bg-zesty-green"
+                      className="bg-zesty-green hover:bg-zesty-green hover:bg-opacity-80"
                     >
                       Add Field
                     </Button>
@@ -557,7 +557,7 @@ const TaskCardDialog = ({
                 setIsDialogOpen(false);
               }
             })}
-            className="bg-zesty-green hover:bg-zesty-green w-full text-black"
+            className="bg-zesty-green hover:bg-zesty-green w-full text-black hover:bg-opacity-80"
           >
             {loading ? "Updating" : submitButtonText}
           </Button>
