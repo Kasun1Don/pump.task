@@ -39,7 +39,7 @@ export default async function UserProfile({
           className="mb-4"
         />
 
-        <div className="relative mb-4 flex h-auto justify-between">
+        <div className="relative mb-4 flex h-auto justify-between gap-2">
           <div className="w-7/10 justify-start" style={{ maxWidth: "70%" }}>
             <h1 className="text-2xl font-bold">{userData.name}</h1>
             <p className="w-96 flex-1 p-1 text-sm text-gray-400">
@@ -51,7 +51,7 @@ export default async function UserProfile({
               }
             </p>
           </div>
-          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-7 text-sm sm:w-auto">
+          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-4 text-sm sm:w-auto">
             <p>Copy {userData.name}'s wallet ID.</p>
             <CopyButton textToCopy={`${userData.walletId}`} />
           </div>

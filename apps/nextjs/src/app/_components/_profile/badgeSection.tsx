@@ -16,8 +16,16 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
     { image: string; title: string; count: number }[]
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [url, setUrl] = useState<string>("");
 
   const chain = defineChain(sepolia);
+
+  useEffect(() => {
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    const pathname = "/projects";
+    setUrl(`${protocol}//${host}${pathname}`);
+  }, []);
 
   useEffect(() => {
     const fetchNFTs = async () => {
@@ -95,7 +103,30 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
   }
 
   if (nfts.length === 0) {
-    return <div>No NFTs found.</div>;
+    return (
+      <div className="flex h-full flex-col">
+        <h1 className="text-3xl font-semibold">Badges Earned</h1>
+        <p className="mb-4 text-sm text-gray-400">
+          Complete tasks to earn badges. These badges represent your onchain
+          resume, they’re minted as NFTs on Sepolia Testnet using Thirdweb.
+        </p>
+        <p className="mb-4 text-sm">
+          You currently do not have any earned badges in your wallet.
+        </p>
+        <div className="mt-auto">
+          <p className="mb-4 text-sm">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zesty-green"
+            >
+              Complete tasks in a project to earn badges.
+            </a>
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -103,7 +134,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
       <h1 className="text-3xl font-semibold">Badges Earned</h1>
       <p className="mb-4 text-sm text-gray-400">
         Complete tasks to earn badges. These badges represent your onchain
-        resume, they’re minted as NFTs on Sepolia Testnet.
+        resume, they’re minted as NFTs on Sepolia Testnet using Thirdweb.
       </p>
       <div className="flex flex-wrap gap-4">
         {nfts.map((nft, index) => (
