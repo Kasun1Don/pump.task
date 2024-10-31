@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import Image from "next/image";
 
 import type { UserClass } from "@acme/db";
+import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/server";
 import BadgeSection from "../../_components/_profile/badgeSection";
@@ -14,8 +15,8 @@ export default async function UserProfile() {
   const walletId = cookies().get("wallet")?.value;
 
   if (!walletId) {
-    console.error("Wallet ID is undefined or not found in cookies.");
-    return <div>Error: Wallet ID not found.</div>;
+    toast.error("Wallet ID is undefined or not found.");
+    return;
   }
 
   const response = await api.user.byWallet({ walletId });
