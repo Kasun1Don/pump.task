@@ -59,7 +59,7 @@ export default async function Navbar() {
                 />
                 <h1 className="text-2xl font-bold">pump.task</h1>
               </div>
-              <h5 className="h-fit rounded-md bg-zinc-800 px-2 py-1 text-xs text-lime-500">
+              <h5 className="h-fit rounded-md bg-zinc-800 px-2 py-1 text-xs text-zesty-green">
                 Web3 Project Tracker
               </h5>
             </div>
@@ -68,17 +68,9 @@ export default async function Navbar() {
           {/* Navbar section right-hand side */}
           <div className="mt-1 flex max-h-8 gap-10 hover:cursor-pointer">
             {/* Pass projects to Project dropdown make sure to add ProjectClass */}
-            {userData.projects ? (
               <NavProjectDropdown
                 projects={userData.projects as ProjectClass[]}
               />
-            ) : (
-              <Link href="/projects">
-                <Button className="hover:bg-zesty-green h-fit rounded-md bg-zinc-800 px-8 py-[0.375em] text-sm text-lime-500 hover:bg-opacity-50 hover:text-white">
-                  Start a Project...
-                </Button>
-              </Link>
-            )}
             {/* Pass user data to User dropdown */}
             <NavUserDropdown
               username={userData.name ?? ""}
