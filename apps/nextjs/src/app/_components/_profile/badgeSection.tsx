@@ -120,9 +120,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
           Complete tasks to earn badges. These badges represent your onchain
           resume, they’re minted as NFTs on Sepolia Testnet using Thirdweb.
         </p>
-        <p className="mb-4 text-sm">
-          You currently do not have any earned badges in your wallet.
-        </p>
+        <p className="mb-4 text-sm">There are currently no badges earned.</p>
         <div className="mt-auto">
           <p className="mb-4 text-sm">
             <a
