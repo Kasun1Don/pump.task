@@ -103,7 +103,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
       <h1 className="text-3xl font-semibold">Badges Earned</h1>
       <p className="mb-4 text-sm text-gray-400">
         Complete tasks to earn badges. These badges represent your onchain
-        resume, they’re minted as NFTs on Base.
+        resume, they’re minted as NFTs on Sepolia Testnet.
       </p>
       <div className="flex flex-wrap gap-4">
         {nfts.map((nft, index) => (
