@@ -23,6 +23,7 @@ import {
   PaginationPrevious,
 } from "@acme/ui/pagination";
 import { Switch } from "@acme/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@acme/ui/tabs";
 
 import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
 import { revalidate } from "~/app/actions/revalidate";
@@ -207,42 +208,32 @@ export default function ProjectsPage() {
               onClick={() => setIsModalOpen(true)}
               className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
             >
-              + Create new project
+              + Create New Project
             </Button>
           </div>
           <div className="flex justify-center">
-            <div className="overflow-hidden rounded-lg border border-gray-700">
-              <button
-                className={`px-4 py-2 font-semibold ${
-                  showFilter === "all"
-                    ? "bg-[#18181B] text-white"
-                    : "bg-[#09090B] text-gray-400"
-                } hover:bg-[#27272A]`}
-                onClick={() => setShowFilter("all")}
-              >
-                All projects
-              </button>
-              <button
-                className={`px-4 py-2 font-semibold ${
-                  showFilter === "my"
-                    ? "bg-[#18181B] text-white"
-                    : "bg-[#09090B] text-gray-400"
-                } hover:bg-[#27272A]`}
-                onClick={() => setShowFilter("my")}
-              >
-                My projects
-              </button>
-              <button
-                className={`px-4 py-2 font-semibold ${
-                  showFilter === "Owned"
-                    ? "bg-[#18181B] text-white"
-                    : "bg-[#09090B] text-gray-400"
-                } hover:bg-[#27272A]`}
-                onClick={() => setShowFilter("Owned")}
-              >
-                Created by me
-              </button>
-            </div>
+            <Tabs defaultValue="all" onValueChange={(value) => setShowFilter(value)} className="w-[300px] sm:w-[400px] md:w-[500px]">
+              <TabsList className="bg-[#18181B] grid w-full grid-cols-3">
+                <TabsTrigger 
+                  value="all" 
+                  className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
+                >
+                  All Projects
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="my"
+                  className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
+                >
+                  My Projects
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="Owned"
+                  className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
+                >
+                  Created By Me
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
           <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
             {currentProjects && currentProjects.length > 0 ? (
