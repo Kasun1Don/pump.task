@@ -194,6 +194,16 @@ export default function ProjectsPage() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<{id: string, name: string, description?: string} | null>(null);
+
+  const updateProjectDescription = api.project.updateName.useMutation({
+    onSuccess: () => {
+      void refetchProjects();
+      setIsEditModalOpen(false);
+      setEditingProject(null);
+    },
+  });
 
   const deleteProject = api.project.delete.useMutation({
     onSuccess: () => {
@@ -296,6 +306,12 @@ export default function ProjectsPage() {
                       member.role === "Owner",
                   );
 
+                  const isAdmin = userMemberships.some(
+                    (member) =>
+                      member.projectId === project._id.toString() &&
+                      member.role === "Admin",
+                  );
+
                   const isMember = userMemberships.some(
                     (member) => member.projectId === project._id.toString(),
                   );
@@ -366,6 +382,21 @@ export default function ProjectsPage() {
                           >
                             View Badges
                           </DropdownMenuItem>
+                          {(isOwner || isAdmin) && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingProject({
+                                  id: project._id.toString(),
+                                  name: project.name,
+                                  description: project.description
+                                });
+                                setIsEditModalOpen(true);
+                              }}
+                            >
+                              Edit Project Details
+                            </DropdownMenuItem>
+                          )}
                           {isMember && !isOwner && (
                             <DropdownMenuItem
                               onClick={(e) => {
@@ -705,6 +736,58 @@ export default function ProjectsPage() {
               className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
             >
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Project Details</DialogTitle>
+            <DialogDescription>
+              Make changes to your project details here.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <input
+                type="text"
+                maxLength={40}
+                placeholder="Project Name"
+                value={editingProject?.name ?? ""}
+                onChange={(e) => setEditingProject(prev => prev ? {...prev, name: e.target.value} : null)}
+                className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
+              />
+            </div>
+            <div className="grid gap-2">
+              <input
+                type="text"
+                placeholder="Description (optional, max 60 char)"
+                maxLength={60}
+                value={editingProject?.description ?? ""}
+                onChange={(e) => setEditingProject(prev => prev ? {...prev, description: e.target.value} : null)}
+                className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                if (editingProject) {
+                  updateProjectDescription.mutate({
+                    projectId: editingProject.id,
+                    name: editingProject.name,
+                    description: editingProject.description
+                  });
+                }
+              }}
+              className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
+            >
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

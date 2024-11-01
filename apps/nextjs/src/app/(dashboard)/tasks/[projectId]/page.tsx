@@ -24,6 +24,7 @@ export default function TasksPage({
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState("");
+
   // // Retrieve projectId from URL
   // const rawProjectId = searchParams.get("projectId");
 
