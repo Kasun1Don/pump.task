@@ -65,7 +65,6 @@ export default function ProjectsPage() {
   // number of projects per page
   const projectsPerPage = 9;
 
-
   useEffect(() => {
     // Try to get wallet from activeAccount first
     if (activeAccount?.address) {
@@ -167,14 +166,14 @@ export default function ProjectsPage() {
     return items;
   };
 
-    // reset modal fields
-    const handleCloseModal = () => {
-      setIsModalOpen(false);
-      setNewProjectName("");
-      setSelectedTemplate("");
-      setIsPrivate(false);
-      setDescription("");
-    };
+  // reset modal fields
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setNewProjectName("");
+    setSelectedTemplate("");
+    setIsPrivate(false);
+    setDescription("");
+  };
 
   const createProject = api.project.create.useMutation({
     onSuccess: async (newProject) => {
@@ -245,8 +244,6 @@ export default function ProjectsPage() {
   const { data: projectTags } = api.task.getProjectTags.useQuery(
     projects?.map((p) => p._id.toString()) ?? [],
   );
-
-
 
   return (
     <>
@@ -434,7 +431,7 @@ export default function ProjectsPage() {
                         )}
                       </h3>
                       {project.description && (
-                        <p className="px-4 pb-2 text-sm text-gray-400 font-light">
+                        <p className="px-4 pb-2 text-sm font-light text-gray-400">
                           {project.description}
                         </p>
                       )}
@@ -561,6 +558,7 @@ export default function ProjectsPage() {
               <div>
                 <input
                   type="text"
+                  maxLength={40}
                   placeholder="Project Name"
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
@@ -570,12 +568,12 @@ export default function ProjectsPage() {
               <div>
                 <input
                   type="text"
-                  placeholder="Description (optional, max 50 char)"
-                  maxLength={50}
+                  placeholder="Description (optional, max 60 char)"
+                  maxLength={60}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
-                  />
+                />
               </div>
               <div>
                 <select

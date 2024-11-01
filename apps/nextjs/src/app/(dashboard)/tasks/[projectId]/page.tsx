@@ -158,6 +158,7 @@ export default function TasksPage({
         {isEditing ? (
           <input
             type="text"
+            maxLength={40}
             value={editedName}
             onChange={(e) => setEditedName(e.target.value)}
             onBlur={() => {
