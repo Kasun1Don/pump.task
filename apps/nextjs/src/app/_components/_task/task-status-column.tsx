@@ -1,4 +1,19 @@
+import type { DragEndEvent } from "@dnd-kit/core";
 import { useEffect, useState } from "react";
+import {
+  closestCenter,
+  DndContext,
+  MouseSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import type { UserClass } from "@acme/db";
 import type { StatusColumn, TaskCard as TaskCardData } from "@acme/validators";
@@ -22,7 +37,6 @@ import TaskCard from "./task-card";
 // type TaskCardData = z.infer<typeof TaskCardSchema>;
 
 interface TaskStatusColumnProps {
-  // project: Project;
   statusColumn: StatusColumn;
   members:
     | {
@@ -37,6 +51,14 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false); // State to control options visibility
 
+  // Drag and drop sorting
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: statusColumn._id });
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
+
   // Retrieve tasks
   const { data: taskData } = api.task.getTaskByStatusId.useQuery(
     {
@@ -49,7 +71,6 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
 
   useEffect(() => {
     if (taskData) {
-      // console.log(taskData);
       const validationResult = TaskCardSchema.array().safeParse(taskData);
 
       if (validationResult.success) {
@@ -58,6 +79,7 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
         console.error("Validation error:", validationResult.error.errors);
       }
     }
+    // Add parentTaskState as a dependency to re-fetch tasks on its update
   }, [taskData]);
 
   const utils = api.useUtils();
@@ -94,19 +116,39 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
     setIsDeleteModalOpen(false);
   };
 
-  // Toggle visibility of delete/rename options
-  const toggleOptions = () => {
-    setIsOptionsVisible((prev) => !prev);
+  // Drag and drop event handler swap tasks in the array
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setTasks((tasks) => {
+      const activeIndex = tasks.findIndex((task) => task._id === active.id);
+      const overIndex = tasks.findIndex((task) => task._id === over.id);
+
+      return arrayMove(tasks, activeIndex, overIndex);
+    });
   };
+
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 5,
+    },
+  });
+
+  const sensors = useSensors(mouseSensor);
 
   return (
     <div
-      className="bg-transparent-[16] group/status-column relative flex min-w-[350px] flex-col gap-5 rounded-lg bg-[#0000004a] p-3"
-      onMouseLeave={() => setIsOptionsVisible(false)} // Hide menu when mouse leaves
+      className="bg-transparent-[16] group/status-column relative flex min-w-[350px] flex-col gap-5 rounded-lg bg-[#0000004a] p-3 hover:cursor-pointer"
+      onMouseLeave={() => setIsOptionsVisible(false)}
+      {...attributes}
+      ref={setNodeRef}
+      {...listeners}
+      style={style}
     >
       {/* Menu in the top right corner */}
       <div
-        onClick={toggleOptions}
+        onClick={() => setIsOptionsVisible((prev) => !prev)}
         className="group/menu-button absolute right-2 top-2 z-50 flex cursor-pointer items-center space-x-2 opacity-0 transition-opacity duration-300 group-hover/status-column:opacity-100"
       >
         <div aria-label="Options" className="flex gap-0.5 p-1">
@@ -147,52 +189,63 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
           )}
         </div>
       )}
-
       {/* Status name centered below the menu */}
       <h2 className="flex justify-between text-lg font-extrabold">
         {statusColumn.name}
       </h2>
-      {tasks.map((task) => (
-        <TaskCard
-          members={members}
-          key={task._id}
-          projectId={statusColumn.projectId}
-          statusId={statusColumn._id}
-          task={task}
-        />
-      ))}
-      {statusColumn.isProtected === false && (
-        <NewTaskCard
-          members={members}
-          statusId={statusColumn._id}
-          projectId={statusColumn.projectId}
-          onTaskCreated={handleTaskCreated}
-        />
-      )}
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              <div>Are you sure you want to remove this status column?</div>
-              <div>This will also remove all tasks within the status</div>
-              <div>(This action cannot be undone)</div>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteColumn}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+      <DndContext
+        onDragEnd={onDragEnd}
+        collisionDetection={closestCenter}
+        sensors={sensors}
+      >
+        <SortableContext
+          items={tasks.map((task) => task._id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {tasks.map((task) => (
+            <TaskCard
+              members={members}
+              key={task._id}
+              projectId={statusColumn.projectId}
+              statusId={statusColumn._id}
+              task={task}
+            />
+          ))}
+          {statusColumn.isProtected === false && (
+            <NewTaskCard
+              members={members}
+              statusId={statusColumn._id}
+              projectId={statusColumn.projectId}
+              onTaskCreated={handleTaskCreated}
+            />
+          )}
+          {/* Delete Confirmation Dialog */}
+          <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogDescription>
+                  <div>Are you sure you want to remove this status column?</div>
+                  <div>This will also remove all tasks within the status</div>
+                  <div>(This action cannot be undone)</div>
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDeleteColumn}>
+                  Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };

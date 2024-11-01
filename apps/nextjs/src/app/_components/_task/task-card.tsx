@@ -3,6 +3,8 @@
 import type { z } from "zod";
 import { useState } from "react";
 import Image from "next/image";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { FaClock } from "react-icons/fa";
 
 import type { UserClass } from "@acme/db";
@@ -48,6 +50,13 @@ interface TaskCardProps {
 }
 
 const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: task._id });
+
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [submitButtonText, setSubmitButtonText] = useState("Submit");
 
@@ -107,10 +116,8 @@ const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
     (member) => member.userData.walletId === task.assigneeId,
   )?.userData;
 
-  console.log("TaskCard members", assignee);
-
   return (
-    <>
+    <div {...attributes} ref={setNodeRef} {...listeners} style={style}>
       <TaskCardDialog
         members={members}
         loading={updateTaskMutation.isPending}
@@ -211,7 +218,7 @@ const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 
