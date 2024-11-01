@@ -102,6 +102,9 @@ export default function ProjectsPage() {
       userId: user[0]._id,
     });
 
+  // TRPC utility function to invalidate cache data
+  const utils = api.useUtils();
+
   const filteredProjects = projects
     ?.filter((project) => {
       if (showFilter === "all") {
@@ -289,19 +292,27 @@ export default function ProjectsPage() {
                   const memberCount =
                     memberCounts?.[project._id.toString()] ?? 0;
 
+                  // check if this project is the most recent active project (length of array minus 1)
+                  const isActive = user[0]?.activeProjects?.length ? 
+                    user[0]?.activeProjects[user[0]?.activeProjects?.length - 1]?.toString() === project._id.toString() 
+                    : false;
+
                   return (
                     <div
                       key={project._id.toString()}
                       className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
                       onClick={async () => {
                         try {
-                          // Update active projects
+                          // Update active projects 
                           await updateActiveProjectsMutation.mutateAsync({
                             walletId: walletId,
                             projectId: project._id.toString(),
                           });
 
-                          // Navigate to the project's tasks page
+                          // invalidate and refetch user data
+                          await utils.user.byWallet.invalidate();
+                          
+                          // Navigate to the project's tasks page 
                           await revalidate("/");
                           router.push(`/tasks/${project._id.toString()}`);
                         } catch (error) {
@@ -309,11 +320,7 @@ export default function ProjectsPage() {
                             "Error updating active projects:",
                             error,
                           );
-                          // Optionally, display an error message to the user
                         }
-                        //document.cookie = `projectId=${project._id.toString()}; path=/;`;
-                        //router.push(`/tasks/${project._id.toString()}`);
-                        // router.refresh();
                       }}
                     >
                       <DropdownMenu>
@@ -398,7 +405,18 @@ export default function ProjectsPage() {
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      <h3 className="p-4 text-white">{project.name}</h3>
+                      <h3 className="p-4 text-white">
+                        {project.name}
+                        {isActive && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white text-black rounded-lg px-2 h-6 ml-3 text-base"
+                          >
+                            Active
+                          </Button>
+                        )}
+                      </h3>
                       <div className="flex items-center justify-between px-4 pb-4">
                         <div className="flex gap-4 text-sm text-gray-400">
                           <p>
