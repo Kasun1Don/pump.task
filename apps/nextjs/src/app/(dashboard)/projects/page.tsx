@@ -195,7 +195,11 @@ export default function ProjectsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<{id: string, name: string, description?: string} | null>(null);
+  const [editingProject, setEditingProject] = useState<{
+    id: string;
+    name: string;
+    description?: string;
+  } | null>(null);
 
   const updateProjectDescription = api.project.updateName.useMutation({
     onSuccess: () => {
@@ -389,7 +393,7 @@ export default function ProjectsPage() {
                                 setEditingProject({
                                   id: project._id.toString(),
                                   name: project.name,
-                                  description: project.description
+                                  description: project.description,
                                 });
                                 setIsEditModalOpen(true);
                               }}
@@ -756,7 +760,11 @@ export default function ProjectsPage() {
                 maxLength={40}
                 placeholder="Project Name"
                 value={editingProject?.name ?? ""}
-                onChange={(e) => setEditingProject(prev => prev ? {...prev, name: e.target.value} : null)}
+                onChange={(e) =>
+                  setEditingProject((prev) =>
+                    prev ? { ...prev, name: e.target.value } : null,
+                  )
+                }
                 className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
               />
             </div>
@@ -766,7 +774,11 @@ export default function ProjectsPage() {
                 placeholder="Description (optional, max 60 char)"
                 maxLength={60}
                 value={editingProject?.description ?? ""}
-                onChange={(e) => setEditingProject(prev => prev ? {...prev, description: e.target.value} : null)}
+                onChange={(e) =>
+                  setEditingProject((prev) =>
+                    prev ? { ...prev, description: e.target.value } : null,
+                  )
+                }
                 className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
               />
             </div>
@@ -775,13 +787,13 @@ export default function ProjectsPage() {
             <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={() => {
                 if (editingProject) {
                   updateProjectDescription.mutate({
                     projectId: editingProject.id,
                     name: editingProject.name,
-                    description: editingProject.description
+                    description: editingProject.description,
                   });
                 }
               }}

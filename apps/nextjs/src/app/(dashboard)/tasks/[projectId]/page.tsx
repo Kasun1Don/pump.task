@@ -136,7 +136,9 @@ export default function TasksPage({
     .find((row) => row.startsWith("wallet="))
     ?.split("=")[1];
 
-  const user = api.user.byWallet.useSuspenseQuery({ walletId: cookieWallet ?? "" });
+  const user = api.user.byWallet.useSuspenseQuery({
+    walletId: cookieWallet ?? "",
+  });
   const [userMemberships] = api.member.byUserId.useSuspenseQuery({
     userId: user[0]._id,
   });
@@ -145,7 +147,7 @@ export default function TasksPage({
     return userMemberships.some(
       (member) =>
         member.projectId === projectId &&
-        (member.role === "Owner" || member.role === "Admin")
+        (member.role === "Owner" || member.role === "Admin"),
     );
   };
 
