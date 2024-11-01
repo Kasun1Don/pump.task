@@ -24,7 +24,6 @@ export default function TasksPage({
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState("");
-
   // // Retrieve projectId from URL
   // const rawProjectId = searchParams.get("projectId");
 
@@ -130,6 +129,25 @@ export default function TasksPage({
     },
   });
 
+  // Get wallet ID from cookie
+  const cookieWallet = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("wallet="))
+    ?.split("=")[1];
+
+  const user = api.user.byWallet.useSuspenseQuery({ walletId: cookieWallet ?? "" });
+  const [userMemberships] = api.member.byUserId.useSuspenseQuery({
+    userId: user[0]._id,
+  });
+
+  const isOwner = () => {
+    return userMemberships.some(
+      (member) =>
+        member.projectId === projectId &&
+        (member.role === "Owner" || member.role === "Admin")
+    );
+  };
+
   if (validationError) {
     return <p>{validationError}</p>;
   }
@@ -155,7 +173,7 @@ export default function TasksPage({
   return (
     <div className="flex h-full flex-col">
       <div className="mb-3 flex justify-center">
-        {isEditing ? (
+        {isEditing && isOwner() ? (
           <input
             type="text"
             maxLength={40}
@@ -185,8 +203,16 @@ export default function TasksPage({
           />
         ) : (
           <h1
-            onDoubleClick={() => setIsEditing(true)}
-            className="cursor-pointer text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg hover:opacity-80"
+            onDoubleClick={() => {
+              // only allow editing if the user is an owner or admin
+              if (isOwner()) {
+                setIsEditing(true);
+                setEditedName(project.name);
+              }
+            }}
+            className={`text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg ${
+              isOwner() ? "cursor-pointer hover:opacity-80" : ""
+            }`}
           >
             {project.name}
           </h1>
