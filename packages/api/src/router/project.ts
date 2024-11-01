@@ -178,7 +178,9 @@ export const projectRouter = {
         input.projectId,
         {
           name: input.name,
-          ...(input.description !== undefined && { description: input.description }),
+          ...(input.description !== undefined && {
+            description: input.description,
+          }),
         },
         { new: true },
       );

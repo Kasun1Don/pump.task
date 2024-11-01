@@ -42,10 +42,10 @@ export default function ProjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [showFilter, setShowFilter] = useState("all");
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+  const [description, setDescription] = useState("");
   const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<
     string | null
   >(null);
@@ -64,6 +64,7 @@ export default function ProjectsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   // number of projects per page
   const projectsPerPage = 9;
+
 
   useEffect(() => {
     // Try to get wallet from activeAccount first
@@ -166,6 +167,15 @@ export default function ProjectsPage() {
     return items;
   };
 
+    // reset modal fields
+    const handleCloseModal = () => {
+      setIsModalOpen(false);
+      setNewProjectName("");
+      setSelectedTemplate("");
+      setIsPrivate(false);
+      setDescription("");
+    };
+
   const createProject = api.project.create.useMutation({
     onSuccess: async (newProject) => {
       setIsModalOpen(false);
@@ -235,6 +245,8 @@ export default function ProjectsPage() {
   const { data: projectTags } = api.task.getProjectTags.useQuery(
     projects?.map((p) => p._id.toString()) ?? [],
   );
+
+
 
   return (
     <>
@@ -421,9 +433,11 @@ export default function ProjectsPage() {
                           </Button>
                         )}
                       </h3>
-                      <h4 className="px-4 pb-4 text-sm text-gray-400">
-                        {(project as { description?: string }).description ?? ''}
-                      </h4>
+                      {project.description && (
+                        <p className="px-4 pb-2 text-sm text-gray-400 font-light">
+                          {project.description}
+                        </p>
+                      )}
                       <div className="flex items-center justify-between px-4 pb-4">
                         <div className="flex gap-4 text-sm text-gray-400">
                           <p>
@@ -591,7 +605,7 @@ export default function ProjectsPage() {
             </div>
             <div className="mt-6 flex justify-end">
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={handleCloseModal}
                 className="mr-2 rounded-lg bg-gray-700 px-4 py-2 text-white hover:bg-gray-600"
               >
                 Cancel
