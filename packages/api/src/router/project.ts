@@ -13,6 +13,7 @@ export const projectRouter = {
         name: z.string().min(1, "Project name is required"),
         isPrivate: z.boolean().default(false),
         templateId: z.string().optional(),
+        description: z.string().optional(),
         members: z.object({
           user: z.string(),
           role: z.enum(["Observer", "Admin", "Owner"]),
@@ -25,6 +26,7 @@ export const projectRouter = {
         const newProject = new Project({
           name: input.name,
           isPrivate: input.isPrivate,
+          description: input.description,
           templateId: input.templateId
             ? new Types.ObjectId(input.templateId)
             : undefined,
@@ -168,12 +170,16 @@ export const projectRouter = {
       z.object({
         projectId: z.string(),
         name: z.string().min(1),
+        description: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
       const updatedProject = await Project.findByIdAndUpdate(
         input.projectId,
-        { name: input.name },
+        {
+          name: input.name,
+          ...(input.description !== undefined && { description: input.description }),
+        },
         { new: true },
       );
 

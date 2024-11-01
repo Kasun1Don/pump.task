@@ -42,6 +42,7 @@ export default function ProjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [showFilter, setShowFilter] = useState("all");
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
@@ -171,6 +172,7 @@ export default function ProjectsPage() {
       setNewProjectName("");
       setSelectedTemplate("");
       setIsPrivate(false);
+      setDescription("");
       // Update active projects
       await updateActiveProjectsMutation.mutateAsync({
         walletId: walletId,
@@ -293,8 +295,10 @@ export default function ProjectsPage() {
                     memberCounts?.[project._id.toString()] ?? 0;
 
                   // check if this project is the most recent active project (length of array minus 1)
-                  const isActive = user[0]?.activeProjects?.length ? 
-                    user[0]?.activeProjects[user[0]?.activeProjects?.length - 1]?.toString() === project._id.toString() 
+                  const isActive = user[0].activeProjects?.length
+                    ? user[0].activeProjects[
+                        user[0].activeProjects.length - 1
+                      ]?.toString() === project._id.toString()
                     : false;
 
                   return (
@@ -303,7 +307,7 @@ export default function ProjectsPage() {
                       className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
                       onClick={async () => {
                         try {
-                          // Update active projects 
+                          // Update active projects
                           await updateActiveProjectsMutation.mutateAsync({
                             walletId: walletId,
                             projectId: project._id.toString(),
@@ -311,8 +315,8 @@ export default function ProjectsPage() {
 
                           // invalidate and refetch user data
                           await utils.user.byWallet.invalidate();
-                          
-                          // Navigate to the project's tasks page 
+
+                          // Navigate to the project's tasks page
                           await revalidate("/");
                           router.push(`/tasks/${project._id.toString()}`);
                         } catch (error) {
@@ -411,12 +415,15 @@ export default function ProjectsPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="bg-white text-black rounded-lg px-2 h-6 ml-3 text-base"
+                            className="ml-3 h-6 rounded-lg bg-white px-2 text-base text-black"
                           >
                             Active
                           </Button>
                         )}
                       </h3>
+                      <h4 className="px-4 pb-4 text-sm text-gray-400">
+                        {(project as { description?: string }).description ?? ''}
+                      </h4>
                       <div className="flex items-center justify-between px-4 pb-4">
                         <div className="flex gap-4 text-sm text-gray-400">
                           <p>
@@ -547,6 +554,16 @@ export default function ProjectsPage() {
                 />
               </div>
               <div>
+                <input
+                  type="text"
+                  placeholder="Description (optional, max 50 char)"
+                  maxLength={50}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
+                  />
+              </div>
+              <div>
                 <select
                   value={selectedTemplate}
                   onChange={(e) => setSelectedTemplate(e.target.value)}
@@ -589,12 +606,14 @@ export default function ProjectsPage() {
                     name: newProjectName,
                     isPrivate: isPrivate,
                     templateId: selectedTemplate || undefined,
+                    description: description || undefined,
                     userMemberships: [{ user: walletId, role: "Owner" }],
                   });
                   createProject.mutate({
                     name: newProjectName,
                     isPrivate: isPrivate,
                     templateId: selectedTemplate || undefined,
+                    description: description || undefined,
                     members: { user: walletId, role: "Owner" },
                   });
                 }}
