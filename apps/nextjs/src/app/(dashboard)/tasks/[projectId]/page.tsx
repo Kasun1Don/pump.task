@@ -1,6 +1,19 @@
 "use client";
 
+import type { DragEndEvent } from "@dnd-kit/core";
 import { useEffect, useState } from "react";
+import {
+  closestCenter,
+  DndContext,
+  MouseSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+} from "@dnd-kit/sortable";
 import { z } from "zod";
 
 import type { ObjectIdString, StatusColumn } from "@acme/validators";
@@ -65,7 +78,7 @@ export default function TasksPage({
     },
   );
 
-  const { data: members } = api.member.byProjectId.useQuery(
+  const { data: members, error: membersError } = api.member.byProjectId.useQuery(
     {
       projectId: projectId as string,
     },
@@ -74,21 +87,25 @@ export default function TasksPage({
     },
   );
 
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 5,
+    },
+  });
+
+  const sensors = useSensors(mouseSensor);
+
   useEffect(() => {
     if (statusData) {
       const validationResult = StatusSchema.array().safeParse(statusData);
-
       if (validationResult.success) {
         const statusColumnsCopy = [...validationResult.data]; // Create a copy of the array
-
         // Remove the status column at index 0 (which has isProtected flag)
         const protectedColumn = statusColumnsCopy.shift();
-
         // If the protected column exists, push it to the end
         if (protectedColumn?.isProtected) {
           statusColumnsCopy.push(protectedColumn);
         }
-
         setStatusColumns(statusColumnsCopy);
       } else {
         console.error("Validation error:", validationResult.error.errors);
@@ -100,21 +117,26 @@ export default function TasksPage({
   const handleNewStatusCreated = (newStatus: StatusColumn) => {
     setStatusColumns((prevStatusColumns) => {
       const statusColumnsCopy = [...prevStatusColumns]; // Create a copy of the array
-
       // Remove the status column at index 0 (which has isProtected flag)
       const protectedColumn = statusColumnsCopy.shift();
-
       // Add the new status column
       statusColumns.push(newStatus);
-
       // If the protected column exists, push it to the end
       if (protectedColumn?.isProtected) {
         statusColumnsCopy.push(protectedColumn);
       }
-
       return statusColumnsCopy;
     });
   };
+
+  if (membersError) {
+    return (
+      <p>
+        Error fetching members: {" "}
+        {membersError instanceof Error ? membersError.message : "Unknown error"}
+      </p>
+    )
+  }
 
   const utils = api.useUtils();
 
@@ -151,31 +173,42 @@ export default function TasksPage({
     );
   };
 
-  if (validationError) {
-    return <p>{validationError}</p>;
-  }
+  if (validationError) return <p>{validationError}</p>;
+  if (isLoading) return <TaskBoardSkeleton />;
+  if (error) return <p>Error fetching statuses: {error.message}</p>;
+  if (!projectId || !project) return <TaskBoardSkeleton />;
+  if ("error" in project) return <p>Error fetching project: {project.error}</p>;
 
-  if (isLoading) {
-    // Display skeleton loading screen for status columns
-    return <TaskBoardSkeleton />;
-  }
+  // Function to handle drag and drop of status columns
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-  if (error) {
-    return <p>Error fetching statuses: {error.message}</p>;
-  }
+    setStatusColumns((statusColumns) => {
+      const activeIndex = statusColumns.findIndex(
+        (column) => column._id === active.id,
+      );
+      const overIndex = statusColumns.findIndex(
+        (column) => column._id === over.id,
+      );
 
-  if (!projectId || !project) {
-    return <TaskBoardSkeleton />;
-  }
-
-  if ("error" in project) {
-    return <p>Error fetching project: {project.error}</p>;
-  }
+      return arrayMove(statusColumns, activeIndex, overIndex);
+    });
+  };
 
   // responsive scrolling for the task board
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-3 flex justify-center">
+    <DndContext
+      onDragEnd={onDragEnd}
+      collisionDetection={closestCenter}
+      sensors={sensors}
+    >
+      <SortableContext
+        items={statusColumns.map((column) => column._id)}
+        strategy={horizontalListSortingStrategy}
+      >
+        <div className="flex h-full flex-col">
+          <div className="mb-3 flex justify-center">
         {isEditing && isOwner() ? (
           <input
             type="text"
@@ -217,25 +250,28 @@ export default function TasksPage({
               isOwner() ? "cursor-pointer hover:opacity-80" : ""
             }`}
           >
-            {project.name}
-          </h1>
+                {project.name}
+              </h1>
         )}
       </div>
-      <div className="flex-1 overflow-x-auto">
-        <div className="flex min-w-max gap-6 p-6">
-          {statusColumns.map((status) => (
-            <TaskStatusColumn
-              key={status._id}
-              statusColumn={status}
-              members={members}
-            />
-          ))}
-          <NewStatusColumn
-            projectId={projectId}
-            onStatusCreated={handleNewStatusCreated}
-          />
+          <div className="flex-1 overflow-x-auto">
+            <div className="flex min-w-max gap-6 p-6">
+              {statusColumns.map((status) => (
+                <TaskStatusColumn
+                  key={status._id}
+                  statusColumn={status}
+                  members={members}
+                />
+              ))}
+
+              <NewStatusColumn
+                projectId={projectId}
+                onStatusCreated={handleNewStatusCreated}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </SortableContext>
+    </DndContext>
   );
 }
