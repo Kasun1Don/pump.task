@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Switch } from "@acme/ui/switch";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@acme/ui/dialog";
+import { Switch } from "@acme/ui/switch";
 
 import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
@@ -67,7 +67,7 @@ export function CreateProjectDialog({
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogContent className="bg-[#18181B] border-gray-700 w-96">
+      <DialogContent className="w-96 border-gray-700 bg-[#18181B]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-white">
             Create New Project
@@ -117,7 +117,7 @@ export function CreateProjectDialog({
             <Switch
               checked={isPrivate}
               onCheckedChange={setIsPrivate}
-              className="data-[state=checked]:bg-[#72D524] border border-gray-700"
+              className="border border-gray-700 data-[state=checked]:bg-[#72D524]"
             />
           </div>
         </div>
