@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
+import { CreateProjectDialog } from "~/app/_components/_projects/create-project-dialog";
 
 import { Button } from "@acme/ui/button";
 import {
@@ -14,6 +16,12 @@ import {
   DialogTitle,
 } from "@acme/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@acme/ui/dropdown-menu";
+import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
@@ -22,21 +30,21 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@acme/ui/pagination";
-import { Switch } from "@acme/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@acme/ui/tabs";
+import { toast } from "@acme/ui/toast";
 
-import TrashIcon from "~/app/_components/_task/icons/TrashIcon";
 import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
 export default function ProjectsPage() {
   const activeAccount = useActiveAccount();
   const [showOwnedOnly, _setShowOwnedOnly] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newProjectName, setNewProjectName] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [isPrivate, setIsPrivate] = useState(false);
+  const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+  const [selectedProjectForBadges, setSelectedProjectForBadges] = useState<
+    string | null
+  >(null);
   const [showFilter, setShowFilter] = useState("all");
+  const [_selectedTemplate, setSelectedTemplate] = useState("");
   const router = useRouter();
 
   // Modified wallet ID retrieval with cookie fallback
@@ -52,6 +60,10 @@ export default function ProjectsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   // number of projects per page
   const projectsPerPage = 9;
+
+
+
+
 
   useEffect(() => {
     // Try to get wallet from activeAccount first
@@ -86,9 +98,13 @@ export default function ProjectsPage() {
     );
 
   const user = api.user.byWallet.useSuspenseQuery({ walletId });
-  const [userMemberships] = api.member.byUserId.useSuspenseQuery({
-    userId: user[0]._id,
-  });
+  const [userMemberships, { refetch: refetchMemberships }] =
+    api.member.byUserId.useSuspenseQuery({
+      userId: user[0]._id,
+    });
+
+  // TRPC utility function to invalidate cache data
+  const utils = api.useUtils();
 
   const filteredProjects = projects
     ?.filter((project) => {
@@ -150,24 +166,24 @@ export default function ProjectsPage() {
     return items;
   };
 
-  const createProject = api.project.create.useMutation({
-    onSuccess: async (newProject) => {
-      setIsModalOpen(false);
-      setNewProjectName("");
-      setSelectedTemplate("");
-      setIsPrivate(false);
-      // Update active projects
-      await updateActiveProjectsMutation.mutateAsync({
-        walletId: walletId,
-        projectId: newProject.id.toString(),
-      });
-      await revalidate("/");
-      router.push(`/tasks/${newProject.id.toString()}`);
-    },
-  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<{
+    id: string;
+    name: string;
+    description?: string;
+  } | null>(null);
+
+  const updateProjectDescription = api.project.updateName.useMutation({
+    onSuccess: () => {
+      void refetchProjects();
+      setIsEditModalOpen(false);
+      setEditingProject(null);
+    },
+  });
 
   const deleteProject = api.project.delete.useMutation({
     onSuccess: () => {
@@ -201,6 +217,25 @@ export default function ProjectsPage() {
 
   // fetch templates
   const { data: templates = [] } = api.template.getAll.useQuery();
+
+  const leaveProject = api.member.removeSelf.useMutation({
+    onSuccess: async () => {
+      await Promise.all([refetchProjects(), refetchMemberships()]);
+    },
+    onError: (error) => {
+      console.error("Error leaving project:", error);
+    },
+  });
+
+  const { data: memberCounts } = api.member.getProjectMemberCounts.useQuery(
+    projects?.map((p) => p._id.toString()) ?? [],
+  );
+
+  const { data: projectTags } = api.task.getProjectTags.useQuery(
+    projects?.map((p) => p._id.toString()) ?? [],
+  );
+
+
 
   return (
     <>
@@ -253,6 +288,26 @@ export default function ProjectsPage() {
                       member.role === "Owner",
                   );
 
+                  const isAdmin = userMemberships.some(
+                    (member) =>
+                      member.projectId === project._id.toString() &&
+                      member.role === "Admin",
+                  );
+
+                  const isMember = userMemberships.some(
+                    (member) => member.projectId === project._id.toString(),
+                  );
+
+                  const memberCount =
+                    memberCounts?.[project._id.toString()] ?? 0;
+
+                  // check if this project is the most recent active project (length of array minus 1)
+                  const isActive = user[0].activeProjects?.length
+                    ? user[0].activeProjects[
+                        user[0].activeProjects.length - 1
+                      ]?.toString() === project._id.toString()
+                    : false;
+
                   return (
                     <div
                       key={project._id.toString()}
@@ -265,6 +320,9 @@ export default function ProjectsPage() {
                             projectId: project._id.toString(),
                           });
 
+                          // invalidate and refetch user data
+                          await utils.user.byWallet.invalidate();
+
                           // Navigate to the project's tasks page
                           await revalidate("/");
                           router.push(`/tasks/${project._id.toString()}`);
@@ -273,30 +331,155 @@ export default function ProjectsPage() {
                             "Error updating active projects:",
                             error,
                           );
-                          // Optionally, display an error message to the user
                         }
-                        //document.cookie = `projectId=${project._id.toString()}; path=/;`;
-                        //router.push(`/tasks/${project._id.toString()}`);
-                        // router.refresh();
                       }}
                     >
-                      {isOwner && (
-                        <button
-                          className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-700 hover:stroke-rose-500 group-hover:opacity-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setProjectToDelete(project._id.toString());
-                            setIsDeleteModalOpen(true);
-                          }}
-                          aria-label="Delete Project"
-                        >
-                          <TrashIcon />
-                        </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="absolute right-2 top-2">
+                          <Image
+                            src="/VertDots.svg"
+                            alt="Options"
+                            width={2}
+                            height={10}
+                            className="mt-1 h-6 w-6 hover:brightness-50 hover:[filter:invert(48%)_sepia(79%)_saturate(2476%)_hue-rotate(86deg)_brightness(118%)_contrast(119%)]"
+                          />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/users/${project._id.toString()}`);
+                            }}
+                          >
+                            View Users
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProjectForBadges(
+                                project._id.toString(),
+                              );
+                              setIsBadgeModalOpen(true);
+                            }}
+                          >
+                            View Badges
+                          </DropdownMenuItem>
+                          {(isOwner || isAdmin) && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingProject({
+                                  id: project._id.toString(),
+                                  name: project.name,
+                                  description: project.description,
+                                });
+                                setIsEditModalOpen(true);
+                              }}
+                            >
+                              Edit Project Details
+                            </DropdownMenuItem>
+                          )}
+                          {isMember && !isOwner && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toast.promise(
+                                  new Promise((resolve) => {
+                                    toast(
+                                      "Are you sure you want to leave this project?",
+                                      {
+                                        action: {
+                                          label: "Confirm",
+                                          onClick: () => {
+                                            leaveProject.mutate({
+                                              projectId: project._id.toString(),
+                                              walletId: walletId,
+                                            });
+                                            resolve(true);
+                                          },
+                                        },
+                                        cancel: {
+                                          label: "Cancel",
+                                          onClick: () => resolve(false),
+                                        },
+                                      },
+                                    );
+                                  }),
+                                  {
+                                    loading: "Leaving project...",
+                                    success: "Successfully left project",
+                                    error: "Failed to leave project",
+                                  },
+                                );
+                              }}
+                              className="text-red-500"
+                            >
+                              Leave Project
+                            </DropdownMenuItem>
+                          )}
+                          {isOwner && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setProjectToDelete(project._id.toString());
+                                setIsDeleteModalOpen(true);
+                              }}
+                              className="text-red-500"
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <h3 className="p-4 text-white">
+                        {project.name}
+                        {isActive && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="ml-3 h-6 rounded-lg bg-white px-2 text-base text-black"
+                          >
+                            Active
+                          </Button>
+                        )}
+                      </h3>
+                      {project.description && (
+                        <p className="px-4 pb-2 text-sm font-light text-gray-400">
+                          {project.description}
+                        </p>
                       )}
-                      <h3 className="p-4 text-white">{project.name}</h3>
-                      <p className="px-4 pb-4 text-sm text-gray-400">
-                        {project.isPrivate ? "Private" : "Public"} project
-                      </p>
+                      <div className="flex items-center justify-between px-4 pb-4">
+                        <div className="flex gap-4 text-sm text-gray-400">
+                          <p>
+                            {project.isPrivate ? "Private" : "Public"} project
+                          </p>
+                          <p className="flex items-center gap-1">
+                            Available Badges:{" "}
+                            {projectTags?.[project._id.toString()]?.length ?? 0}
+                            {/* only show badge icon if there are available badges */}
+                            {(projectTags?.[project._id.toString()]?.length ??
+                              0) > 0 && (
+                              <Image
+                                src="/CheckoutVector.svg"
+                                alt="Badges"
+                                width={14}
+                                height={14}
+                                className="inline-block"
+                              />
+                            )}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-gray-400">
+                          <Image
+                            src="/userIcon.png"
+                            alt="Members"
+                            width={16}
+                            height={16}
+                            className="opacity-60"
+                          />
+                          <span>{memberCount}</span>
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
@@ -378,82 +561,11 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-96 rounded-lg bg-[#18181B] p-6">
-            <h2 className="mb-6 text-xl font-bold text-white">
-              Create New Project
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <input
-                  type="text"
-                  placeholder="Project Name"
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
-                />
-              </div>
-              <div>
-                <select
-                  value={selectedTemplate}
-                  onChange={(e) => setSelectedTemplate(e.target.value)}
-                  className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
-                >
-                  <option value="">Select a template (optional)</option>
-                  {templates.map((template) => (
-                    <option
-                      key={template._id.toString()}
-                      value={template._id.toString()}
-                    >
-                      {template.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-white">Private Project</span>
-                <Switch
-                  checked={isPrivate}
-                  onCheckedChange={setIsPrivate}
-                  className="data-[state=checked]:bg-[#72D524]"
-                />
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="mr-2 rounded-lg bg-gray-700 px-4 py-2 text-white hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (!walletId) {
-                    console.error("No active account found");
-                    return;
-                  }
-                  console.log("Attempting to create project with:", {
-                    name: newProjectName,
-                    isPrivate: isPrivate,
-                    templateId: selectedTemplate || undefined,
-                    userMemberships: [{ user: walletId, role: "Owner" }],
-                  });
-                  createProject.mutate({
-                    name: newProjectName,
-                    isPrivate: isPrivate,
-                    templateId: selectedTemplate || undefined,
-                    members: { user: walletId, role: "Owner" },
-                  });
-                }}
-                className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateProjectDialog
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen} 
+        walletId={walletId}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
@@ -486,6 +598,102 @@ export default function ProjectsPage() {
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Badge Display Modal */}
+      <Dialog open={isBadgeModalOpen} onOpenChange={setIsBadgeModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Available Badges</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-wrap gap-4 p-4">
+            {selectedProjectForBadges &&
+              projectTags?.[selectedProjectForBadges]?.map((tag) => {
+                // Remove spaces from tag name to match image filenames
+                const imageTag = tag.replace(/\s+/g, "").toLowerCase();
+                return (
+                  <div key={tag} className="flex flex-col items-center">
+                    <Image
+                      src={`/nfts/${imageTag}.png`}
+                      alt={tag}
+                      width={100}
+                      height={100}
+                      className="rounded-lg"
+                    />
+                    <span className="mt-2 text-sm text-gray-400">{tag}</span>
+                  </div>
+                );
+              })}
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setIsBadgeModalOpen(false)}
+              className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Project Details</DialogTitle>
+            <DialogDescription>
+              Make changes to your project details here.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <input
+                type="text"
+                maxLength={40}
+                placeholder="Project Name"
+                value={editingProject?.name ?? ""}
+                onChange={(e) =>
+                  setEditingProject((prev) =>
+                    prev ? { ...prev, name: e.target.value } : null,
+                  )
+                }
+                className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
+              />
+            </div>
+            <div className="grid gap-2">
+              <input
+                type="text"
+                placeholder="Description (optional, max 60 char)"
+                maxLength={60}
+                value={editingProject?.description ?? ""}
+                onChange={(e) =>
+                  setEditingProject((prev) =>
+                    prev ? { ...prev, description: e.target.value } : null,
+                  )
+                }
+                className="w-full rounded-lg border border-gray-700 bg-[#09090B] p-2 text-white"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (editingProject) {
+                  updateProjectDescription.mutate({
+                    projectId: editingProject.id,
+                    name: editingProject.name,
+                    description: editingProject.description,
+                  });
+                }
+              }}
+              className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
+            >
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

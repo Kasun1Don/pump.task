@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { CreateProjectDialog } from "~/app/_components/_projects/create-project-dialog";
 
 import type { Project } from "@acme/validators";
 // Import ProjectClass from Typegoose models
@@ -124,6 +125,9 @@ export default function NavProjectDropdown({
     }
   };
 
+  // new state variable for the create project dialog
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+
   // UseEffect to set the current project when data is loaded
   useEffect(() => {
     if (!isLoading && projectData.length > 0) {
@@ -140,9 +144,10 @@ export default function NavProjectDropdown({
   }, [isLoading, projectData, projects]);
 
   return (
-    <DropdownMenu>
-      {/* The Current selected Project */}
-      <DropdownMenuTrigger className="relative flex cursor-default select-none items-center rounded-md border px-4 py-2 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+    <>
+      <DropdownMenu>
+        {/* The Current selected Project */}
+        <DropdownMenuTrigger className="relative flex cursor-default select-none items-center rounded-md border px-4 py-2 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
         <div className="flex flex-row items-center gap-4">
           {/* <Image
             className="inline-block h-4 w-4 rounded-full"
@@ -200,11 +205,20 @@ export default function NavProjectDropdown({
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
-        {/* Create new Project Button (needs functionality) */}
-        <DropdownMenuItem className="hover:cursor-pointer">
+        <DropdownMenuItem 
+          className="hover:cursor-pointer"
+          onClick={() => setIsCreateProjectOpen(true)}
+        >
           Create New Project
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <CreateProjectDialog
+      isModalOpen={isCreateProjectOpen}
+      setIsModalOpen={setIsCreateProjectOpen}
+      walletId={walletId}
+    />
+  </>
   );
 }

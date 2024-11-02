@@ -17,6 +17,7 @@ import {
 import { z } from "zod";
 
 import type { ObjectIdString, StatusColumn } from "@acme/validators";
+import { toast } from "@acme/ui/toast";
 import { StatusSchema, validateObjectIdString } from "@acme/validators";
 
 import NewStatusColumn from "~/app/_components/_task/new-status-column";
@@ -34,6 +35,11 @@ export default function TasksPage({
     params.projectId as ObjectIdString,
   );
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState("");
+
+  // // Retrieve projectId from URL
+  // const rawProjectId = searchParams.get("projectId");
 
   // Validate projectId inside useEffect
   useEffect(() => {
@@ -78,7 +84,7 @@ export default function TasksPage({
         projectId: projectId as string,
       },
       {
-        enabled: Boolean(projectId), // Only run query if projectId is valid
+        enabled: Boolean(projectId),
       },
     );
 
@@ -133,6 +139,41 @@ export default function TasksPage({
     );
   }
 
+  const utils = api.useUtils();
+
+  const updateProjectName = api.project.updateName.useMutation({
+    onSuccess: () => {
+      setIsEditing(false);
+      // refresh the data by invalidating the old project query
+      void utils.project.byId.invalidate({ id: projectId as string });
+      toast.success("Project name updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update project name: ${error.message}`);
+    },
+  });
+
+  // Get wallet ID from cookie
+  const cookieWallet = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("wallet="))
+    ?.split("=")[1];
+
+  const user = api.user.byWallet.useSuspenseQuery({
+    walletId: cookieWallet ?? "",
+  });
+  const [userMemberships] = api.member.byUserId.useSuspenseQuery({
+    userId: user[0]._id,
+  });
+
+  const isOwner = () => {
+    return userMemberships.some(
+      (member) =>
+        member.projectId === projectId &&
+        (member.role === "Owner" || member.role === "Admin"),
+    );
+  };
+
   if (validationError) return <p>{validationError}</p>;
   if (isLoading) return <TaskBoardSkeleton />;
   if (error) return <p>Error fetching statuses: {error.message}</p>;
@@ -168,9 +209,52 @@ export default function TasksPage({
         strategy={horizontalListSortingStrategy}
       >
         <div className="flex h-full flex-col">
-          <h1 className="mb-3 flex justify-center text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg">
-            {project.name}
-          </h1>
+          <div className="mb-3 flex justify-center">
+            {isEditing && isOwner() ? (
+              <input
+                type="text"
+                maxLength={40}
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                onBlur={() => {
+                  if (editedName.trim() && editedName !== project.name) {
+                    updateProjectName.mutate({
+                      projectId: projectId as string,
+                      name: editedName.trim(),
+                    });
+                  } else {
+                    setIsEditing(false);
+                    setEditedName(project.name);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.currentTarget.blur();
+                  } else if (e.key === "Escape") {
+                    setIsEditing(false);
+                    setEditedName(project.name);
+                  }
+                }}
+                className="border-b border-gray-500 bg-transparent text-center text-5xl font-extrabold text-white outline-none focus:border-[#72D524]"
+                autoFocus
+              />
+            ) : (
+              <h1
+                onDoubleClick={() => {
+                  // only allow editing if the user is an owner or admin
+                  if (isOwner()) {
+                    setIsEditing(true);
+                    setEditedName(project.name);
+                  }
+                }}
+                className={`text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg ${
+                  isOwner() ? "cursor-pointer hover:opacity-80" : ""
+                }`}
+              >
+                {project.name}
+              </h1>
+            )}
+          </div>
           <div className="flex-1 overflow-x-auto">
             <div className="flex min-w-max gap-6 p-6">
               {statusColumns.map((status) => (
