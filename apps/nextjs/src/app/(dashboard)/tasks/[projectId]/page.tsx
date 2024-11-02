@@ -78,14 +78,15 @@ export default function TasksPage({
     },
   );
 
-  const { data: members, error: membersError } = api.member.byProjectId.useQuery(
-    {
-      projectId: projectId as string,
-    },
-    {
-      enabled: Boolean(projectId),
-    },
-  );
+  const { data: members, error: membersError } =
+    api.member.byProjectId.useQuery(
+      {
+        projectId: projectId as string,
+      },
+      {
+        enabled: Boolean(projectId),
+      },
+    );
 
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
@@ -132,10 +133,10 @@ export default function TasksPage({
   if (membersError) {
     return (
       <p>
-        Error fetching members: {" "}
+        Error fetching members:{" "}
         {membersError instanceof Error ? membersError.message : "Unknown error"}
       </p>
-    )
+    );
   }
 
   const utils = api.useUtils();
@@ -209,51 +210,51 @@ export default function TasksPage({
       >
         <div className="flex h-full flex-col">
           <div className="mb-3 flex justify-center">
-        {isEditing && isOwner() ? (
-          <input
-            type="text"
-            maxLength={40}
-            value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
-            onBlur={() => {
-              if (editedName.trim() && editedName !== project.name) {
-                updateProjectName.mutate({
-                  projectId: projectId as string,
-                  name: editedName.trim(),
-                });
-              } else {
-                setIsEditing(false);
-                setEditedName(project.name);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.currentTarget.blur();
-              } else if (e.key === "Escape") {
-                setIsEditing(false);
-                setEditedName(project.name);
-              }
-            }}
-            className="border-b border-gray-500 bg-transparent text-center text-5xl font-extrabold text-white outline-none focus:border-[#72D524]"
-            autoFocus
-          />
-        ) : (
-          <h1
-            onDoubleClick={() => {
-              // only allow editing if the user is an owner or admin
-              if (isOwner()) {
-                setIsEditing(true);
-                setEditedName(project.name);
-              }
-            }}
-            className={`text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg ${
-              isOwner() ? "cursor-pointer hover:opacity-80" : ""
-            }`}
-          >
+            {isEditing && isOwner() ? (
+              <input
+                type="text"
+                maxLength={40}
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                onBlur={() => {
+                  if (editedName.trim() && editedName !== project.name) {
+                    updateProjectName.mutate({
+                      projectId: projectId as string,
+                      name: editedName.trim(),
+                    });
+                  } else {
+                    setIsEditing(false);
+                    setEditedName(project.name);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.currentTarget.blur();
+                  } else if (e.key === "Escape") {
+                    setIsEditing(false);
+                    setEditedName(project.name);
+                  }
+                }}
+                className="border-b border-gray-500 bg-transparent text-center text-5xl font-extrabold text-white outline-none focus:border-[#72D524]"
+                autoFocus
+              />
+            ) : (
+              <h1
+                onDoubleClick={() => {
+                  // only allow editing if the user is an owner or admin
+                  if (isOwner()) {
+                    setIsEditing(true);
+                    setEditedName(project.name);
+                  }
+                }}
+                className={`text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg ${
+                  isOwner() ? "cursor-pointer hover:opacity-80" : ""
+                }`}
+              >
                 {project.name}
               </h1>
-        )}
-      </div>
+            )}
+          </div>
           <div className="flex-1 overflow-x-auto">
             <div className="flex min-w-max gap-6 p-6">
               {statusColumns.map((status) => (
