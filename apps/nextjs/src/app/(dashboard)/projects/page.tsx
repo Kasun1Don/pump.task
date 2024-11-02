@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
-import { CreateProjectDialog } from "~/app/_components/_projects/create-project-dialog";
 
 import { Button } from "@acme/ui/button";
 import {
@@ -33,6 +32,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@acme/ui/tabs";
 import { toast } from "@acme/ui/toast";
 
+import { CreateProjectDialog } from "~/app/_components/_projects/create-project-dialog";
 import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
@@ -60,10 +60,6 @@ export default function ProjectsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   // number of projects per page
   const projectsPerPage = 9;
-
-
-
-
 
   useEffect(() => {
     // Try to get wallet from activeAccount first
@@ -234,8 +230,6 @@ export default function ProjectsPage() {
   const { data: projectTags } = api.task.getProjectTags.useQuery(
     projects?.map((p) => p._id.toString()) ?? [],
   );
-
-
 
   return (
     <>
@@ -563,7 +557,7 @@ export default function ProjectsPage() {
 
       <CreateProjectDialog
         isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen} 
+        setIsModalOpen={setIsModalOpen}
         walletId={walletId}
       />
 

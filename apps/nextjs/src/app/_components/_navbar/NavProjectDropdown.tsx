@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { CreateProjectDialog } from "~/app/_components/_projects/create-project-dialog";
 
 import type { Project } from "@acme/validators";
 // Import ProjectClass from Typegoose models
@@ -17,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
 
+import { CreateProjectDialog } from "~/app/_components/_projects/create-project-dialog";
 import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
@@ -148,77 +148,77 @@ export default function NavProjectDropdown({
       <DropdownMenu>
         {/* The Current selected Project */}
         <DropdownMenuTrigger className="relative flex cursor-default select-none items-center rounded-md border px-4 py-2 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-        <div className="flex flex-row items-center gap-4">
-          {/* <Image
+          <div className="flex flex-row items-center gap-4">
+            {/* <Image
             className="inline-block h-4 w-4 rounded-full"
             src="/badge.png"
             alt="badge"
             width={12}
             height={12}
           /> */}
-          <h6 className="text-sm">{currentProject}</h6>
-          <Image
-            src="/chevron-down.svg"
-            alt="Chevron Down"
-            width={16}
-            height={16}
-          />
-        </div>
-      </DropdownMenuTrigger>
+            <h6 className="text-sm">{currentProject}</h6>
+            <Image
+              src="/chevron-down.svg"
+              alt="Chevron Down"
+              width={16}
+              height={16}
+            />
+          </div>
+        </DropdownMenuTrigger>
 
-      {/* A map of the user's Projects */}
-      <DropdownMenuContent>
-        {isLoading ? (
-          <DropdownMenuItem className="flex flex-row items-center gap-4">
-            <h1 className="text-sm">Loading Projects...</h1>
-          </DropdownMenuItem>
-        ) : isError ? (
-          <DropdownMenuItem className="flex flex-row items-center gap-4">
-            <h1 className="text-sm text-red-500">Error loading projects</h1>
-          </DropdownMenuItem>
-        ) : projectData.length > 0 ? (
-          projectData.reverse().map((project) => (
-            <DropdownMenuItem
-              key={project._id}
-              className="flex flex-row items-center gap-4 hover:cursor-pointer"
-              onClick={async () => {
-                try {
-                  await handleProjectChange(project);
-                } catch (error) {
-                  console.log(error);
-                }
-              }}
-            >
-              {/* <Image
+        {/* A map of the user's Projects */}
+        <DropdownMenuContent>
+          {isLoading ? (
+            <DropdownMenuItem className="flex flex-row items-center gap-4">
+              <h1 className="text-sm">Loading Projects...</h1>
+            </DropdownMenuItem>
+          ) : isError ? (
+            <DropdownMenuItem className="flex flex-row items-center gap-4">
+              <h1 className="text-sm text-red-500">Error loading projects</h1>
+            </DropdownMenuItem>
+          ) : projectData.length > 0 ? (
+            projectData.reverse().map((project) => (
+              <DropdownMenuItem
+                key={project._id}
+                className="flex flex-row items-center gap-4 hover:cursor-pointer"
+                onClick={async () => {
+                  try {
+                    await handleProjectChange(project);
+                  } catch (error) {
+                    console.log(error);
+                  }
+                }}
+              >
+                {/* <Image
                 className="inline-block h-5 w-5 rounded-full"
                 src={project.image ?? "/default-project-image.png"}
                 alt={project.name}
                 width={20}
                 height={20}
               /> */}
-              <h1 className="text-sm">{project.name}</h1>
+                <h1 className="text-sm">{project.name}</h1>
+              </DropdownMenuItem>
+            ))
+          ) : (
+            <DropdownMenuItem className="flex flex-row items-center gap-4">
+              <h1 className="text-sm">No selected project</h1>
             </DropdownMenuItem>
-          ))
-        ) : (
-          <DropdownMenuItem className="flex flex-row items-center gap-4">
-            <h1 className="text-sm">No selected project</h1>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="hover:cursor-pointer"
+            onClick={() => setIsCreateProjectOpen(true)}
+          >
+            Create New Project
           </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          className="hover:cursor-pointer"
-          onClick={() => setIsCreateProjectOpen(true)}
-        >
-          Create New Project
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-    <CreateProjectDialog
-      isModalOpen={isCreateProjectOpen}
-      setIsModalOpen={setIsCreateProjectOpen}
-      walletId={walletId}
-    />
-  </>
+      <CreateProjectDialog
+        isModalOpen={isCreateProjectOpen}
+        setIsModalOpen={setIsCreateProjectOpen}
+        walletId={walletId}
+      />
+    </>
   );
 }

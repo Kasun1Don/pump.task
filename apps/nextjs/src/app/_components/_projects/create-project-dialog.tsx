@@ -4,26 +4,33 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Switch } from "@acme/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@acme/ui/dialog";
 
 import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
 interface CreateProjectDialogProps {
-    isModalOpen: boolean;
-    setIsModalOpen: (value: boolean) => void;
-    walletId: string;
+  isModalOpen: boolean;
+  setIsModalOpen: (value: boolean) => void;
+  walletId: string;
 }
 
 export function CreateProjectDialog({
-    isModalOpen,
-    setIsModalOpen,
-    walletId,
+  isModalOpen,
+  setIsModalOpen,
+  walletId,
 }: CreateProjectDialogProps) {
-    const router = useRouter();
-    const [newProjectName, setNewProjectName] = useState("");
-    const [selectedTemplate, setSelectedTemplate] = useState("");
-    const [isPrivate, setIsPrivate] = useState(false);
-    const [description, setDescription] = useState("");
+  const router = useRouter();
+  const [newProjectName, setNewProjectName] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [description, setDescription] = useState("");
 
   const { data: templates = [] } = api.template.getAll.useQuery();
 
@@ -40,14 +47,15 @@ export function CreateProjectDialog({
     },
   });
 
-  const updateActiveProjectsMutation = api.user.updateActiveProjects.useMutation({
-    onSuccess: (data) => {
-      console.log("Active projects updated:", data.activeProjects);
-    },
-    onError: (error) => {
-      console.error("Error updating active projects:", error);
-    },
-  });
+  const updateActiveProjectsMutation =
+    api.user.updateActiveProjects.useMutation({
+      onSuccess: (data) => {
+        console.log("Active projects updated:", data.activeProjects);
+      },
+      onError: (error) => {
+        console.error("Error updating active projects:", error);
+      },
+    });
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -57,14 +65,15 @@ export function CreateProjectDialog({
     setDescription("");
   };
 
-  if (!isModalOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-96 rounded-lg bg-[#18181B] p-6">
-        <h2 className="mb-6 text-xl font-bold text-white">
-          Create New Project
-        </h2>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogContent className="bg-[#18181B] border-gray-700 w-96">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold text-white">
+            Create New Project
+          </DialogTitle>
+        </DialogHeader>
+
         <div className="space-y-4">
           <div>
             <input
@@ -103,16 +112,17 @@ export function CreateProjectDialog({
               ))}
             </select>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between px-2">
             <span className="text-white">Private Project</span>
             <Switch
               checked={isPrivate}
               onCheckedChange={setIsPrivate}
-              className="data-[state=checked]:bg-[#72D524]"
+              className="data-[state=checked]:bg-[#72D524] border border-gray-700"
             />
           </div>
         </div>
-        <div className="mt-6 flex justify-end">
+
+        <DialogFooter>
           <button
             onClick={handleCloseModal}
             className="mr-2 rounded-lg bg-gray-700 px-4 py-2 text-white hover:bg-gray-600"
@@ -144,8 +154,8 @@ export function CreateProjectDialog({
           >
             Create
           </button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
