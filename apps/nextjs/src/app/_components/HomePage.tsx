@@ -43,7 +43,7 @@ export function Login() {
           },
           doLogin: async (params) => {
             setLoading(true);
-            toast.message("Preparing your dashboard…... please wait");
+            toast.message("Setting up your session... please wait");
             console.log("logging in!");
             await login(params);
           },
