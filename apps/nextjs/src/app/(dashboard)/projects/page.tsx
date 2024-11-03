@@ -256,11 +256,11 @@ export default function ProjectsPage() {
     <>
       <div className="m-8">
         <div>
-          <div className="mb-6 flex items-center justify-between px-8">
+          <div className="mb-6 flex flex-col items-center justify-between space-y-8 px-8 sm:flex-row sm:space-x-4 sm:space-y-0">
             <h1 className="text-xl font-bold">Your Project Task Boards</h1>
             <Button
               onClick={() => setIsModalOpen(true)}
-              className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
+              className="w-full bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D] sm:w-auto"
             >
               + Create New Project
             </Button>
@@ -269,24 +269,24 @@ export default function ProjectsPage() {
             <Tabs
               defaultValue="all"
               onValueChange={(value) => setShowFilter(value)}
-              className="w-[300px] sm:w-[400px] md:w-[500px]"
+              className="w-[500px]"
             >
               <TabsList className="grid w-full grid-cols-3 bg-[#18181B]">
                 <TabsTrigger
                   value="all"
-                  className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
+                  className="border-b border-l border-t px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
                 >
                   All Projects
                 </TabsTrigger>
                 <TabsTrigger
                   value="my"
-                  className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
+                  className="border-b border-t px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
                 >
                   My Projects
                 </TabsTrigger>
                 <TabsTrigger
                   value="Owned"
-                  className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
+                  className="border-b border-r border-t px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
                 >
                   Created By Me
                 </TabsTrigger>
@@ -365,16 +365,18 @@ export default function ProjectsPage() {
                               />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  router.push(
-                                    `/users/${project._id.toString()}`,
-                                  );
-                                }}
-                              >
-                                View Users
-                              </DropdownMenuItem>
+                              {(isOwner || isAdmin) && (
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(
+                                      `/users/${project._id.toString()}`,
+                                    );
+                                  }}
+                                >
+                                  View Users
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -529,7 +531,7 @@ export default function ProjectsPage() {
 
         {/* pagination only renders if there are more than 1 page of projects*/}
         {totalPages > 1 && (
-          <div className="col-span-3 mb-3 flex justify-center">
+          <div className="col-span-3 mb-3 flex justify-center p-4 sm:p-0">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
