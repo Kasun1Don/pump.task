@@ -33,6 +33,7 @@ import { Tabs, TabsList, TabsTrigger } from "@acme/ui/tabs";
 import { toast } from "@acme/ui/toast";
 
 import { CreateProjectDialog } from "~/app/_components/_projects/create-project-dialog";
+import ProjectsSkeleton from "~/app/_components/_projects/projects-skeleton";
 import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
@@ -82,16 +83,19 @@ export default function ProjectsPage() {
     console.log("Current user ID (wallet address):", walletId);
   }, [walletId]);
 
-  const { data: projects, refetch: refetchProjects } =
-    api.project.getAll.useQuery(
-      {
-        showOwnedOnly,
-        userId: walletId,
-      },
-      {
-        enabled: !!walletId, // Only run the query if we have a userId
-      },
-    );
+  const {
+    data: projects,
+    refetch: refetchProjects,
+    isLoading: isProjectsLoading,
+  } = api.project.getAll.useQuery(
+    {
+      showOwnedOnly,
+      userId: walletId,
+    },
+    {
+      enabled: !!walletId, // Only run the query if we have a userId
+    },
+  );
 
   const user = api.user.byWallet.useSuspenseQuery({ walletId });
   const [userMemberships, { refetch: refetchMemberships }] =
@@ -272,261 +276,276 @@ export default function ProjectsPage() {
               </TabsList>
             </Tabs>
           </div>
-          <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
-            {currentProjects && currentProjects.length > 0 ? (
-              <>
-                {currentProjects.map((project) => {
-                  const isOwner = userMemberships.some(
-                    (member) =>
-                      member.projectId === project._id.toString() &&
-                      member.role === "Owner",
-                  );
+          {/* change isProjectsLoading to true to force projects skeleton view */}
+          {isProjectsLoading ? (
+            <ProjectsSkeleton />
+          ) : (
+            <>
+              <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
+                {currentProjects && currentProjects.length > 0 ? (
+                  <>
+                    {currentProjects.map((project) => {
+                      const isOwner = userMemberships.some(
+                        (member) =>
+                          member.projectId === project._id.toString() &&
+                          member.role === "Owner",
+                      );
 
-                  const isAdmin = userMemberships.some(
-                    (member) =>
-                      member.projectId === project._id.toString() &&
-                      member.role === "Admin",
-                  );
+                      const isAdmin = userMemberships.some(
+                        (member) =>
+                          member.projectId === project._id.toString() &&
+                          member.role === "Admin",
+                      );
 
-                  const isMember = userMemberships.some(
-                    (member) => member.projectId === project._id.toString(),
-                  );
+                      const isMember = userMemberships.some(
+                        (member) => member.projectId === project._id.toString(),
+                      );
 
-                  const memberCount =
-                    memberCounts?.[project._id.toString()] ?? 0;
+                      const memberCount =
+                        memberCounts?.[project._id.toString()] ?? 0;
 
-                  // check if this project is the most recent active project (length of array minus 1)
-                  const isActive = user[0].activeProjects?.length
-                    ? user[0].activeProjects[
-                        user[0].activeProjects.length - 1
-                      ]?.toString() === project._id.toString()
-                    : false;
+                      // check if this project is the most recent active project (length of array minus 1)
+                      const isActive = user[0].activeProjects?.length
+                        ? user[0].activeProjects[
+                            user[0].activeProjects.length - 1
+                          ]?.toString() === project._id.toString()
+                        : false;
 
-                  return (
-                    <div
-                      key={project._id.toString()}
-                      className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
-                      onClick={async () => {
-                        try {
-                          // Update active projects
-                          await updateActiveProjectsMutation.mutateAsync({
-                            walletId: walletId,
-                            projectId: project._id.toString(),
-                          });
+                      return (
+                        <div
+                          key={project._id.toString()}
+                          className="group relative flex min-h-32 cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-gray-700 bg-[#09090B] font-bold transition-colors hover:bg-[#18181B]"
+                          onClick={async () => {
+                            try {
+                              // Update active projects
+                              await updateActiveProjectsMutation.mutateAsync({
+                                walletId: walletId,
+                                projectId: project._id.toString(),
+                              });
 
-                          // invalidate and refetch user data
-                          await utils.user.byWallet.invalidate();
+                              // invalidate and refetch user data
+                              await utils.user.byWallet.invalidate();
 
-                          // Navigate to the project's tasks page
-                          await revalidate("/");
-                          router.push(`/tasks/${project._id.toString()}`);
-                        } catch (error) {
-                          console.error(
-                            "Error updating active projects:",
-                            error,
-                          );
-                        }
-                      }}
-                    >
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="absolute right-2 top-2">
-                          <Image
-                            src="/VertDots.svg"
-                            alt="Options"
-                            width={2}
-                            height={10}
-                            className="mt-1 h-6 w-6 hover:brightness-50 hover:[filter:invert(48%)_sepia(79%)_saturate(2476%)_hue-rotate(86deg)_brightness(118%)_contrast(119%)]"
-                          />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/users/${project._id.toString()}`);
-                            }}
-                          >
-                            View Users
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedProjectForBadges(
-                                project._id.toString(),
+                              // Navigate to the project's tasks page
+                              await revalidate("/");
+                              router.push(`/tasks/${project._id.toString()}`);
+                            } catch (error) {
+                              console.error(
+                                "Error updating active projects:",
+                                error,
                               );
-                              setIsBadgeModalOpen(true);
-                            }}
-                          >
-                            View Badges
-                          </DropdownMenuItem>
-                          {(isOwner || isAdmin) && (
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingProject({
-                                  id: project._id.toString(),
-                                  name: project.name,
-                                  description: project.description,
-                                });
-                                setIsEditModalOpen(true);
-                              }}
-                            >
-                              Edit Project Details
-                            </DropdownMenuItem>
-                          )}
-                          {isMember && !isOwner && (
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toast.promise(
-                                  new Promise((resolve) => {
-                                    toast(
-                                      "Are you sure you want to leave this project?",
-                                      {
-                                        action: {
-                                          label: "Confirm",
-                                          onClick: () => {
-                                            leaveProject.mutate({
-                                              projectId: project._id.toString(),
-                                              walletId: walletId,
-                                            });
-                                            resolve(true);
+                            }
+                          }}
+                        >
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="absolute right-2 top-2">
+                              <Image
+                                src="/VertDots.svg"
+                                alt="Options"
+                                width={2}
+                                height={10}
+                                className="mt-1 h-6 w-6 hover:brightness-50 hover:[filter:invert(48%)_sepia(79%)_saturate(2476%)_hue-rotate(86deg)_brightness(118%)_contrast(119%)]"
+                              />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(
+                                    `/users/${project._id.toString()}`,
+                                  );
+                                }}
+                              >
+                                View Users
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedProjectForBadges(
+                                    project._id.toString(),
+                                  );
+                                  setIsBadgeModalOpen(true);
+                                }}
+                              >
+                                View Badges
+                              </DropdownMenuItem>
+                              {(isOwner || isAdmin) && (
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingProject({
+                                      id: project._id.toString(),
+                                      name: project.name,
+                                      description: project.description,
+                                    });
+                                    setIsEditModalOpen(true);
+                                  }}
+                                >
+                                  Edit Project Details
+                                </DropdownMenuItem>
+                              )}
+                              {isMember && !isOwner && (
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toast.promise(
+                                      new Promise((resolve) => {
+                                        toast(
+                                          "Are you sure you want to leave this project?",
+                                          {
+                                            action: {
+                                              label: "Confirm",
+                                              onClick: () => {
+                                                leaveProject.mutate({
+                                                  projectId:
+                                                    project._id.toString(),
+                                                  walletId: walletId,
+                                                });
+                                                resolve(true);
+                                              },
+                                            },
+                                            cancel: {
+                                              label: "Cancel",
+                                              onClick: () => resolve(false),
+                                            },
                                           },
-                                        },
-                                        cancel: {
-                                          label: "Cancel",
-                                          onClick: () => resolve(false),
-                                        },
+                                        );
+                                      }),
+                                      {
+                                        loading: "Leaving project...",
+                                        success: "Successfully left project",
+                                        error: "Failed to leave project",
                                       },
                                     );
-                                  }),
-                                  {
-                                    loading: "Leaving project...",
-                                    success: "Successfully left project",
-                                    error: "Failed to leave project",
-                                  },
-                                );
-                              }}
-                              className="text-red-500"
-                            >
-                              Leave Project
-                            </DropdownMenuItem>
-                          )}
-                          {isOwner && (
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setProjectToDelete(project._id.toString());
-                                setIsDeleteModalOpen(true);
-                              }}
-                              className="text-red-500"
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <h3 className="p-4 text-white">
-                        {project.name}
-                        {isActive && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="ml-3 h-6 rounded-lg bg-white px-2 text-base text-black"
-                          >
-                            Active
-                          </Button>
-                        )}
-                      </h3>
-                      {project.description && (
-                        <p className="px-4 pb-2 text-sm font-light text-gray-400">
-                          {project.description}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between px-4 pb-4">
-                        <div className="flex gap-4 text-sm text-gray-400">
-                          <p>
-                            {project.isPrivate ? "Private" : "Public"} project
-                          </p>
-                          <p className="flex items-center gap-1">
-                            Available Badges:{" "}
-                            {projectTags?.[project._id.toString()]?.length ?? 0}
-                            {/* only show badge icon if there are available badges */}
-                            {(projectTags?.[project._id.toString()]?.length ??
-                              0) > 0 && (
-                              <Image
-                                src="/CheckoutVector.svg"
-                                alt="Badges"
-                                width={14}
-                                height={14}
-                                className="inline-block"
-                              />
+                                  }}
+                                  className="text-red-500"
+                                >
+                                  Leave Project
+                                </DropdownMenuItem>
+                              )}
+                              {isOwner && (
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setProjectToDelete(project._id.toString());
+                                    setIsDeleteModalOpen(true);
+                                  }}
+                                  className="text-red-500"
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <h3 className="p-4 text-white">
+                            {project.name}
+                            {isActive && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="ml-3 h-6 rounded-lg bg-white px-2 text-base text-black"
+                              >
+                                Active
+                              </Button>
                             )}
-                          </p>
+                          </h3>
+                          {project.description && (
+                            <p className="px-4 pb-2 text-sm font-light text-gray-400">
+                              {project.description}
+                            </p>
+                          )}
+                          <div className="flex items-center justify-between px-4 pb-4">
+                            <div className="flex gap-4 text-sm text-gray-400">
+                              <p>
+                                {project.isPrivate ? "Private" : "Public"}{" "}
+                                project
+                              </p>
+                              <p className="flex items-center gap-1">
+                                Available Badges:{" "}
+                                {projectTags?.[project._id.toString()]
+                                  ?.length ?? 0}
+                                {/* only show badge icon if there are available badges */}
+                                {(projectTags?.[project._id.toString()]
+                                  ?.length ?? 0) > 0 && (
+                                  <Image
+                                    src="/CheckoutVector.svg"
+                                    alt="Badges"
+                                    width={14}
+                                    height={14}
+                                    className="inline-block"
+                                  />
+                                )}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1 text-sm text-gray-400">
+                              <Image
+                                src="/userIcon.png"
+                                alt="Members"
+                                width={16}
+                                height={16}
+                                className="opacity-60"
+                              />
+                              <span>{memberCount}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1 text-sm text-gray-400">
-                          <Image
-                            src="/userIcon.png"
-                            alt="Members"
-                            width={16}
-                            height={16}
-                            className="opacity-60"
-                          />
-                          <span>{memberCount}</span>
-                        </div>
+                      );
+                    })}
+                    {/* pagination only renders if there are more than 1 page of projects*/}
+                    {totalPages > 1 && (
+                      <div className="col-span-3 mt-6">
+                        <Pagination>
+                          <PaginationContent>
+                            <PaginationItem>
+                              <PaginationPrevious
+                                onClick={() =>
+                                  setCurrentPage((p) => Math.max(1, p - 1))
+                                }
+                                className={
+                                  currentPage === 1
+                                    ? "pointer-events-none opacity-50"
+                                    : ""
+                                }
+                              />
+                            </PaginationItem>
+
+                            {generatePaginationItems()}
+
+                            <PaginationItem>
+                              <PaginationNext
+                                onClick={() =>
+                                  setCurrentPage((p) =>
+                                    Math.min(totalPages, p + 1),
+                                  )
+                                }
+                                className={
+                                  currentPage === totalPages
+                                    ? "pointer-events-none opacity-50"
+                                    : ""
+                                }
+                              />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
                       </div>
-                    </div>
-                  );
-                })}
-                {/* pagination only renders if there are more than 1 page of projects*/}
-                {totalPages > 1 && (
-                  <div className="col-span-3 mt-6">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() =>
-                              setCurrentPage((p) => Math.max(1, p - 1))
-                            }
-                            className={
-                              currentPage === 1
-                                ? "pointer-events-none opacity-50"
-                                : ""
-                            }
-                          />
-                        </PaginationItem>
-
-                        {generatePaginationItems()}
-
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() =>
-                              setCurrentPage((p) => Math.min(totalPages, p + 1))
-                            }
-                            className={
-                              currentPage === totalPages
-                                ? "pointer-events-none opacity-50"
-                                : ""
-                            }
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
+                    )}
+                  </>
+                ) : (
+                  <div className="col-span-3 text-center text-gray-400">
+                    <p>
+                      {showFilter === "all"
+                        ? "You are not associated with any projects yet."
+                        : showFilter === "my"
+                          ? "You are not a member of any projects."
+                          : "You haven't created any projects yet."}
+                    </p>
                   </div>
                 )}
-              </>
-            ) : (
-              <div className="col-span-3 text-center text-gray-400">
-                <p>
-                  {showFilter === "all"
-                    ? "You are not associated with any projects yet."
-                    : showFilter === "my"
-                      ? "You are not a member of any projects."
-                      : "You haven't created any projects yet."}
-                </p>
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
+
         <div>
           <div className="pl-8 pr-8">
             <h1 className="mb-4 text-xl font-bold">Task Board Templates</h1>
