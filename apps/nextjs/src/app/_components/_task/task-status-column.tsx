@@ -49,9 +49,14 @@ interface TaskStatusColumnProps {
         projectId: ObjectIdString;
       }[]
     | undefined;
+  selectedMembers: string[];
 }
 
-const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
+const TaskStatusColumn = ({
+  statusColumn,
+  members,
+  selectedMembers,
+}: TaskStatusColumnProps) => {
   const [tasks, setTasks] = useState<TaskCardData[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false); // State to control options visibility
@@ -157,6 +162,14 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
 
   const sensors = useSensors(mouseSensor);
 
+  // filter tasks based on selected members
+  const filteredTasks = tasks.filter((task) => {
+    const assigneeId = task.assigneeId;
+    if (selectedMembers.length === 0) return true;
+    if (!assigneeId) return false;
+    return selectedMembers.includes(assigneeId);
+  });
+
   return (
     <div
       className="bg-transparent-[16] group/status-column relative flex min-w-[350px] flex-col gap-5 rounded-lg bg-[#0000004a] p-3 hover:cursor-pointer"
@@ -220,10 +233,10 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
         sensors={sensors}
       >
         <SortableContext
-          items={tasks.map((task) => task._id)}
+          items={filteredTasks.map((task) => task._id)}
           strategy={verticalListSortingStrategy}
         >
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <TaskCard
               members={members}
               currentUserWalletId={cookieWallet ?? ""}
