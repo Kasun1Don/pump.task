@@ -209,7 +209,7 @@ export default function TasksPage({
         strategy={horizontalListSortingStrategy}
       >
         <div className="flex h-full flex-col">
-          <div className="mb-3 flex justify-center">
+          <div className="mb-3 flex justify-center pb-4">
             {isEditing && isOwner() ? (
               <input
                 type="text"
