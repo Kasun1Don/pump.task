@@ -11,7 +11,7 @@ const ProjectsSkeleton = () => {
           key={i}
           // TODO: fix this so that the 7th card onward is hidden for lg
           className={`group relative flex min-h-32 flex-col justify-between overflow-hidden rounded-lg border ${
-            i >= 3 ? "sm:block hidden" : ""
+            i >= 3 ? "hidden sm:block" : ""
           }`}
         />
       ))}
