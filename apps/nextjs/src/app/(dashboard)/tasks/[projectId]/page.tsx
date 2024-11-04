@@ -261,14 +261,19 @@ export default function TasksPage({
                 <TaskStatusColumn
                   key={status._id}
                   statusColumn={status}
-                  members={members}
+                  members={members?.map(member => ({
+                    ...member,
+                    projectId: projectId as ObjectIdString
+                  })) ?? []}
                 />
               ))}
-
-              <NewStatusColumn
-                projectId={projectId}
-                onStatusCreated={handleNewStatusCreated}
-              />
+              {/* only allow owner to create new status columns */}
+              {isOwner() && (
+                <NewStatusColumn
+                  projectId={projectId}
+                  onStatusCreated={handleNewStatusCreated}
+                />
+              )}
             </div>
           </div>
         </div>

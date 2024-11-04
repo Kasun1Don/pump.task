@@ -16,7 +16,11 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import type { UserClass } from "@acme/db";
-import type { StatusColumn, TaskCard as TaskCardData } from "@acme/validators";
+import type {
+  ObjectIdString,
+  StatusColumn,
+  TaskCard as TaskCardData,
+} from "@acme/validators";
 import { Button } from "@acme/ui/button";
 import {
   Dialog,
@@ -42,6 +46,7 @@ interface TaskStatusColumnProps {
     | {
         role: string;
         userData: UserClass;
+        projectId: ObjectIdString;
       }[]
     | undefined;
 }
@@ -50,6 +55,21 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
   const [tasks, setTasks] = useState<TaskCardData[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false); // State to control options visibility
+
+  const cookieWallet = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("wallet="))
+    ?.split("=")[1];
+
+  const isOwner = () => {
+    const currentUser = members?.find(
+      (member) => member.userData.walletId === cookieWallet,
+    );
+    return (
+      currentUser &&
+      (currentUser.role === "Owner" || currentUser.role === "Admin")
+    );
+  };
 
   // Drag and drop sorting
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -206,13 +226,14 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
           {tasks.map((task) => (
             <TaskCard
               members={members}
+              currentUserWalletId={cookieWallet ?? ""}
               key={task._id}
               projectId={statusColumn.projectId}
               statusId={statusColumn._id}
               task={task}
             />
           ))}
-          {statusColumn.isProtected === false && (
+          {statusColumn.isProtected === false && isOwner() && (
             <NewTaskCard
               members={members}
               statusId={statusColumn._id}

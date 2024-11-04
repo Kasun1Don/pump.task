@@ -86,7 +86,7 @@ export default async function Navbar() {
           {/* Navbar section right-hand side */}
           <div className="mt-1 flex max-h-8 gap-10 hover:cursor-pointer">
             {/* Pass projects to Project dropdown make sure to add ProjectClass */}
-            <div className="hidden sm:block">
+            <div className="hidden max-w-[250px] sm:block">
               <NavProjectDropdown
                 projects={activeProjectIds}
                 walletId={walletId}

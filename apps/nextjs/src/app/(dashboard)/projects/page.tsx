@@ -594,6 +594,7 @@ export default function ProjectsPage() {
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         walletId={walletId}
+        initialTemplate={_selectedTemplate}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -19,16 +19,18 @@ interface CreateProjectDialogProps {
   isModalOpen: boolean;
   setIsModalOpen: (value: boolean) => void;
   walletId: string;
+  initialTemplate?: string;
 }
 
 export function CreateProjectDialog({
   isModalOpen,
   setIsModalOpen,
   walletId,
+  initialTemplate = "",
 }: CreateProjectDialogProps) {
   const router = useRouter();
   const [newProjectName, setNewProjectName] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState(initialTemplate);
   const [isPrivate, setIsPrivate] = useState(false);
   const [description, setDescription] = useState("");
 
@@ -64,6 +66,10 @@ export function CreateProjectDialog({
     setIsPrivate(false);
     setDescription("");
   };
+
+  useEffect(() => {
+    setSelectedTemplate(initialTemplate);
+  }, [initialTemplate]);
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -144,7 +150,7 @@ export function CreateProjectDialog({
                 members: { user: walletId, role: "Owner" },
               });
             }}
-            className="rounded-lg bg-[#72D524] px-4 py-2 pb-2 text-[#18181B] hover:bg-[#5CAB1D] sm:pb-0"
+            className="rounded-lg bg-[#72D524] px-4 pb-2 text-[#18181B] hover:bg-[#5CAB1D] sm:pb-0"
           >
             Create
           </button>
