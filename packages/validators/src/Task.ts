@@ -48,6 +48,7 @@ export const TaskCardSchema = z.object({
   tags: TagClassSchema,
   customFields: z.array(customFieldSchema).optional(),
   _id: objectIdStringSchema("taskId"),
+  isMinted: z.boolean().default(false).optional(),
 });
 
 export const NewTaskCardSchema = TaskCardSchema.omit({
