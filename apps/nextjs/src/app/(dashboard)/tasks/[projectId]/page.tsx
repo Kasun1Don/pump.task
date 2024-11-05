@@ -116,7 +116,6 @@ export default function TasksPage({
     }
   }, [statusData]);
 
-
   // Callback function to handle when a new status column is created
   const handleNewStatusCreated = (newStatus: StatusColumn) => {
     setStatusColumns((prevStatusColumns) => {
