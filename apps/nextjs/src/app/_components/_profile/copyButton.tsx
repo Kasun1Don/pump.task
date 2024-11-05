@@ -3,28 +3,37 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
+import { toast } from "@acme/ui/toast";
+
 const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
   const [imageSrc, setImageSrc] = useState("/profile/copy.svg");
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleCopyClick = () => {
     navigator.clipboard
       .writeText(textToCopy)
       .then(() => {
         setImageSrc("/profile/check.png");
+        setIsCopied(true);
+        toast.message("Url copied to clipboard");
       })
-      .catch((err) => {
-        console.error("Failed to copy text: ", err);
+      .catch(() => {
+        toast.error("Failed to copy text");
       });
   };
 
   return (
-    <div
-      className="mx-2 cursor-pointer rounded-sm border hover:bg-gray-700"
+    <button
+      className="mx-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded-sm hover:bg-gray-700"
       onClick={handleCopyClick}
-      style={{ width: "30px", height: "30px" }}
     >
-      <Image src={imageSrc} alt="Copy text button" width={30} height={30} />
-    </div>
+      <Image
+        src={imageSrc}
+        alt="Copy text button"
+        width={isCopied ? 40 : 24}
+        height={isCopied ? 40 : 24}
+      />
+    </button>
   );
 };
 
