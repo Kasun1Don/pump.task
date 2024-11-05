@@ -22,7 +22,10 @@ export default function GlobalError({
           </h1>
           <p className="text-xl text-white">500 Internal Server Error</p>
 
-          <Button className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]" onClick={() => reset()}>
+          <Button
+            className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
+            onClick={() => reset()}
+          >
             Try Again
           </Button>
         </div>
