@@ -139,7 +139,6 @@ export default function TasksPage({
     );
   }
 
-
   const utils = api.useUtils();
 
   const updateProjectName = api.project.updateName.useMutation({
@@ -174,7 +173,7 @@ export default function TasksPage({
         (member.role === "Owner" || member.role === "Admin"),
     );
   };
-    
+
   if (validationError) return <p>{validationError}</p>;
   if (isLoading) return <TaskBoardSkeleton />;
   if (error) return <p>Error fetching statuses: {error.message}</p>;

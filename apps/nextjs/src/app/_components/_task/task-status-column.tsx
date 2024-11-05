@@ -226,7 +226,6 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
               <DialogHeader>
                 <DialogTitle>Confirm Deletion</DialogTitle>
                 <DialogDescription>
-
                   <div>Are you sure you want to remove this status column?</div>
                   <div>This will also remove all tasks within the status</div>
                   <div>(This action cannot be undone)</div>
