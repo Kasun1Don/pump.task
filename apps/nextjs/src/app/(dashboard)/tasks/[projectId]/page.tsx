@@ -60,6 +60,21 @@ export default function TasksPage({
     }
   }, [projectId]);
 
+  const utils = api.useUtils();
+
+  const updateStatusOrder = api.status.updateOrder.useMutation({
+    onSuccess: () => {
+      toast.success("Status order updated successfully");
+      // invalidate and refetch the statuses
+      void utils.status.getStatusesByProjectId.invalidate({
+        projectId: projectId as string,
+      });
+    },
+    onError: (error) => {
+      toast.error(`Failed to update status order: ${error.message}`);
+    },
+  });
+
   // Retrieve the project object by projectId
   const { data: project } = api.project.byId.useQuery(
     { id: projectId as string },
@@ -71,7 +86,7 @@ export default function TasksPage({
     data: statusData,
     error,
     isLoading,
-  } = api.task.getStatusesByProjectId.useQuery(
+  } = api.status.getStatusesByProjectId.useQuery(
     {
       projectId: projectId as string,
     },
@@ -102,14 +117,8 @@ export default function TasksPage({
     if (statusData) {
       const validationResult = StatusSchema.array().safeParse(statusData);
       if (validationResult.success) {
-        const statusColumnsCopy = [...validationResult.data]; // Create a copy of the array
-        // Remove the status column at index 0 (which has isProtected flag)
-        const protectedColumn = statusColumnsCopy.shift();
-        // If the protected column exists, push it to the end
-        if (protectedColumn?.isProtected) {
-          statusColumnsCopy.push(protectedColumn);
-        }
-        setStatusColumns(statusColumnsCopy);
+        // set state directly with the validated data
+        setStatusColumns(validationResult.data);
       } else {
         console.error("Validation error:", validationResult.error.errors);
       }
@@ -119,16 +128,18 @@ export default function TasksPage({
   // Callback function to handle when a new status column is created
   const handleNewStatusCreated = (newStatus: StatusColumn) => {
     setStatusColumns((prevStatusColumns) => {
-      const statusColumnsCopy = [...prevStatusColumns]; // Create a copy of the array
-      // Remove the status column at index 0 (which has isProtected flag)
-      const protectedColumn = statusColumnsCopy.shift();
-      // Add the new status column
-      statusColumns.push(newStatus);
-      // If the protected column exists, push it to the end
-      if (protectedColumn?.isProtected) {
-        statusColumnsCopy.push(protectedColumn);
-      }
-      return statusColumnsCopy;
+      // find the protected column
+      const protectedColumnIndex = prevStatusColumns.findIndex(
+        (col) => col.isProtected,
+      );
+      if (protectedColumnIndex === -1) return [...prevStatusColumns, newStatus];
+
+      // insert the new status after the protected column
+      return [
+        ...prevStatusColumns.slice(0, protectedColumnIndex + 1),
+        newStatus,
+        ...prevStatusColumns.slice(protectedColumnIndex + 1),
+      ];
     });
   };
 
@@ -140,8 +151,6 @@ export default function TasksPage({
       </p>
     );
   }
-
-  const utils = api.useUtils();
 
   const updateProjectName = api.project.updateName.useMutation({
     onSuccess: () => {
@@ -187,6 +196,12 @@ export default function TasksPage({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
+    // find the active column
+    const activeColumn = statusColumns.find((col) => col._id === active.id);
+
+    // prevent moving protected columns
+    if (activeColumn?.isProtected) return;
+
     setStatusColumns((statusColumns) => {
       const activeIndex = statusColumns.findIndex(
         (column) => column._id === active.id,
@@ -195,7 +210,18 @@ export default function TasksPage({
         (column) => column._id === over.id,
       );
 
-      return arrayMove(statusColumns, activeIndex, overIndex);
+      // can't drag protected column (index 0)
+      if (overIndex === 0) return statusColumns;
+
+      const newOrder = arrayMove(statusColumns, activeIndex, overIndex);
+
+      // Update the order on the server
+      updateStatusOrder.mutate({
+        projectId: projectId as string,
+        statusIds: newOrder.map((status) => status._id),
+      });
+
+      return newOrder;
     });
   };
 
@@ -214,33 +240,35 @@ export default function TasksPage({
           <div className="relative flex items-center justify-center">
             <div className="mb-3 flex-1 justify-center">
               {isEditing && isOwner() ? (
-                <input
-                  type="text"
-                  maxLength={40}
-                  value={editedName}
-                  onChange={(e) => setEditedName(e.target.value)}
-                  onBlur={() => {
-                    if (editedName.trim() && editedName !== project.name) {
-                      updateProjectName.mutate({
-                        projectId: projectId as string,
-                        name: editedName.trim(),
-                      });
-                    } else {
-                      setIsEditing(false);
-                      setEditedName(project.name);
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.currentTarget.blur();
-                    } else if (e.key === "Escape") {
-                      setIsEditing(false);
-                      setEditedName(project.name);
-                    }
-                  }}
-                  className="border-b border-gray-500 bg-transparent text-center text-5xl font-extrabold text-white outline-none focus:border-[#72D524]"
-                  autoFocus
-                />
+                <div className="flex justify-center">
+                  <input
+                    type="text"
+                    maxLength={40}
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    onBlur={() => {
+                      if (editedName.trim() && editedName !== project.name) {
+                        updateProjectName.mutate({
+                          projectId: projectId as string,
+                          name: editedName.trim(),
+                        });
+                      } else {
+                        setIsEditing(false);
+                        setEditedName(project.name);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.currentTarget.blur();
+                      } else if (e.key === "Escape") {
+                        setIsEditing(false);
+                        setEditedName(project.name);
+                      }
+                    }}
+                    className="border-b border-gray-500 bg-transparent text-center text-5xl font-extrabold text-white outline-none focus:border-[#72D524]"
+                    autoFocus
+                  />
+                </div>
               ) : (
                 <h1
                   onDoubleClick={() => {
