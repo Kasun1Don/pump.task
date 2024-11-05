@@ -13,6 +13,7 @@ export const projectRouter = {
         name: z.string().min(1, "Project name is required"),
         isPrivate: z.boolean().default(false),
         templateId: z.string().optional(),
+        description: z.string().optional(),
         members: z.object({
           user: z.string(),
           role: z.enum(["Observer", "Admin", "Owner"]),
@@ -25,6 +26,7 @@ export const projectRouter = {
         const newProject = new Project({
           name: input.name,
           isPrivate: input.isPrivate,
+          description: input.description,
           templateId: input.templateId
             ? new Types.ObjectId(input.templateId)
             : undefined,
@@ -150,8 +152,14 @@ export const projectRouter = {
           throw new Error("Project not found");
         }
 
+        // Remove the project reference from the user
+        await User.updateMany(
+          { projects: projectId },
+          { $pull: { projects: projectId, activeProjects: projectId } },
+        );
+
         console.log(
-          "Project and associated task and statuses deleted successfully",
+          "Project, associated tasks, statuses, and user references deleted successfully",
         );
 
         return { message: "Project deleted successfully" };
@@ -161,5 +169,32 @@ export const projectRouter = {
           `Failed to delete project: ${(error as Error).message}`,
         );
       }
+    }),
+
+  updateName: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        name: z.string().min(1),
+        description: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const updatedProject = await Project.findByIdAndUpdate(
+        input.projectId,
+        {
+          name: input.name,
+          ...(input.description !== undefined && {
+            description: input.description,
+          }),
+        },
+        { new: true },
+      );
+
+      if (!updatedProject) {
+        throw new Error("Project not found");
+      }
+
+      return updatedProject;
     }),
 } satisfies TRPCRouterRecord;
