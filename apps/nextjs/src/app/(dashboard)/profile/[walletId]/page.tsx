@@ -58,7 +58,7 @@ export default async function UserProfile({
               }
             </p>
           </div>
-          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-7 text-sm sm:w-auto">
+          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-6 text-sm sm:w-auto">
             <p>Copy profile link</p>
             <CopyButton textToCopy={url} />
           </div>
