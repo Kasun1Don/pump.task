@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 // Thirdweb React Components
 import { ConnectButton, darkTheme } from "thirdweb/react";
 
+import { toast } from "@acme/ui/toast";
+
 // Functions for logging in and out, Auth
 import {
   generatePayload,
@@ -28,7 +30,7 @@ export function Login() {
         chain={chain}
         theme={darkTheme({
           colors: {
-            primaryButtonBg: "#2aa72a",
+            primaryButtonBg: "#72D524",
           },
         })}
         auth={{
@@ -41,6 +43,7 @@ export function Login() {
           },
           doLogin: async (params) => {
             setLoading(true);
+            toast.message("Setting up your session... please wait");
             console.log("logging in!");
             await login(params);
           },
