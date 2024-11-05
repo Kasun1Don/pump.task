@@ -236,7 +236,7 @@ export default function TasksPage({
         items={statusColumns.map((column) => column._id)}
         strategy={horizontalListSortingStrategy}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-[calc(100vh-12rem)] flex-col">
           <div className="relative flex items-center justify-center">
             <div className="mb-3 flex-1 justify-center">
               {isEditing && isOwner() ? (

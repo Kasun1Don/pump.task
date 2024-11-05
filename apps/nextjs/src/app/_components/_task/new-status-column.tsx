@@ -88,7 +88,7 @@ export default function NewStatusColumn({
       </DialogTrigger>
 
       {/* Dialog content for entering the new status */}
-      <DialogContent className="rounded-lg bg-gray-900 p-6 text-white">
+      <DialogContent className="rounded-lg bg-black p-6 text-white">
         <DialogHeader>
           <DialogTitle>Create New Status</DialogTitle>
         </DialogHeader>
@@ -115,7 +115,7 @@ export default function NewStatusColumn({
         <DialogFooter>
           <Button
             onClick={handleCreateStatus}
-            className="bg-zesty-green hover:bg-zesty-green rounded px-4 py-2 text-black hover:bg-opacity-80"
+            className="bg-zesty-green hover:bg-zesty-green w-full rounded px-4 py-2 text-black hover:bg-opacity-80"
           >
             Create Status
           </Button>
