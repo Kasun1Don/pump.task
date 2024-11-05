@@ -21,6 +21,7 @@ import { toast } from "@acme/ui/toast";
 import { StatusSchema, validateObjectIdString } from "@acme/validators";
 
 import NewStatusColumn from "~/app/_components/_task/new-status-column";
+import TaskFilter from "~/app/_components/_task/task-filter";
 import TaskStatusColumn from "~/app/_components/_task/task-status-column";
 import TaskBoardSkeleton from "~/app/_components/_task/TaskBoardLoader";
 import { api } from "~/trpc/react";
@@ -37,6 +38,7 @@ export default function TasksPage({
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState("");
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
   // // Retrieve projectId from URL
   // const rawProjectId = searchParams.get("projectId");
@@ -209,51 +211,66 @@ export default function TasksPage({
         strategy={horizontalListSortingStrategy}
       >
         <div className="flex h-full flex-col">
-          <div className="mb-3 flex justify-center pb-4">
-            {isEditing && isOwner() ? (
-              <input
-                type="text"
-                maxLength={40}
-                value={editedName}
-                onChange={(e) => setEditedName(e.target.value)}
-                onBlur={() => {
-                  if (editedName.trim() && editedName !== project.name) {
-                    updateProjectName.mutate({
-                      projectId: projectId as string,
-                      name: editedName.trim(),
-                    });
-                  } else {
-                    setIsEditing(false);
-                    setEditedName(project.name);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.currentTarget.blur();
-                  } else if (e.key === "Escape") {
-                    setIsEditing(false);
-                    setEditedName(project.name);
-                  }
-                }}
-                className="border-b border-gray-500 bg-transparent text-center text-5xl font-extrabold text-white outline-none focus:border-[#72D524]"
-                autoFocus
+          <div className="relative flex items-center justify-center">
+            <div className="mb-3 flex-1 justify-center">
+              {isEditing && isOwner() ? (
+                <input
+                  type="text"
+                  maxLength={40}
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  onBlur={() => {
+                    if (editedName.trim() && editedName !== project.name) {
+                      updateProjectName.mutate({
+                        projectId: projectId as string,
+                        name: editedName.trim(),
+                      });
+                    } else {
+                      setIsEditing(false);
+                      setEditedName(project.name);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.currentTarget.blur();
+                    } else if (e.key === "Escape") {
+                      setIsEditing(false);
+                      setEditedName(project.name);
+                    }
+                  }}
+                  className="border-b border-gray-500 bg-transparent text-center text-5xl font-extrabold text-white outline-none focus:border-[#72D524]"
+                  autoFocus
+                />
+              ) : (
+                <h1
+                  onDoubleClick={() => {
+                    // only allow editing if the user is an owner or admin
+                    if (isOwner()) {
+                      setIsEditing(true);
+                      setEditedName(project.name);
+                    }
+                  }}
+                  className={`text-center text-xl font-extrabold leading-tight tracking-wide text-white shadow-lg sm:text-5xl ${
+                    isOwner() ? "cursor-pointer hover:opacity-80" : ""
+                  }`}
+                >
+                  {project.name}
+                </h1>
+              )}
+            </div>
+            <div className="absolute right-0 pr-8">
+              <TaskFilter
+                selectedMembers={selectedMembers}
+                setSelectedMembers={setSelectedMembers}
+                projectId={projectId}
+                members={
+                  members?.map((member) => ({
+                    ...member,
+                    projectId: projectId,
+                  })) ?? []
+                }
               />
-            ) : (
-              <h1
-                onDoubleClick={() => {
-                  // only allow editing if the user is an owner or admin
-                  if (isOwner()) {
-                    setIsEditing(true);
-                    setEditedName(project.name);
-                  }
-                }}
-                className={`text-center text-xl font-extrabold leading-tight tracking-wide text-white shadow-lg sm:text-5xl ${
-                  isOwner() ? "cursor-pointer hover:opacity-80" : ""
-                }`}
-              >
-                {project.name}
-              </h1>
-            )}
+            </div>
           </div>
           <div className="flex-1 overflow-x-auto">
             <div className="flex min-w-max gap-6 p-6">
@@ -261,14 +278,22 @@ export default function TasksPage({
                 <TaskStatusColumn
                   key={status._id}
                   statusColumn={status}
-                  members={members}
+                  members={
+                    members?.map((member) => ({
+                      ...member,
+                      projectId: projectId,
+                    })) ?? []
+                  }
+                  selectedMembers={selectedMembers}
                 />
               ))}
-
-              <NewStatusColumn
-                projectId={projectId}
-                onStatusCreated={handleNewStatusCreated}
-              />
+              {/* only allow owner to create new status columns */}
+              {isOwner() && (
+                <NewStatusColumn
+                  projectId={projectId}
+                  onStatusCreated={handleNewStatusCreated}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -45,11 +45,19 @@ interface TaskCardProps {
     | {
         role: string;
         userData: UserClass;
+        projectId: ObjectIdString;
       }[]
     | undefined;
+  currentUserWalletId: string;
 }
 
-const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
+const TaskCard = ({
+  task,
+  projectId,
+  statusId,
+  members,
+  currentUserWalletId,
+}: TaskCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: task._id });
 
@@ -116,6 +124,13 @@ const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
     (member) => member.userData.walletId === task.assigneeId,
   )?.userData;
 
+  const canEdit = members?.some(
+    (member) =>
+      member.userData.walletId === currentUserWalletId &&
+      member.projectId === projectId &&
+      (member.role === "Admin" || member.role === "Owner"),
+  );
+
   return (
     <div {...attributes} ref={setNodeRef} {...listeners} style={style}>
       <TaskCardDialog
@@ -127,7 +142,7 @@ const TaskCard = ({ task, projectId, statusId, members }: TaskCardProps) => {
         onSubmit={handleSubmit}
         submitButtonText={submitButtonText}
         setSubmitButtonTextState={setSubmitButtonText}
-        isEditable={true} // Need to change this to be conditional based on user role
+        isEditable={canEdit} //conditional based on user role
         dialogTrigger={
           <div className="group relative max-w-[350px] rounded-2xl border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">
             {/* Delete Icon */}

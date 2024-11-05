@@ -570,7 +570,7 @@ export default function ProjectsPage() {
               through tasks faster:
             </p>
           </div>
-          <div className="grid auto-rows-min grid-cols-1 gap-4 p-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto grid max-w-7xl auto-rows-min grid-cols-1 gap-4 p-8 sm:grid-cols-2 lg:grid-cols-3">
             {templates.map((template) => (
               <div
                 key={template._id.toString()}
@@ -594,6 +594,7 @@ export default function ProjectsPage() {
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         walletId={walletId}
+        initialTemplate={_selectedTemplate}
       />
 
       {/* Delete Confirmation Dialog */}
