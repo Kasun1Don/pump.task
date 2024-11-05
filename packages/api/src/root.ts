@@ -4,6 +4,7 @@ import { emailRouter } from "./router/email";
 import { loginHistoryRouter } from "./router/loginHistory";
 import { memberRouter } from "./router/member";
 import { projectRouter } from "./router/project";
+import { statusRouter } from "./router/status";
 import { taskRouter } from "./router/task";
 import { templateRouter } from "./router/template";
 import { userRouter } from "./router/user";
@@ -19,6 +20,7 @@ export const appRouter = createTRPCRouter({
   badge: badgeRouter,
   member: memberRouter,
   template: templateRouter,
+  status: statusRouter,
 });
 
 // export type definition of API

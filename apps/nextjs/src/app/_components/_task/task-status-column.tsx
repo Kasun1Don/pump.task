@@ -16,7 +16,11 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import type { UserClass } from "@acme/db";
-import type { StatusColumn, TaskCard as TaskCardData } from "@acme/validators";
+import type {
+  ObjectIdString,
+  StatusColumn,
+  TaskCard as TaskCardData,
+} from "@acme/validators";
 import { Button } from "@acme/ui/button";
 import {
   Dialog,
@@ -26,6 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@acme/ui/dialog";
+import { Input } from "@acme/ui/input";
 import { TaskCardSchema } from "@acme/validators";
 
 import { api } from "~/trpc/react";
@@ -34,26 +39,50 @@ import TrashIcon from "./icons/TrashIcon";
 import NewTaskCard from "./new-task-card";
 import TaskCard from "./task-card";
 
-// type TaskCardData = z.infer<typeof TaskCardSchema>;
-
 interface TaskStatusColumnProps {
   statusColumn: StatusColumn;
   members:
     | {
         role: string;
         userData: UserClass;
+        projectId: ObjectIdString;
       }[]
     | undefined;
+  selectedMembers: string[];
 }
 
-const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
+const TaskStatusColumn = ({
+  statusColumn,
+  members,
+  selectedMembers,
+}: TaskStatusColumnProps) => {
   const [tasks, setTasks] = useState<TaskCardData[]>([]);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [newStatusName, setNewStatusName] = useState(statusColumn.name);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false); // State to control options visibility
 
+  const cookieWallet = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("wallet="))
+    ?.split("=")[1];
+
+  const isOwner = () => {
+    const currentUser = members?.find(
+      (member) => member.userData.walletId === cookieWallet,
+    );
+    return (
+      currentUser &&
+      (currentUser.role === "Owner" || currentUser.role === "Admin")
+    );
+  };
+
   // Drag and drop sorting
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: statusColumn._id });
+    useSortable({
+      id: statusColumn._id,
+      disabled: statusColumn.isProtected, // disable drag and drop for approved column
+    });
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
@@ -92,6 +121,29 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
     if (statusColumn.isProtected) {
       console.log("Task is protected");
     }
+  };
+
+  // Mutation for renaming the status column
+  const renameStatusColumn = api.task.renameStatusColumn.useMutation({
+    onSuccess: () => {
+      console.log("Status column renamed successfully");
+      void utils.task.getStatusesByProjectId.invalidate(); // Invalidate statuses to refresh data
+    },
+    onError: (error) => console.error("Error renaming status column:", error),
+  });
+
+  // Function to handle renaming
+  const handleRenameColumn = () => {
+    renameStatusColumn.mutate({
+      statusId: statusColumn._id,
+      newName: newStatusName,
+    });
+    setIsRenameModalOpen(false);
+  };
+
+  const handleCloseRenameDialog = () => {
+    setIsRenameModalOpen(false);
+    setNewStatusName(statusColumn.name); // Reset input to original name if closed without saving
   };
 
   // Deletion mutation for the status column
@@ -137,6 +189,14 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
 
   const sensors = useSensors(mouseSensor);
 
+  // filter tasks based on selected members
+  const filteredTasks = tasks.filter((task) => {
+    const assigneeId = task.assigneeId;
+    if (selectedMembers.length === 0) return true;
+    if (!assigneeId) return false;
+    return selectedMembers.includes(assigneeId);
+  });
+
   return (
     <div
       className="bg-transparent-[16] group/status-column relative flex min-w-[350px] flex-col gap-5 rounded-lg bg-[#0000004a] p-3 hover:cursor-pointer"
@@ -168,7 +228,7 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
           <button
             className="flex items-center gap-2 text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
             onClick={() => {
-              console.log("Rename column");
+              setIsRenameModalOpen(true);
               setIsOptionsVisible(false); // Close the menu after rename
             }}
           >
@@ -200,19 +260,21 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
         sensors={sensors}
       >
         <SortableContext
-          items={tasks.map((task) => task._id)}
+          items={filteredTasks.map((task) => task._id)}
           strategy={verticalListSortingStrategy}
         >
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <TaskCard
               members={members}
+              currentUserWalletId={cookieWallet ?? ""}
               key={task._id}
               projectId={statusColumn.projectId}
               statusId={statusColumn._id}
               task={task}
+              statusColumnName={statusColumn.name}
             />
           ))}
-          {statusColumn.isProtected === false && (
+          {statusColumn.isProtected === false && isOwner() && (
             <NewTaskCard
               members={members}
               statusId={statusColumn._id}
@@ -220,15 +282,55 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
               onTaskCreated={handleTaskCreated}
             />
           )}
+
+          {/* Rename Dialog */}
+          <Dialog
+            open={isRenameModalOpen}
+            onOpenChange={handleCloseRenameDialog}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Rename Status Column</DialogTitle>
+              </DialogHeader>
+              <DialogDescription>
+                <Input
+                  value={newStatusName}
+                  onChange={(e) => setNewStatusName(e.target.value)}
+                  placeholder="Enter new column name"
+                  className="mt-2"
+                />
+              </DialogDescription>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsRenameModalOpen(false);
+                    handleCloseRenameDialog();
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="default"
+                  className="bg-zesty-green hover:bg-zesty-green hover:bg-opacity-80"
+                  onClick={handleRenameColumn}
+                  disabled={!newStatusName.trim()}
+                >
+                  Save
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           {/* Delete Confirmation Dialog */}
           <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Confirm Deletion</DialogTitle>
                 <DialogDescription>
-                  <p>Are you sure you want to remove this status column?</p>
-                  <p>This will also remove all tasks within the status</p>
-                  <p>(This action cannot be undone)</p>
+                  Are you sure you want to remove this status column? This will
+                  also remove all tasks within the status (This action cannot be
+                  undone)
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>

@@ -19,7 +19,10 @@ export class ProjectClass {
   @prop({ type: String })
   public image?: string;
 
-  @prop({ type: Boolean, required: true })
+  @prop({ type: String })
+  public description?: string;
+
+  @prop({ type: Boolean, required: true, default: false })
   public isPrivate!: boolean;
 
   @prop({ type: String, required: false })

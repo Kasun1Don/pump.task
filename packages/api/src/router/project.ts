@@ -13,6 +13,7 @@ export const projectRouter = {
         name: z.string().min(1, "Project name is required"),
         isPrivate: z.boolean().default(false),
         templateId: z.string().optional(),
+        description: z.string().optional(),
         members: z.object({
           user: z.string(),
           role: z.enum(["Observer", "Admin", "Owner"]),
@@ -25,6 +26,7 @@ export const projectRouter = {
         const newProject = new Project({
           name: input.name,
           isPrivate: input.isPrivate,
+          description: input.description,
           templateId: input.templateId
             ? new Types.ObjectId(input.templateId)
             : undefined,
@@ -36,31 +38,35 @@ export const projectRouter = {
         // Create all status columns in order
         const statusColumns = [];
 
-        // Always add Approved as the first column
-        statusColumns.push({
-          name: "Approved",
-          projectId: savedProject._id,
-          order: 0,
-          isProtected: true, // This column is protected and cannot be removed
-        });
-
-        // if a template was selected, create additional status columns
+        // if a template was selected, add template columns first
         if (input.templateId) {
           const template = await Template.findById(input.templateId);
           if (template) {
-            template.statusColumns.forEach((column, index) => {
-              // loop through each column, adding 1 to the order
+            // sort template columns by order first
+            const sortedColumns = [...template.statusColumns].sort(
+              (a, b) => a.order - b.order,
+            );
+
+            sortedColumns.forEach((column, index) => {
               statusColumns.push({
                 name: column.name,
                 projectId: savedProject._id,
-                order: index + 1, // ordering starting after Approved
+                order: index, // ordering sequentially starting from 0
                 isProtected: column.isProtected,
               });
             });
           }
         }
 
-        // create all status columns at once to maintain order
+        // Add Approved column at the end with the last order number
+        statusColumns.push({
+          name: "Approved",
+          projectId: savedProject._id,
+          order: statusColumns.length, // puts at the end of the order sequence
+          isProtected: true,
+        });
+
+        // create all status columns at once
         await Status.insertMany(statusColumns);
 
         const user = await User.findOne({ walletId: input.members.user });
@@ -167,5 +173,32 @@ export const projectRouter = {
           `Failed to delete project: ${(error as Error).message}`,
         );
       }
+    }),
+
+  updateName: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        name: z.string().min(1),
+        description: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const updatedProject = await Project.findByIdAndUpdate(
+        input.projectId,
+        {
+          name: input.name,
+          ...(input.description !== undefined && {
+            description: input.description,
+          }),
+        },
+        { new: true },
+      );
+
+      if (!updatedProject) {
+        throw new Error("Project not found");
+      }
+
+      return updatedProject;
     }),
 } satisfies TRPCRouterRecord;

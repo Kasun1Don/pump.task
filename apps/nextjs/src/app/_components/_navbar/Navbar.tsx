@@ -75,7 +75,7 @@ export default async function Navbar() {
                 <h1 className="text-2xl font-bold">pump.task</h1>
               </div>
               <h5
-                className="text-zesty-green h-fit rounded-md px-1 py-1 text-xs"
+                className="text-zesty-green hidden h-fit rounded-md px-1 py-1 text-xs md:block"
                 style={{ backgroundColor: "#72D5240F" }}
               >
                 Web3 Project Tracker
@@ -86,10 +86,12 @@ export default async function Navbar() {
           {/* Navbar section right-hand side */}
           <div className="mt-1 flex max-h-8 gap-10 hover:cursor-pointer">
             {/* Pass projects to Project dropdown make sure to add ProjectClass */}
-            <NavProjectDropdown
-              projects={activeProjectIds}
-              walletId={walletId}
-            />
+            <div className="hidden max-w-[250px] sm:block">
+              <NavProjectDropdown
+                projects={activeProjectIds}
+                walletId={walletId}
+              />
+            </div>
             {/* Pass user data to User dropdown */}
             <NavUserDropdown
               username={userData.name ?? ""}
@@ -99,23 +101,24 @@ export default async function Navbar() {
         </div>
 
         {/* Navigation links */}
-        <div className="top-24 z-40 flex flex-wrap border-b-2 bg-zinc-950">
-          <NavLink href="/projects">Projects</NavLink>
-          {hasActiveProjects && (
-            <NavLink href={`/tasks/${projectId}`}>Tasks</NavLink>
-          )}
+        <div className="top-24 z-40 flex flex-wrap border-b-2 bg-zinc-950 px-2">
+          <div className="flex w-full flex-nowrap gap-x-2 overflow-hidden sm:w-auto sm:gap-x-4">
+            <NavLink href="/projects">Projects</NavLink>
+            {hasActiveProjects && (
+              <NavLink href={`/tasks/${projectId}`}>Tasks</NavLink>
+            )}
+            <NavLink href="/profile">Profile</NavLink>
+            {hasActiveProjects && (
+              <NavLink
+                href={projectId ? `/users/${projectId}` : "/missingproject"}
+              >
+                Users
+              </NavLink>
+            )}
 
-          <NavLink href="/profile">My Profile</NavLink>
-          {hasActiveProjects && (
-            <NavLink
-              href={projectId ? `/users/${projectId}` : "/missingproject"}
-            >
-              Users
-            </NavLink>
-          )}
-
-          {/* <NavLink href={`/users/66fdf1c172285f6bc485b20c`}>{projectId}</NavLink> */}
-          <NavLink href="/settings">Settings</NavLink>
+            {/* <NavLink href={`/users/66fdf1c172285f6bc485b20c`}>{projectId}</NavLink> */}
+            <NavLink href="/settings">Settings</NavLink>
+          </div>
         </div>
       </div>
 

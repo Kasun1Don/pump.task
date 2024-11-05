@@ -17,9 +17,11 @@ import {
 import { z } from "zod";
 
 import type { ObjectIdString, StatusColumn } from "@acme/validators";
+import { toast } from "@acme/ui/toast";
 import { StatusSchema, validateObjectIdString } from "@acme/validators";
 
 import NewStatusColumn from "~/app/_components/_task/new-status-column";
+import TaskFilter from "~/app/_components/_task/task-filter";
 import TaskStatusColumn from "~/app/_components/_task/task-status-column";
 import TaskBoardSkeleton from "~/app/_components/_task/TaskBoardLoader";
 import { api } from "~/trpc/react";
@@ -34,6 +36,12 @@ export default function TasksPage({
     params.projectId as ObjectIdString,
   );
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+
+  // // Retrieve projectId from URL
+  // const rawProjectId = searchParams.get("projectId");
 
   // Validate projectId inside useEffect
   useEffect(() => {
@@ -52,6 +60,21 @@ export default function TasksPage({
     }
   }, [projectId]);
 
+  const utils = api.useUtils();
+
+  const updateStatusOrder = api.status.updateOrder.useMutation({
+    onSuccess: () => {
+      toast.success("Status order updated successfully");
+      // invalidate and refetch the statuses
+      void utils.status.getStatusesByProjectId.invalidate({
+        projectId: projectId as string,
+      });
+    },
+    onError: (error) => {
+      toast.error(`Failed to update status order: ${error.message}`);
+    },
+  });
+
   // Retrieve the project object by projectId
   const { data: project } = api.project.byId.useQuery(
     { id: projectId as string },
@@ -63,7 +86,7 @@ export default function TasksPage({
     data: statusData,
     error,
     isLoading,
-  } = api.task.getStatusesByProjectId.useQuery(
+  } = api.status.getStatusesByProjectId.useQuery(
     {
       projectId: projectId as string,
     },
@@ -78,7 +101,7 @@ export default function TasksPage({
         projectId: projectId as string,
       },
       {
-        enabled: Boolean(projectId), // Only run query if projectId is valid
+        enabled: Boolean(projectId),
       },
     );
 
@@ -94,14 +117,8 @@ export default function TasksPage({
     if (statusData) {
       const validationResult = StatusSchema.array().safeParse(statusData);
       if (validationResult.success) {
-        const statusColumnsCopy = [...validationResult.data]; // Create a copy of the array
-        // Remove the status column at index 0 (which has isProtected flag)
-        const protectedColumn = statusColumnsCopy.shift();
-        // If the protected column exists, push it to the end
-        if (protectedColumn?.isProtected) {
-          statusColumnsCopy.push(protectedColumn);
-        }
-        setStatusColumns(statusColumnsCopy);
+        // set state directly with the validated data
+        setStatusColumns(validationResult.data);
       } else {
         console.error("Validation error:", validationResult.error.errors);
       }
@@ -111,16 +128,18 @@ export default function TasksPage({
   // Callback function to handle when a new status column is created
   const handleNewStatusCreated = (newStatus: StatusColumn) => {
     setStatusColumns((prevStatusColumns) => {
-      const statusColumnsCopy = [...prevStatusColumns]; // Create a copy of the array
-      // Remove the status column at index 0 (which has isProtected flag)
-      const protectedColumn = statusColumnsCopy.shift();
-      // Add the new status column
-      statusColumns.push(newStatus);
-      // If the protected column exists, push it to the end
-      if (protectedColumn?.isProtected) {
-        statusColumnsCopy.push(protectedColumn);
-      }
-      return statusColumnsCopy;
+      // find the protected column
+      const protectedColumnIndex = prevStatusColumns.findIndex(
+        (col) => col.isProtected,
+      );
+      if (protectedColumnIndex === -1) return [...prevStatusColumns, newStatus];
+
+      // insert the new status after the protected column
+      return [
+        ...prevStatusColumns.slice(0, protectedColumnIndex + 1),
+        newStatus,
+        ...prevStatusColumns.slice(protectedColumnIndex + 1),
+      ];
     });
   };
 
@@ -133,6 +152,39 @@ export default function TasksPage({
     );
   }
 
+  const updateProjectName = api.project.updateName.useMutation({
+    onSuccess: () => {
+      setIsEditing(false);
+      // refresh the data by invalidating the old project query
+      void utils.project.byId.invalidate({ id: projectId as string });
+      toast.success("Project name updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update project name: ${error.message}`);
+    },
+  });
+
+  // Get wallet ID from cookie
+  const cookieWallet = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("wallet="))
+    ?.split("=")[1];
+
+  const user = api.user.byWallet.useSuspenseQuery({
+    walletId: cookieWallet ?? "",
+  });
+  const [userMemberships] = api.member.byUserId.useSuspenseQuery({
+    userId: user[0]._id,
+  });
+
+  const isOwner = () => {
+    return userMemberships.some(
+      (member) =>
+        member.projectId === projectId &&
+        (member.role === "Owner" || member.role === "Admin"),
+    );
+  };
+
   if (validationError) return <p>{validationError}</p>;
   if (isLoading) return <TaskBoardSkeleton />;
   if (error) return <p>Error fetching statuses: {error.message}</p>;
@@ -144,6 +196,12 @@ export default function TasksPage({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
+    // find the active column
+    const activeColumn = statusColumns.find((col) => col._id === active.id);
+
+    // prevent moving protected columns
+    if (activeColumn?.isProtected) return;
+
     setStatusColumns((statusColumns) => {
       const activeIndex = statusColumns.findIndex(
         (column) => column._id === active.id,
@@ -152,7 +210,18 @@ export default function TasksPage({
         (column) => column._id === over.id,
       );
 
-      return arrayMove(statusColumns, activeIndex, overIndex);
+      // can't drag protected column (index 0)
+      if (overIndex === 0) return statusColumns;
+
+      const newOrder = arrayMove(statusColumns, activeIndex, overIndex);
+
+      // Update the order on the server
+      updateStatusOrder.mutate({
+        projectId: projectId as string,
+        statusIds: newOrder.map((status) => status._id),
+      });
+
+      return newOrder;
     });
   };
 
@@ -167,24 +236,92 @@ export default function TasksPage({
         items={statusColumns.map((column) => column._id)}
         strategy={horizontalListSortingStrategy}
       >
-        <div className="flex h-full flex-col">
-          <h1 className="mb-3 flex justify-center text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg">
-            {project.name}
-          </h1>
+        <div className="flex h-[calc(100vh-12rem)] flex-col">
+          <div className="relative flex items-center justify-center">
+            <div className="mb-3 flex-1 justify-center">
+              {isEditing && isOwner() ? (
+                <div className="flex justify-center">
+                  <input
+                    type="text"
+                    maxLength={40}
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    onBlur={() => {
+                      if (editedName.trim() && editedName !== project.name) {
+                        updateProjectName.mutate({
+                          projectId: projectId as string,
+                          name: editedName.trim(),
+                        });
+                      } else {
+                        setIsEditing(false);
+                        setEditedName(project.name);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.currentTarget.blur();
+                      } else if (e.key === "Escape") {
+                        setIsEditing(false);
+                        setEditedName(project.name);
+                      }
+                    }}
+                    className="border-b border-gray-500 bg-transparent text-center text-5xl font-extrabold text-white outline-none focus:border-[#72D524]"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <h1
+                  onDoubleClick={() => {
+                    // only allow editing if the user is an owner or admin
+                    if (isOwner()) {
+                      setIsEditing(true);
+                      setEditedName(project.name);
+                    }
+                  }}
+                  className={`text-center text-xl font-extrabold leading-tight tracking-wide text-white shadow-lg sm:text-5xl ${
+                    isOwner() ? "cursor-pointer hover:opacity-80" : ""
+                  }`}
+                >
+                  {project.name}
+                </h1>
+              )}
+            </div>
+            <div className="absolute right-0 pr-8">
+              <TaskFilter
+                selectedMembers={selectedMembers}
+                setSelectedMembers={setSelectedMembers}
+                projectId={projectId}
+                members={
+                  members?.map((member) => ({
+                    ...member,
+                    projectId: projectId,
+                  })) ?? []
+                }
+              />
+            </div>
+          </div>
           <div className="flex-1 overflow-x-auto">
             <div className="flex min-w-max gap-6 p-6">
               {statusColumns.map((status) => (
                 <TaskStatusColumn
                   key={status._id}
                   statusColumn={status}
-                  members={members}
+                  members={
+                    members?.map((member) => ({
+                      ...member,
+                      projectId: projectId,
+                    })) ?? []
+                  }
+                  selectedMembers={selectedMembers}
                 />
               ))}
-
-              <NewStatusColumn
-                projectId={projectId}
-                onStatusCreated={handleNewStatusCreated}
-              />
+              {/* only allow owner to create new status columns */}
+              {isOwner() && (
+                <NewStatusColumn
+                  projectId={projectId}
+                  onStatusCreated={handleNewStatusCreated}
+                />
+              )}
             </div>
           </div>
         </div>
