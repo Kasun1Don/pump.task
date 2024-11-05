@@ -17,12 +17,14 @@ export default function GlobalError({
     <html>
       <body>
         <div className="bg-custom-bg flex h-screen flex-col items-center justify-center gap-8 bg-cover bg-center text-center">
-          <h1 className="mb-2 text-4xl font-bold">
+          <h1 className="mb-2 text-4xl font-bold text-white">
             Sorry something went wrong!
           </h1>
-          <p className="text-xl">500 Internal Server Error</p>
+          <p className="text-xl text-white">500 Internal Server Error</p>
 
-          <Button onClick={() => reset()}>Try Again</Button>
+          <Button className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]" onClick={() => reset()}>
+            Try Again
+          </Button>
         </div>
       </body>
     </html>
