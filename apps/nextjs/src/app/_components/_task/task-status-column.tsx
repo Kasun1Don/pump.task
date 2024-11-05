@@ -119,7 +119,7 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
       {/* Options (delete and rename) */}
       {isOptionsVisible && (
         <div
-          className="border-1 absolute right-2 top-4 z-50 flex flex-col gap-4 rounded border-white border-opacity-30 bg-black stroke-gray-500 p-2 shadow-lg"
+          className="border-1 absolute right-2 top-4 z-50 flex flex-col gap-4 rounded border-white border-opacity-30 bg-black stroke-gray-500 p-3 text-sm shadow-lg"
           onMouseLeave={() => setIsOptionsVisible(false)}
         >
           {/* Rename option */}
@@ -175,9 +175,9 @@ const TaskStatusColumn = ({ statusColumn, members }: TaskStatusColumnProps) => {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              <div>Are you sure you want to remove this status column?</div>
-              <div>This will also remove all tasks within the status</div>
-              <div>(This action cannot be undone)</div>
+              <p>Are you sure you want to remove this status column?</p>
+              <p>This will also remove all tasks within the status</p>
+              <p>(This action cannot be undone)</p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
