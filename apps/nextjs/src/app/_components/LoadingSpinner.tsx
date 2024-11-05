@@ -2,9 +2,9 @@ export default function LoadingSpinner() {
   return (
     <div className="relative flex h-[500px] w-screen flex-col items-center justify-center">
       <div className="p-8">
-        <span className="text-zesty-green text-4xl font-medium">Pump</span>
+        <span className="text-zesty-green text-4xl font-medium">pump</span>
         <span className="mx-0 text-4xl font-medium text-zinc-400">.</span>
-        <span className="text-zesty-green text-4xl font-medium">Task</span>
+        <span className="text-zesty-green text-4xl font-medium">task</span>
       </div>
 
       <div className="relative flex flex-col items-center">
