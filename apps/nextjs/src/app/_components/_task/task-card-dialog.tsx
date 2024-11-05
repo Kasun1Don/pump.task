@@ -1,7 +1,5 @@
 "use client";
 
-// Current testing URL for project board
-// http://localhost:3000/tasks/6720293fcbf4d733c85b5975
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";

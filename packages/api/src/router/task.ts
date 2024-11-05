@@ -21,7 +21,6 @@ export const taskRouter = {
         const statusObjectId = new mongoose.Types.ObjectId(input.statusId);
         const projectObjectId = new mongoose.Types.ObjectId(input.projectId);
         const assigneeWalletId = input.assigneeId;
-        console.log("Assignee ID:", assigneeWalletId);
 
         const newTask = new Task({
           title: input.title,
@@ -33,6 +32,8 @@ export const taskRouter = {
           order: input.order,
           tags: input.tags,
           customFields: input.customFields,
+          isMinted: false,
+          transactionHash: "",
         });
 
         // Save the task, remove versionKey and convert it to type TaskCard
@@ -58,6 +59,8 @@ export const taskRouter = {
         dueDate: z.date().optional(),
         assigneeId: z.string().optional(),
         statusId: objectIdStringSchema("statusId").optional(),
+        isMinted: z.boolean().optional(),
+        transactionHash: z.string().optional(),
         tags: z
           .object({
             defaultTags: z.array(z.string()).optional(),
@@ -79,8 +82,6 @@ export const taskRouter = {
       try {
         const taskId = input._id;
 
-        console.log("Attempting to update task:", taskId);
-
         const updatedTask = await Task.findByIdAndUpdate(
           new mongoose.Types.ObjectId(taskId),
           { $set: input }, // Update only the fields provided in the input
@@ -92,8 +93,6 @@ export const taskRouter = {
         if (!updatedTask) {
           throw new Error("Task not found");
         }
-
-        console.log("Task updated successfully:", updatedTask);
 
         // Return the updated task
         return updatedTask;
@@ -271,6 +270,51 @@ export const taskRouter = {
       }
     }),
 
+  renameStatusColumn: publicProcedure
+    .input(
+      z.object({
+        statusId: objectIdStringSchema("statusId"),
+        newName: z.string().min(1, "New name is required"),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const { statusId, newName } = input;
+
+        console.log("Attempting to rename status column:", statusId);
+
+        // Find and update the status column
+        const updatedStatus = await Status.findByIdAndUpdate(
+          new mongoose.Types.ObjectId(statusId),
+          { $set: { name: newName } },
+          { new: true, runValidators: true }, // Return the updated document and validate fields
+        )
+          .lean()
+          .exec();
+
+        if (!updatedStatus) {
+          throw new Error("Status column not found");
+        }
+
+        console.log("Status column renamed successfully:", updatedStatus);
+
+        // Return the updated status column
+        return {
+          msg: "Status column renamed successfully",
+          status: {
+            ...updatedStatus,
+            _id: validateObjectIdString(
+              updatedStatus._id.toString(),
+              "statusId",
+            ),
+          },
+        };
+      } catch (error) {
+        console.error("Error renaming status column:", error);
+        throw new Error("Failed to rename status column");
+      }
+    }),
+
   deleteStatusColumn: publicProcedure
     .input(
       z.object({
@@ -322,4 +366,34 @@ export const taskRouter = {
         }
       },
     ),
+
+  // get all the tags (NFTs) associated with a project
+  getProjectTags: publicProcedure
+    .input(z.array(objectIdStringSchema("projectId")))
+    .query(async ({ input: projectIds }) => {
+      try {
+        const projectTagsMap: Record<string, string[]> = {};
+
+        // Get tags for each project
+        await Promise.all(
+          projectIds.map(async (projectId) => {
+            const tasks = await Task.find(
+              { projectId: new mongoose.Types.ObjectId(projectId) },
+              { "tags.defaultTags": 1 },
+            ).lean();
+
+            const uniqueTags = [
+              ...new Set(tasks.map((task) => task.tags.defaultTags).flat()),
+            ];
+
+            projectTagsMap[projectId] = uniqueTags;
+          }),
+        );
+
+        return projectTagsMap;
+      } catch (error) {
+        console.error("Error fetching project tags:", error);
+        throw new Error("Failed to fetch project tags");
+      }
+    }),
 } satisfies TRPCRouterRecord;

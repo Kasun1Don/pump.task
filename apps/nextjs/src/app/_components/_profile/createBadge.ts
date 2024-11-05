@@ -7,10 +7,15 @@ import { api } from "~/trpc/react";
 // Function to create a delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const createBadge = async (
-  walletID: string | undefined,
-  tags: string[],
-) => {
+export const createBadge = async ({
+  taskId,
+  walletID,
+  tags,
+}: {
+  taskId: string;
+  walletID: string | undefined;
+  tags: string[];
+}) => {
   const { mutateAsync: createBadge } = api.badge.create.useMutation();
 
   try {
@@ -29,6 +34,7 @@ export const createBadge = async (
     // Iterate through tags and create each badge one by one, waiting for each to complete
     for (const tag of tags) {
       const result = await createBadge({
+        taskId: taskId,
         walletId: walletID,
         receivedDate: new Date(),
         tags: [tag],

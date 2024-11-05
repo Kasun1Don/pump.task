@@ -16,16 +16,21 @@ const tagToIndexMap: Record<string, number> = {
   Design: 1,
   "Smart Contracts": 5,
   Integration: 6,
-  Misc: 2, // User-generated tags will map to Misc
+  Misc: 2,
 };
 
 export const badgeRouter = {
+  getbadge: protectedProcedure.input(z.string()).query(async ({ input }) => {
+    const badges = await Badge.find({ taskId: input });
+    return badges;
+  }),
   create: protectedProcedure
     .input(
       z.object({
+        taskId: z.string().optional(),
         walletId: z.string(),
         receivedDate: z.date(),
-        tags: z.array(z.string()), // Accept multiple tags
+        tags: z.array(z.string()),
       }),
     )
     .mutation(async ({ input }) => {
@@ -74,6 +79,8 @@ export const badgeRouter = {
             receivedDate,
             index,
             NFTTitle: nftMetadata?.name,
+            transactionHash: mintResult,
+            taskId: input.taskId,
           });
 
           await badge.save();
