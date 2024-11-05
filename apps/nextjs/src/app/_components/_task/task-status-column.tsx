@@ -38,8 +38,6 @@ import TrashIcon from "./icons/TrashIcon";
 import NewTaskCard from "./new-task-card";
 import TaskCard from "./task-card";
 
-// type TaskCardData = z.infer<typeof TaskCardSchema>;
-
 interface TaskStatusColumnProps {
   statusColumn: StatusColumn;
   members:
@@ -78,7 +76,10 @@ const TaskStatusColumn = ({
 
   // Drag and drop sorting
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: statusColumn._id });
+    useSortable({
+      id: statusColumn._id,
+      disabled: statusColumn.isProtected, // disable drag and drop for approved column
+    });
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),

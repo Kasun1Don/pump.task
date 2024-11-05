@@ -22,7 +22,11 @@ export class TemplateClass {
   public description?: string;
 
   @prop({ type: () => [StatusClass], required: true })
-  public statusColumns!: Pick<StatusClass, "name" | "order" | "isProtected">[];
+  public statusColumns!: {
+    name: string;
+    order: number;
+    isProtected: boolean;
+  }[];
 }
 
 export const Template =
