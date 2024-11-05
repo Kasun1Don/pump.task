@@ -75,6 +75,12 @@ export class TaskClass {
   // Order of the task within column (Used to arrange location of task within status column)
   @prop({ type: Number, required: true })
   public order!: number;
+
+  @prop({ type: Boolean, default: false })
+  public isMinted!: boolean;
+
+  @prop({ type: String, required: false })
+  public transactionHash?: string;
 }
 
 export const Task =

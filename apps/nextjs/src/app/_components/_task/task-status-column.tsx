@@ -271,6 +271,7 @@ const TaskStatusColumn = ({
               projectId={statusColumn.projectId}
               statusId={statusColumn._id}
               task={task}
+              statusColumnName={statusColumn.name}
             />
           ))}
           {statusColumn.isProtected === false && isOwner() && (

@@ -24,8 +24,14 @@ export class BadgeClass {
   @prop({ type: Date, required: true })
   public receivedDate: Date;
 
-  @prop({ required: true })
+  @prop({ type: String, required: true })
   public walletId: string;
+
+  @prop({ type: String, required: false })
+  public transactionHash?: string;
+
+  @prop({ type: String, required: false })
+  public taskId?: string;
 
   constructor(index: number, NFTTitle: string, receivedDate: Date) {
     this.index = index;

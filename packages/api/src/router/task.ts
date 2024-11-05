@@ -21,7 +21,6 @@ export const taskRouter = {
         const statusObjectId = new mongoose.Types.ObjectId(input.statusId);
         const projectObjectId = new mongoose.Types.ObjectId(input.projectId);
         const assigneeWalletId = input.assigneeId;
-        console.log("Assignee ID:", assigneeWalletId);
 
         const newTask = new Task({
           title: input.title,
@@ -33,6 +32,8 @@ export const taskRouter = {
           order: input.order,
           tags: input.tags,
           customFields: input.customFields,
+          isMinted: false,
+          transactionHash: "",
         });
 
         // Save the task, remove versionKey and convert it to type TaskCard
@@ -58,6 +59,8 @@ export const taskRouter = {
         dueDate: z.date().optional(),
         assigneeId: z.string().optional(),
         statusId: objectIdStringSchema("statusId").optional(),
+        isMinted: z.boolean().optional(),
+        transactionHash: z.string().optional(),
         tags: z
           .object({
             defaultTags: z.array(z.string()).optional(),
@@ -79,8 +82,6 @@ export const taskRouter = {
       try {
         const taskId = input._id;
 
-        console.log("Attempting to update task:", taskId);
-
         const updatedTask = await Task.findByIdAndUpdate(
           new mongoose.Types.ObjectId(taskId),
           { $set: input }, // Update only the fields provided in the input
@@ -92,8 +93,6 @@ export const taskRouter = {
         if (!updatedTask) {
           throw new Error("Task not found");
         }
-
-        console.log("Task updated successfully:", updatedTask);
 
         // Return the updated task
         return updatedTask;
