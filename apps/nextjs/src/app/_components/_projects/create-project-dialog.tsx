@@ -122,13 +122,7 @@ export function CreateProjectDialog({
           </div>
         </div>
 
-        <DialogFooter>
-          <button
-            onClick={handleCloseModal}
-            className="mr-2 rounded-lg bg-gray-700 px-4 py-2 text-white hover:bg-gray-600"
-          >
-            Cancel
-          </button>
+        <DialogFooter className="flex flex-col gap-2 sm:flex-row">
           <button
             onClick={() => {
               if (!walletId) {
@@ -150,9 +144,15 @@ export function CreateProjectDialog({
                 members: { user: walletId, role: "Owner" },
               });
             }}
-            className="rounded-lg bg-[#72D524] px-4 py-2 text-[#18181B] hover:bg-[#5CAB1D]"
+            className="rounded-lg bg-[#72D524] px-4 py-2 pb-2 text-[#18181B] hover:bg-[#5CAB1D] sm:pb-0"
           >
             Create
+          </button>
+          <button
+            onClick={handleCloseModal}
+            className="mr-2 rounded-lg bg-gray-700 px-4 py-2 text-white hover:bg-gray-600"
+          >
+            Cancel
           </button>
         </DialogFooter>
       </DialogContent>

@@ -46,6 +46,7 @@ export default function ProjectsPage() {
   >(null);
   const [showFilter, setShowFilter] = useState("all");
   const [_selectedTemplate, setSelectedTemplate] = useState("");
+  const [projectsPerPage, setProjectsPerPage] = useState(3);
   const router = useRouter();
 
   // Modified wallet ID retrieval with cookie fallback
@@ -59,8 +60,28 @@ export default function ProjectsPage() {
 
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
-  // number of projects per page
-  const projectsPerPage = 9;
+
+  // side-effect to set projects per page based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        // lg breakpoint
+        setProjectsPerPage(9);
+      } else if (window.innerWidth >= 640) {
+        // sm breakpoint
+        setProjectsPerPage(6);
+      } else {
+        setProjectsPerPage(3);
+      }
+    };
+
+    // initialize
+    handleResize();
+    // event listener
+    window.addEventListener("resize", handleResize);
+    // cleanup
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     // Try to get wallet from activeAccount first
@@ -78,10 +99,6 @@ export default function ProjectsPage() {
       }
     }
   }, [activeAccount]);
-
-  useEffect(() => {
-    console.log("Current user ID (wallet address):", walletId);
-  }, [walletId]);
 
   const {
     data: projects,
@@ -238,12 +255,12 @@ export default function ProjectsPage() {
   return (
     <>
       <div className="m-8">
-        <div className="mb-8">
-          <div className="mb-6 flex items-center justify-between px-8">
+        <div>
+          <div className="mb-6 flex flex-col items-center justify-between space-y-8 px-8 sm:flex-row sm:space-x-4 sm:space-y-0">
             <h1 className="text-xl font-bold">Your Project Task Boards</h1>
             <Button
               onClick={() => setIsModalOpen(true)}
-              className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
+              className="w-full bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D] sm:w-auto"
             >
               + Create New Project
             </Button>
@@ -252,24 +269,24 @@ export default function ProjectsPage() {
             <Tabs
               defaultValue="all"
               onValueChange={(value) => setShowFilter(value)}
-              className="w-[300px] sm:w-[400px] md:w-[500px]"
+              className="w-[500px]"
             >
               <TabsList className="grid w-full grid-cols-3 bg-[#18181B]">
                 <TabsTrigger
                   value="all"
-                  className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
+                  className="border-b border-l border-t px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
                 >
                   All Projects
                 </TabsTrigger>
                 <TabsTrigger
                   value="my"
-                  className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
+                  className="border-b border-t px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
                 >
                   My Projects
                 </TabsTrigger>
                 <TabsTrigger
                   value="Owned"
-                  className="px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
+                  className="border-b border-r border-t px-4 py-2 text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:text-white"
                 >
                   Created By Me
                 </TabsTrigger>
@@ -281,7 +298,7 @@ export default function ProjectsPage() {
             <ProjectsSkeleton />
           ) : (
             <>
-              <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
+              <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 p-4 pt-8 sm:grid-cols-2 lg:grid-cols-3">
                 {currentProjects && currentProjects.length > 0 ? (
                   <>
                     {currentProjects.map((project) => {
@@ -348,16 +365,18 @@ export default function ProjectsPage() {
                               />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  router.push(
-                                    `/users/${project._id.toString()}`,
-                                  );
-                                }}
-                              >
-                                View Users
-                              </DropdownMenuItem>
+                              {(isOwner || isAdmin) && (
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(
+                                      `/users/${project._id.toString()}`,
+                                    );
+                                  }}
+                                >
+                                  View Users
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -437,7 +456,7 @@ export default function ProjectsPage() {
                               )}
                             </DropdownMenuContent>
                           </DropdownMenu>
-                          <h3 className="p-4 text-white">
+                          <h3 className="p-4 pr-8 text-white">
                             {project.name}
                             {isActive && (
                               <Button
@@ -454,27 +473,29 @@ export default function ProjectsPage() {
                               {project.description}
                             </p>
                           )}
-                          <div className="flex items-center justify-between px-4 pb-4">
+                          <div className="flex items-center justify-between space-x-4 px-4 pb-4">
                             <div className="flex gap-4 text-sm text-gray-400">
                               <p>
                                 {project.isPrivate ? "Private" : "Public"}{" "}
                                 project
                               </p>
-                              <p className="flex items-center gap-1">
+                              <p className="flex items-center whitespace-nowrap">
                                 Available Badges:{" "}
-                                {projectTags?.[project._id.toString()]
-                                  ?.length ?? 0}
-                                {/* only show badge icon if there are available badges */}
-                                {(projectTags?.[project._id.toString()]
-                                  ?.length ?? 0) > 0 && (
-                                  <Image
-                                    src="/CheckoutVector.svg"
-                                    alt="Badges"
-                                    width={14}
-                                    height={14}
-                                    className="inline-block"
-                                  />
-                                )}
+                                <span className="inline-flex items-center gap-1">
+                                  {projectTags?.[project._id.toString()]
+                                    ?.length ?? 0}
+                                  {/* only show badge icon if there are available badges */}
+                                  {(projectTags?.[project._id.toString()]
+                                    ?.length ?? 0) > 0 && (
+                                    <Image
+                                      src="/CheckoutVector.svg"
+                                      alt="Badges"
+                                      width={14}
+                                      height={14}
+                                      className="inline-block flex-shrink-0"
+                                    />
+                                  )}
+                                </span>
                               </p>
                             </div>
                             <div className="flex items-center gap-1 text-sm text-gray-400">
@@ -491,44 +512,6 @@ export default function ProjectsPage() {
                         </div>
                       );
                     })}
-                    {/* pagination only renders if there are more than 1 page of projects*/}
-                    {totalPages > 1 && (
-                      <div className="col-span-3 mt-6">
-                        <Pagination>
-                          <PaginationContent>
-                            <PaginationItem>
-                              <PaginationPrevious
-                                onClick={() =>
-                                  setCurrentPage((p) => Math.max(1, p - 1))
-                                }
-                                className={
-                                  currentPage === 1
-                                    ? "pointer-events-none opacity-50"
-                                    : ""
-                                }
-                              />
-                            </PaginationItem>
-
-                            {generatePaginationItems()}
-
-                            <PaginationItem>
-                              <PaginationNext
-                                onClick={() =>
-                                  setCurrentPage((p) =>
-                                    Math.min(totalPages, p + 1),
-                                  )
-                                }
-                                className={
-                                  currentPage === totalPages
-                                    ? "pointer-events-none opacity-50"
-                                    : ""
-                                }
-                              />
-                            </PaginationItem>
-                          </PaginationContent>
-                        </Pagination>
-                      </div>
-                    )}
                   </>
                 ) : (
                   <div className="col-span-3 text-center text-gray-400">
@@ -546,6 +529,39 @@ export default function ProjectsPage() {
           )}
         </div>
 
+        {/* pagination only renders if there are more than 1 page of projects*/}
+        {totalPages > 1 && (
+          <div className="col-span-3 mb-3 flex justify-center p-4 sm:p-0">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className={
+                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                    }
+                  />
+                </PaginationItem>
+
+                {generatePaginationItems()}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
+
         <div>
           <div className="pl-8 pr-8">
             <h1 className="mb-4 text-xl font-bold">Task Board Templates</h1>
@@ -554,7 +570,7 @@ export default function ProjectsPage() {
               through tasks faster:
             </p>
           </div>
-          <div className="grid auto-rows-min grid-cols-3 gap-4 p-8">
+          <div className="grid auto-rows-min grid-cols-1 gap-4 p-8 sm:grid-cols-2 lg:grid-cols-3">
             {templates.map((template) => (
               <div
                 key={template._id.toString()}

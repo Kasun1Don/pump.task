@@ -209,7 +209,7 @@ export default function TasksPage({
         strategy={horizontalListSortingStrategy}
       >
         <div className="flex h-full flex-col">
-          <div className="mb-3 flex justify-center">
+          <div className="mb-3 flex justify-center pb-4">
             {isEditing && isOwner() ? (
               <input
                 type="text"
@@ -247,7 +247,7 @@ export default function TasksPage({
                     setEditedName(project.name);
                   }
                 }}
-                className={`text-5xl font-extrabold leading-tight tracking-wide text-white shadow-lg ${
+                className={`text-center text-xl font-extrabold leading-tight tracking-wide text-white shadow-lg sm:text-5xl ${
                   isOwner() ? "cursor-pointer hover:opacity-80" : ""
                 }`}
               >
