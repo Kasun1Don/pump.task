@@ -30,6 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@acme/ui/dialog";
+import { Input } from "@acme/ui/input";
 import { TaskCardSchema } from "@acme/validators";
 
 import { api } from "~/trpc/react";
@@ -58,6 +59,8 @@ const TaskStatusColumn = ({
   selectedMembers,
 }: TaskStatusColumnProps) => {
   const [tasks, setTasks] = useState<TaskCardData[]>([]);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [newStatusName, setNewStatusName] = useState(statusColumn.name);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false); // State to control options visibility
 
@@ -117,6 +120,29 @@ const TaskStatusColumn = ({
     if (statusColumn.isProtected) {
       console.log("Task is protected");
     }
+  };
+
+  // Mutation for renaming the status column
+  const renameStatusColumn = api.task.renameStatusColumn.useMutation({
+    onSuccess: () => {
+      console.log("Status column renamed successfully");
+      void utils.task.getStatusesByProjectId.invalidate(); // Invalidate statuses to refresh data
+    },
+    onError: (error) => console.error("Error renaming status column:", error),
+  });
+
+  // Function to handle renaming
+  const handleRenameColumn = () => {
+    renameStatusColumn.mutate({
+      statusId: statusColumn._id,
+      newName: newStatusName,
+    });
+    setIsRenameModalOpen(false);
+  };
+
+  const handleCloseRenameDialog = () => {
+    setIsRenameModalOpen(false);
+    setNewStatusName(statusColumn.name); // Reset input to original name if closed without saving
   };
 
   // Deletion mutation for the status column
@@ -194,14 +220,14 @@ const TaskStatusColumn = ({
       {/* Options (delete and rename) */}
       {isOptionsVisible && (
         <div
-          className="border-1 absolute right-2 top-4 z-50 flex flex-col gap-4 rounded border-white border-opacity-30 bg-black stroke-gray-500 p-2 shadow-lg"
+          className="border-1 absolute right-2 top-4 z-50 flex flex-col gap-4 rounded border-white border-opacity-30 bg-black stroke-gray-500 p-3 text-sm shadow-lg"
           onMouseLeave={() => setIsOptionsVisible(false)}
         >
           {/* Rename option */}
           <button
             className="flex items-center gap-2 text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
             onClick={() => {
-              console.log("Rename column");
+              setIsRenameModalOpen(true);
               setIsOptionsVisible(false); // Close the menu after rename
             }}
           >
@@ -254,15 +280,55 @@ const TaskStatusColumn = ({
               onTaskCreated={handleTaskCreated}
             />
           )}
+
+          {/* Rename Dialog */}
+          <Dialog
+            open={isRenameModalOpen}
+            onOpenChange={handleCloseRenameDialog}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Rename Status Column</DialogTitle>
+              </DialogHeader>
+              <DialogDescription>
+                <Input
+                  value={newStatusName}
+                  onChange={(e) => setNewStatusName(e.target.value)}
+                  placeholder="Enter new column name"
+                  className="mt-2"
+                />
+              </DialogDescription>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsRenameModalOpen(false);
+                    handleCloseRenameDialog();
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="default"
+                  className="bg-zesty-green hover:bg-zesty-green hover:bg-opacity-80"
+                  onClick={handleRenameColumn}
+                  disabled={!newStatusName.trim()}
+                >
+                  Save
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           {/* Delete Confirmation Dialog */}
           <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Confirm Deletion</DialogTitle>
                 <DialogDescription>
-                  <div>Are you sure you want to remove this status column?</div>
-                  <div>This will also remove all tasks within the status</div>
-                  <div>(This action cannot be undone)</div>
+                  Are you sure you want to remove this status column? This will
+                  also remove all tasks within the status (This action cannot be
+                  undone)
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
