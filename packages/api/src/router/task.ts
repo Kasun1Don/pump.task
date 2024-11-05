@@ -267,6 +267,51 @@ export const taskRouter = {
       }
     }),
 
+  renameStatusColumn: publicProcedure
+    .input(
+      z.object({
+        statusId: objectIdStringSchema("statusId"),
+        newName: z.string().min(1, "New name is required"),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const { statusId, newName } = input;
+
+        console.log("Attempting to rename status column:", statusId);
+
+        // Find and update the status column
+        const updatedStatus = await Status.findByIdAndUpdate(
+          new mongoose.Types.ObjectId(statusId),
+          { $set: { name: newName } },
+          { new: true, runValidators: true }, // Return the updated document and validate fields
+        )
+          .lean()
+          .exec();
+
+        if (!updatedStatus) {
+          throw new Error("Status column not found");
+        }
+
+        console.log("Status column renamed successfully:", updatedStatus);
+
+        // Return the updated status column
+        return {
+          msg: "Status column renamed successfully",
+          status: {
+            ...updatedStatus,
+            _id: validateObjectIdString(
+              updatedStatus._id.toString(),
+              "statusId",
+            ),
+          },
+        };
+      } catch (error) {
+        console.error("Error renaming status column:", error);
+        throw new Error("Failed to rename status column");
+      }
+    }),
+
   deleteStatusColumn: publicProcedure
     .input(
       z.object({
