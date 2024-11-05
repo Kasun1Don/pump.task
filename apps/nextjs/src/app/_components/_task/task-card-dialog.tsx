@@ -114,6 +114,7 @@ const TaskCardDialog = ({
     setValue,
     watch,
     trigger,
+    reset,
     formState: { errors },
   } = useForm<NewTaskCard | TaskCard>({
     resolver: zodResolver(isNewTask ? NewTaskCardSchema : TaskCardSchema),
@@ -579,6 +580,21 @@ const TaskCardDialog = ({
               if (isNewTask) {
                 const newTaskData: NewTaskCard = taskData;
                 onSubmit(newTaskData);
+
+                reset({
+                  title: "",
+                  description: "",
+                  dueDate: new Date(NaN),
+                  statusId: statusId,
+                  assigneeId: "unassigned",
+                  projectId: projectId,
+                  order: 0,
+                  tags: {
+                    defaultTags: [],
+                    userGeneratedTags: [],
+                  },
+                  customFields: [],
+                });
 
                 setIsDialogOpen(false);
               } else {

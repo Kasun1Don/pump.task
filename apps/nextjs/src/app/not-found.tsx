@@ -10,7 +10,11 @@ export default function NotFound() {
         <p className="text-xl">Couldn't find the requested resource</p>
 
         <Link href="/">
-          <Button className="mt-4 bg-[#72D524]" variant="link" size="lg">
+          <Button
+            className="mt-4 bg-[#72D524] text-black"
+            variant="link"
+            size="lg"
+          >
             Return to Home
           </Button>
         </Link>
