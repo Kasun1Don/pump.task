@@ -40,6 +40,7 @@ export default function NavProjectDropdown({
   projects,
   walletId,
 }: NavProjectDropdownProps) {
+  console.log("--projects:", projects);
   const router = useRouter();
   const [currentProject, setCurrentProject] = useState<string>("");
 

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
@@ -7,11 +8,15 @@ import { ThemeProvider } from "@acme/ui/theme";
 import { Toaster } from "@acme/ui/toast";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import { api } from "~/trpc/server";
 
 import "~/app/globals.css";
 
+import { headers } from "next/headers";
+
 import { ThirdwebProvider } from "~/app/thirdweb";
 import { env } from "~/env";
+import { revalidate } from "./actions/revalidate";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -44,7 +49,29 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export default async function RootLayout(props: { children: React.ReactNode }) {
+  const pathname = headers().get("x-pathname");
+  if (
+    pathname?.split("/")[1] === "users" ||
+    pathname?.split("/")[1] === "tasks"
+  ) {
+    const id = pathname.split("/")[2];
+    const walletId: string = cookies().get("wallet")?.value ?? "";
+    const user = await api.user.byWallet({ walletId });
+    if (user.activeProjects !== undefined && id) {
+      if (user.activeProjects.at(-1)?.toString() !== id) {
+        try {
+          await api.user.updateActiveProjects({
+            walletId,
+            projectId: id,
+          });
+        } catch {
+          console.log("Not a member");
+        }
+        await revalidate("/");
+      }
+    }
+  }
   return (
     <html lang="en" suppressHydrationWarning>
       <body

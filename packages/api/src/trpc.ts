@@ -216,6 +216,7 @@ export const memberProcedure = t.procedure.use(async ({ ctx, next }) => {
     ctx: {
       // infers the `session` as non-nullable
       session: { ...ctx.session },
+      projectId,
     },
   });
 });

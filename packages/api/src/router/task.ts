@@ -10,7 +10,7 @@ import {
   validateObjectIdString,
 } from "@acme/validators";
 
-import { publicProcedure } from "../trpc";
+import { memberProcedure, publicProcedure } from "../trpc";
 
 export const taskRouter = {
   addTask: publicProcedure
@@ -175,18 +175,22 @@ export const taskRouter = {
       }
     }),
 
-  getStatusesByProjectId: publicProcedure
+  getStatusesByProjectId: memberProcedure
     .input(
       z.object({
         projectId: objectIdStringSchema("projectId"),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       try {
         console.log(
           "Attempting to find status columns with projectId:",
           input.projectId,
         );
+
+        if (ctx.projectId !== input.projectId) {
+          throw new Error("url and active project do not match");
+        }
         // Query the database for all the status objects related to the given projectId
         const statuses = await Status.find({ projectId: input.projectId })
           .lean()
