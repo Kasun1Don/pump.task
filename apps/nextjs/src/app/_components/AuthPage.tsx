@@ -23,6 +23,7 @@ import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/react";
 import { send2FAEmail, verify2FACode } from "../actions/2FAFunctions";
+import LoadingSpinner from "./LoadingSpinner";
 
 const formSchema = z.object({
   email: z.string(),
@@ -229,7 +230,9 @@ export default function UserLoginClient({
             </Form>
           </div>
         )
-      ) : null}
+      ) : (
+        <LoadingSpinner />
+      )}
     </>
   );
 }
