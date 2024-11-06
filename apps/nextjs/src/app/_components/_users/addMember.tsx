@@ -94,8 +94,8 @@ export function AddMember({ projectId }: { projectId: string }) {
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <div>
-                    <Label>
+                  <div className="flex gap-2">
+                    <Label className="flex items-center">
                       <input
                         type="radio"
                         value="Admin"
@@ -104,7 +104,7 @@ export function AddMember({ projectId }: { projectId: string }) {
                       />
                       Admin
                     </Label>
-                    <Label>
+                    <Label className="flex items-center">
                       <input
                         type="radio"
                         value="Observer"
@@ -118,7 +118,9 @@ export function AddMember({ projectId }: { projectId: string }) {
                 </FormItem>
               )}
             />
-            <Button>Add member</Button>
+            <Button className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]">
+              Add member
+            </Button>
           </form>
         </Form>
       </DialogContent>
