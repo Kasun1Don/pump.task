@@ -125,9 +125,12 @@ const TaskStatusColumn = ({
 
   // Mutation for renaming the status column
   const renameStatusColumn = api.task.renameStatusColumn.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       console.log("Status column renamed successfully");
-      void utils.task.getStatusesByProjectId.invalidate(); // Invalidate statuses to refresh data
+      // invalidate statuses and tasks to refresh data
+      await utils.task.getStatusesByProjectId.invalidate();
+      await utils.task.getTaskByStatusId.invalidate();
+      await utils.status.getStatusesByProjectId.invalidate();
     },
     onError: (error) => console.error("Error renaming status column:", error),
   });
@@ -148,10 +151,11 @@ const TaskStatusColumn = ({
 
   // Deletion mutation for the status column
   const deleteStatusColumn = api.task.deleteStatusColumn.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       console.log("Status column deleted successfully");
-      void utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
-      void utils.task.getStatusesByProjectId.invalidate();
+      await utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
+      await utils.task.getStatusesByProjectId.invalidate();
+      await utils.status.getStatusesByProjectId.invalidate();
     },
     onError: (error) => {
       if (error instanceof Error) {

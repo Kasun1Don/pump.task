@@ -96,7 +96,7 @@ export default function NewStatusColumn({
           <DialogTitle>Create New Status</DialogTitle>
         </DialogHeader>
 
-        <div className="mt-4">
+        <div className="bg- mt-4">
           <Input
             type="text"
             value={newStatusName}
@@ -107,7 +107,7 @@ export default function NewStatusColumn({
               }
             }}
             placeholder="Enter Status Name"
-            className="mb-4 w-full rounded-md bg-[#27272A] p-2 text-white"
+            className="mb-4 w-full rounded-md bg-black p-2 text-white"
           />
         </div>
 
