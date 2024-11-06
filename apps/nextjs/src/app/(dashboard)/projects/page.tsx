@@ -20,20 +20,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@acme/ui/dropdown-menu";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@acme/ui/pagination";
 import { Tabs, TabsList, TabsTrigger } from "@acme/ui/tabs";
 import { toast } from "@acme/ui/toast";
 
 import { BadgeDisplayModal } from "~/app/_components/_projects/badge-display-modal";
 import { CreateProjectDialog } from "~/app/_components/_projects/create-project-dialog";
+import { DeleteProjectDialog } from "~/app/_components/_projects/delete-project-dialog";
+import { PaginationControls } from "~/app/_components/_projects/pagination-projects";
 import ProjectsSkeleton from "~/app/_components/_projects/projects-skeleton";
 import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
@@ -154,36 +147,6 @@ export default function ProjectsPage() {
   const endIndex = startIndex + projectsPerPage;
   const currentProjects = filteredProjects?.slice(startIndex, endIndex);
 
-  // function to generate page numbers for pagination
-  const generatePaginationItems = () => {
-    const items = [];
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - 1 && i <= currentPage + 1)
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              onClick={() => setCurrentPage(i)}
-              isActive={currentPage === i}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>,
-        );
-      } else if (i === currentPage - 2 || i === currentPage + 2) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationEllipsis />
-          </PaginationItem>,
-        );
-      }
-    }
-    return items;
-  };
-
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -202,24 +165,6 @@ export default function ProjectsPage() {
       setEditingProject(null);
     },
   });
-
-  const deleteProject = api.project.delete.useMutation({
-    onSuccess: () => {
-      console.log("Project deleted successfully");
-      void refetchProjects();
-    },
-    onError: (error) => {
-      console.error("Error deleting project:", error);
-    },
-  });
-
-  const handleDelete = () => {
-    if (projectToDelete) {
-      deleteProject.mutate({ projectId: projectToDelete });
-      setIsDeleteModalOpen(false);
-      setProjectToDelete(null);
-    }
-  };
 
   // Initialize the mutation
   const updateActiveProjectsMutation =
@@ -532,35 +477,11 @@ export default function ProjectsPage() {
 
         {/* pagination only renders if there are more than 1 page of projects*/}
         {totalPages > 1 && (
-          <div className="col-span-3 mb-3 flex justify-center p-4 sm:p-0">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    className={
-                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                    }
-                  />
-                </PaginationItem>
-
-                {generatePaginationItems()}
-
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() =>
-                      setCurrentPage((p) => Math.min(totalPages, p + 1))
-                    }
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         )}
 
         <div>
@@ -599,37 +520,12 @@ export default function ProjectsPage() {
       />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleDelete();
-            }
-          }}
-          tabIndex={0}
-          role="alertdialog"
-        >
-          <DialogHeader>
-            <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
-            <DialogDescription id="delete-dialog-description" className="py-2">
-              <p>Are you sure you want to permanently delete this project?</p>
-              <p className="mt-2">You can't undo this action.</p>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteProjectDialog
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        projectId={projectToDelete}
+        onSuccess={refetchProjects}
+      />
 
       <BadgeDisplayModal
         isOpen={isBadgeModalOpen}

@@ -23,7 +23,7 @@ export default async function UsersPage({
   }
 
   return (
-    <div className="mx-2 mt-3 flex flex-col gap-3 sm:mx-20">
+    <div className="mx-4 mt-3 flex flex-col gap-3 sm:mx-20">
       <div className="flex w-full justify-between">
         <h2>{projectData.name}</h2>
         <AddMember projectId={params.id} />
@@ -42,7 +42,9 @@ export default async function UsersPage({
             {/* break-words allows long text to wrap to the next line*/}
             <span className="break-words">{member.userData.name}</span>
             <span className="break-words">{member.userData.email}</span>
-            <span className="col-span-2 break-all">{member.userData.walletId}</span>
+            <span className="col-span-2 break-all">
+              {member.userData.walletId}
+            </span>
             <span>{member.role}</span>
             <EditMember
               walletId={member.userData.walletId ?? ""}
