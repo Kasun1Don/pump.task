@@ -221,7 +221,7 @@ const TaskCard = ({
               <TrashIcon />
             </button>
 
-            <div className="mb-3 flex space-x-2">
+            <div className="mb-3 flex flex-wrap gap-2">
               {task.tags.defaultTags.map((tag) => (
                 <span
                   key={tag}
