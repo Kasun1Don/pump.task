@@ -32,6 +32,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@acme/ui/tabs";
 import { toast } from "@acme/ui/toast";
 
+import { BadgeDisplayModal } from "~/app/_components/_projects/badge-display-modal";
 import { CreateProjectDialog } from "~/app/_components/_projects/create-project-dialog";
 import ProjectsSkeleton from "~/app/_components/_projects/projects-skeleton";
 import { revalidate } from "~/app/actions/revalidate";
@@ -630,41 +631,12 @@ export default function ProjectsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Badge Display Modal */}
-      <Dialog open={isBadgeModalOpen} onOpenChange={setIsBadgeModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Available Badges</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-wrap gap-4 p-4">
-            {selectedProjectForBadges &&
-              projectTags?.[selectedProjectForBadges]?.map((tag) => {
-                // Remove spaces from tag name to match image filenames
-                const imageTag = tag.replace(/\s+/g, "").toLowerCase();
-                return (
-                  <div key={tag} className="flex flex-col items-center">
-                    <Image
-                      src={`/nfts/${imageTag}.png`}
-                      alt={tag}
-                      width={100}
-                      height={100}
-                      className="rounded-lg"
-                    />
-                    <span className="mt-2 text-sm text-gray-400">{tag}</span>
-                  </div>
-                );
-              })}
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={() => setIsBadgeModalOpen(false)}
-              className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <BadgeDisplayModal
+        isOpen={isBadgeModalOpen}
+        onOpenChange={setIsBadgeModalOpen}
+        selectedProjectId={selectedProjectForBadges}
+        projectTags={projectTags}
+      />
 
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-[425px]">

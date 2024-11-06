@@ -60,7 +60,11 @@ export default function TaskFilter({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="text-[#72D524] hover:bg-[#5CAB1D]">
+        <Button
+          variant="outline"
+          size="icon"
+          className="text-[#72D524] hover:bg-[#5CAB1D]"
+        >
           <FaFilter className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
