@@ -214,15 +214,18 @@ export default function TasksPage({
   if ("error" in project) return <p>Error fetching project: {project.error}</p>;
 
   // Function to handle drag and drop of status columns
+  // over is the column that the active column is being dragged over
+  // active is the column that is being dragged
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
     // find the active column
     const activeColumn = statusColumns.find((col) => col._id === active.id);
+    const overColumn = statusColumns.find((col) => col._id === over.id);
 
-    // prevent moving protected columns
-    if (activeColumn?.isProtected) return;
+    // prevent moving protected columns or moving columns to protected position
+    if (activeColumn?.isProtected || overColumn?.isProtected) return;
 
     setStatusColumns((statusColumns) => {
       const activeIndex = statusColumns.findIndex(
@@ -231,9 +234,6 @@ export default function TasksPage({
       const overIndex = statusColumns.findIndex(
         (column) => column._id === over.id,
       );
-
-      // can't drag protected column (index 0)
-      if (overIndex === 0) return statusColumns;
 
       const newOrder = arrayMove(statusColumns, activeIndex, overIndex);
 
@@ -337,13 +337,13 @@ export default function TasksPage({
                   selectedMembers={selectedMembers}
                 />
               ))}
-              {/* only allow owner & admin to create new status columns */}
-              {isOwner() && (
+              {
                 <NewStatusColumn
                   projectId={projectId}
                   onStatusCreated={handleNewStatusCreated}
+                  disabled={!isOwner()}
                 />
-              )}
+              }
             </div>
           </div>
         </div>

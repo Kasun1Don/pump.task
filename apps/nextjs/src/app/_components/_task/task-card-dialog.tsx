@@ -222,6 +222,36 @@ const TaskCardDialog = ({
     void trigger("customFields");
   };
 
+  // (reset dialog inputs) effect to handle dialog state changes
+  useEffect(() => {
+    if (isDialogOpen === false) {
+      // reset initial values or default values when dialog closes
+      reset(
+        initialValues ?? {
+          title: "",
+          description: "",
+          dueDate: new Date(NaN),
+          statusId: statusId,
+          assigneeId: "unassigned",
+          projectId: projectId,
+          order: 0,
+          tags: {
+            defaultTags: [],
+            userGeneratedTags: [],
+          },
+          customFields: [],
+        },
+      );
+      setNewTag("");
+      setNewFieldName("");
+      setIsTagDialogOpen(false);
+      setIsCalendarOpen(false);
+      setIsFieldDialogOpen(false);
+
+      setIsEditMode(isNewTask);
+    }
+  }, [isDialogOpen, initialValues, isNewTask, projectId, reset, statusId]);
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
@@ -595,6 +625,13 @@ const TaskCardDialog = ({
                   },
                   customFields: [],
                 });
+
+                // remove inputs from text fields on dialog close
+                setNewTag("");
+                setNewFieldName("");
+                setIsTagDialogOpen(false);
+                setIsCalendarOpen(false);
+                setIsFieldDialogOpen(false);
 
                 setIsDialogOpen(false);
               } else {
