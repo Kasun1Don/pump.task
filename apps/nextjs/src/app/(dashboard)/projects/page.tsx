@@ -611,12 +611,9 @@ export default function ProjectsPage() {
         >
           <DialogHeader>
             <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
-            <DialogDescription id="delete-dialog-description">
-              <p>Are you sure you want to remove this project?</p>
-              <p>(This action cannot be undone)</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Press Enter to confirm or Escape to cancel
-              </p>
+            <DialogDescription id="delete-dialog-description" className="py-2">
+              <p>Are you sure you want to permanently delete this project?</p>
+              <p className="mt-2">You can't undo this action.</p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

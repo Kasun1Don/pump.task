@@ -117,8 +117,20 @@ export default function TasksPage({
     if (statusData) {
       const validationResult = StatusSchema.array().safeParse(statusData);
       if (validationResult.success) {
-        // set state directly with the validated data
-        setStatusColumns(validationResult.data);
+        const statuses = validationResult.data;
+  
+        // Find the 'Approved' column and move it to the end
+        const approvedColumnIndex = statuses.findIndex(
+          (col) => col.name === "Approved" && col.isProtected,
+        );
+        if (approvedColumnIndex !== -1) {
+          const approvedColumn = statuses.splice(approvedColumnIndex, 1)[0];  // Remove 'Approved' column
+          if (approvedColumn) {
+            statuses.push(approvedColumn); // Add it to the end
+          }
+        }
+        setStatusColumns(statuses);
+        
       } else {
         console.error("Validation error:", validationResult.error.errors);
       }
@@ -129,16 +141,20 @@ export default function TasksPage({
   const handleNewStatusCreated = (newStatus: StatusColumn) => {
     setStatusColumns((prevStatusColumns) => {
       // find the protected column
-      const protectedColumnIndex = prevStatusColumns.findIndex(
-        (col) => col.isProtected,
+      const approvedColumnIndex = prevStatusColumns.findIndex(
+        (col) => col.name === "Approved" && col.isProtected,
       );
-      if (protectedColumnIndex === -1) return [...prevStatusColumns, newStatus];
+  
+      if (approvedColumnIndex === -1) {
+        // No 'Approved' column found, append to the end
+        return [...prevStatusColumns, newStatus];
+      }
 
-      // insert the new status after the protected column
+      // insert the new status before the protected column
       return [
-        ...prevStatusColumns.slice(0, protectedColumnIndex + 1),
+        ...prevStatusColumns.slice(0, approvedColumnIndex),
         newStatus,
-        ...prevStatusColumns.slice(protectedColumnIndex + 1),
+        ...prevStatusColumns.slice(approvedColumnIndex),
       ];
     });
   };
@@ -173,9 +189,16 @@ export default function TasksPage({
   const user = api.user.byWallet.useSuspenseQuery({
     walletId: cookieWallet ?? "",
   });
-  const [userMemberships] = api.member.byUserId.useSuspenseQuery({
-    userId: user[0]._id,
-  });
+  const [userMemberships] = api.member.byUserId.useSuspenseQuery(
+    {
+      userId: user[0]._id,
+    },
+    {
+      //fetch the latest members without requiring a page reload (required for member permissions)
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+    },
+  );
 
   const isOwner = () => {
     return userMemberships.some(
@@ -315,7 +338,7 @@ export default function TasksPage({
                   selectedMembers={selectedMembers}
                 />
               ))}
-              {/* only allow owner to create new status columns */}
+              {/* only allow owner & admin to create new status columns */}
               {isOwner() && (
                 <NewStatusColumn
                   projectId={projectId}
