@@ -65,7 +65,7 @@ export default function MintingDialog({
     if (!badge) {
       return "Loading...";
     }
-     
+
     return badge.transactionHash ?? "Error";
   };
 
