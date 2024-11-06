@@ -337,13 +337,13 @@ export default function TasksPage({
                   selectedMembers={selectedMembers}
                 />
               ))}
-              {/* only allow owner & admin to create new status columns */}
-              {isOwner() && (
+              {
                 <NewStatusColumn
                   projectId={projectId}
                   onStatusCreated={handleNewStatusCreated}
+                  disabled={!isOwner()}
                 />
-              )}
+              }
             </div>
           </div>
         </div>

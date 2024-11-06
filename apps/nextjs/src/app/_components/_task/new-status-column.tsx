@@ -22,11 +22,13 @@ import { api } from "~/trpc/react";
 interface NewStatusColumnProps {
   projectId: ObjectIdString;
   onStatusCreated: (newStatus: StatusColumn) => void;
+  disabled?: boolean;
 }
 
 export default function NewStatusColumn({
   projectId,
   onStatusCreated,
+  disabled = false,
 }: NewStatusColumnProps) {
   const [newStatusName, setNewStatusName] = useState("");
   const [order, setOrder] = useState(0); // Optional: You can handle order differently based on project
@@ -82,6 +84,7 @@ export default function NewStatusColumn({
             textOrientation: "mixed",
             alignItems: "flex-start",
           }}
+          disabled={disabled}
         >
           + New Status
         </Button>
