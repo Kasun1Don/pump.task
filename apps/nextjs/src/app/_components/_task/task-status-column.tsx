@@ -60,7 +60,12 @@ const TaskStatusColumn = ({
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [newStatusName, setNewStatusName] = useState(statusColumn.name);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isOptionsVisible, setIsOptionsVisible] = useState(false); // State to control options visibility
+  const [isOptionsVisible, setIsOptionsVisible] = useState(false);
+  const [isAnyTaskCardModalOpen, setIsAnyTaskCardModalOpen] = useState(false);
+
+  const handleModalStateChange = (isAnyModalOpen: boolean) => {
+    setIsAnyTaskCardModalOpen(isAnyModalOpen);
+  };
 
   const cookieWallet = document.cookie
     .split("; ")
@@ -81,7 +86,14 @@ const TaskStatusColumn = ({
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: statusColumn._id,
-      disabled: statusColumn.isProtected, // disable drag and drop for approved column
+      disabled:
+        // I need to do this to disable sorting when a dialog is open or when the column is protected but eslint doesn't like it
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        statusColumn.isProtected ||
+        isDeleteModalOpen ||
+        isOptionsVisible ||
+        isRenameModalOpen ||
+        isAnyTaskCardModalOpen,
     });
   const style = {
     transition,
@@ -265,6 +277,7 @@ const TaskStatusColumn = ({
         >
           {filteredTasks.map((task) => (
             <TaskCard
+              onModalStateChange={handleModalStateChange}
               members={members}
               currentUserWalletId={cookieWallet ?? ""}
               key={task._id}

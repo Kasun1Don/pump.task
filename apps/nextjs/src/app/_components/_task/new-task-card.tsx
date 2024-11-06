@@ -57,7 +57,7 @@ const NewTaskCard = ({
   };
 
   return (
-    <div>
+    <div onClick={(e) => e.stopPropagation()}>
       {/* Render the TaskCardDialog to create a new task */}
       <TaskCardDialog
         members={members}

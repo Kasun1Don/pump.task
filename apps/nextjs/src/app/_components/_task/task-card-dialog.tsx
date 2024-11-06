@@ -52,6 +52,7 @@ export interface TaskCardDialogProps {
   isEditable?: boolean;
   loading: boolean;
   setSubmitButtonTextState?: (text: string) => void;
+  onModalStateChangeTask?: (isAnyModalOpen: boolean) => void;
 }
 
 const TaskCardDialog = ({
@@ -66,6 +67,7 @@ const TaskCardDialog = ({
   isEditable = false,
   loading,
   setSubmitButtonTextState,
+  onModalStateChangeTask,
 }: TaskCardDialogProps) => {
   const defaultTags = [
     "Frontend",
@@ -84,8 +86,28 @@ const TaskCardDialog = ({
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState<boolean>(false);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [isUserAdminOrOwner, setIsUserAdminOrOwner] = useState<boolean>(false);
-
   const [newFieldName, setNewFieldName] = useState("");
+
+  useEffect(() => {
+    if (onModalStateChangeTask) {
+      onModalStateChangeTask(
+        isDialogOpen ||
+          isTagDialogOpen ||
+          isFieldDialogOpen ||
+          isCalendarOpen ||
+          isEditMode ||
+          isNewTask,
+      );
+    }
+  }, [
+    onModalStateChangeTask,
+    isDialogOpen,
+    isTagDialogOpen,
+    isFieldDialogOpen,
+    isCalendarOpen,
+    isEditMode,
+    isNewTask,
+  ]);
 
   const cookieWallet = document.cookie
     .split("; ")
