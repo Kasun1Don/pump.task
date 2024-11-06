@@ -228,14 +228,14 @@ const TaskStatusColumn = ({
         >
           {/* Rename option - only show if not protected */}
           {statusColumn.isProtected === false && (
-          <button
-            className="flex items-center gap-2 text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
-            onClick={() => {
-              setIsRenameModalOpen(true);
-              setIsOptionsVisible(false); // Close the menu after rename
-            }}
-          >
-            <EditIcon /> Rename
+            <button
+              className="flex items-center gap-2 text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
+              onClick={() => {
+                setIsRenameModalOpen(true);
+                setIsOptionsVisible(false); // Close the menu after rename
+              }}
+            >
+              <EditIcon /> Rename
             </button>
           )}
 
