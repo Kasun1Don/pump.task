@@ -59,8 +59,12 @@ export function CreateProjectDialog({
       },
     });
 
+  // reset form when modal is closed
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const resetForm = () => {
     setNewProjectName("");
     setSelectedTemplate("");
     setIsPrivate(false);
@@ -72,7 +76,13 @@ export function CreateProjectDialog({
   }, [initialTemplate]);
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+    <Dialog
+      open={isModalOpen}
+      onOpenChange={(open) => {
+        setIsModalOpen(open);
+        if (!open) resetForm();
+      }}
+    >
       <DialogContent className="w-96 border-gray-700 bg-[#18181B]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-white">

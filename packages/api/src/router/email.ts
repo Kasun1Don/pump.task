@@ -102,4 +102,35 @@ export const emailRouter = {
         };
       }
     }),
+  requestAccess: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        requesterEmail: z.string(),
+        requesterName: z.string(),
+        ownerEmail: z.string(),
+        projectName: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const msg = {
+          to: input.ownerEmail,
+          from: "coderacademylabrys@gmail.com",
+          subject: `Access Request for ${input.projectName}`,
+          html: `
+            <h2>Project Access Request</h2>
+            <p>${input.requesterName} (${input.requesterEmail}) has requested access to your project: ${input.projectName}</p>
+            <p>Project URL: <a href="http://localhost:3000/tasks/${input.projectId}">View Project</a></p>
+            <p>You can manage project members from the project settings page.</p>
+          `,
+        };
+
+        await sgMail.send(msg);
+        return { success: true, message: "Access request sent successfully" };
+      } catch (error) {
+        console.error("Error sending access request:", error);
+        return { success: false, message: "Failed to send access request" };
+      }
+    }),
 } satisfies TRPCRouterRecord;

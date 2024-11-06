@@ -351,37 +351,43 @@ export default function ProjectsPage() {
                               )}
                               {isMember && !isOwner && (
                                 <DropdownMenuItem
-                                  onClick={(e) => {
+                                  //must be async to wait for the mutation to complete before toast promise resolves
+                                  onClick={async (e) => {
+                                    // Prevent the click from bubbling up to parent elements
                                     e.stopPropagation();
-                                    toast.promise(
-                                      new Promise((resolve) => {
-                                        toast(
-                                          "Are you sure you want to leave this project?",
-                                          {
-                                            action: {
-                                              label: "Confirm",
-                                              onClick: () => {
-                                                leaveProject.mutate({
-                                                  projectId:
-                                                    project._id.toString(),
-                                                  walletId: walletId,
-                                                });
-                                                resolve(true);
+                                    try {
+                                      //prompt user to confirm with toast confirmation (shadcn)
+                                      const confirmed = await new Promise(
+                                        (resolve) => {
+                                          toast(
+                                            "Are you sure you want to leave this project?",
+                                            {
+                                              action: {
+                                                label: "Confirm",
+                                                onClick: () => resolve(true),
+                                              },
+                                              cancel: {
+                                                label: "Cancel",
+                                                onClick: () => resolve(false),
                                               },
                                             },
-                                            cancel: {
-                                              label: "Cancel",
-                                              onClick: () => resolve(false),
-                                            },
-                                          },
+                                          );
+                                        },
+                                      );
+                                      //if user confirms, leave project and issue toast success
+                                      if (confirmed) {
+                                        await leaveProject.mutateAsync({
+                                          projectId: project._id.toString(),
+                                          walletId: walletId,
+                                        });
+                                        toast.success(
+                                          "Successfully left project",
                                         );
-                                      }),
-                                      {
-                                        loading: "Leaving project...",
-                                        success: "Successfully left project",
-                                        error: "Failed to leave project",
-                                      },
-                                    );
+                                      }
+                                    } catch (err) {
+                                      console.error(err);
+                                      toast.error("Failed to leave project");
+                                    }
                                   }}
                                   className="text-red-500"
                                 >
