@@ -351,34 +351,38 @@ export default function ProjectsPage() {
                               )}
                               {isMember && !isOwner && (
                                 <DropdownMenuItem
-                                 //must be async to wait for the mutation to complete before toast promise resolves
+                                  //must be async to wait for the mutation to complete before toast promise resolves
                                   onClick={async (e) => {
-                                     // Prevent the click from bubbling up to parent elements
+                                    // Prevent the click from bubbling up to parent elements
                                     e.stopPropagation();
                                     try {
                                       //prompt user to confirm with toast confirmation (shadcn)
-                                      const confirmed = await new Promise((resolve) => {
-                                        toast(
-                                          "Are you sure you want to leave this project?",
-                                          {
-                                            action: {
-                                              label: "Confirm",
-                                              onClick: () => resolve(true),
+                                      const confirmed = await new Promise(
+                                        (resolve) => {
+                                          toast(
+                                            "Are you sure you want to leave this project?",
+                                            {
+                                              action: {
+                                                label: "Confirm",
+                                                onClick: () => resolve(true),
+                                              },
+                                              cancel: {
+                                                label: "Cancel",
+                                                onClick: () => resolve(false),
+                                              },
                                             },
-                                            cancel: {
-                                              label: "Cancel",
-                                              onClick: () => resolve(false),
-                                            },
-                                          },
-                                        );
-                                      });
+                                          );
+                                        },
+                                      );
                                       //if user confirms, leave project and issue toast success
                                       if (confirmed) {
                                         await leaveProject.mutateAsync({
                                           projectId: project._id.toString(),
                                           walletId: walletId,
                                         });
-                                        toast.success("Successfully left project");
+                                        toast.success(
+                                          "Successfully left project",
+                                        );
                                       }
                                     } catch (err) {
                                       console.error(err);
