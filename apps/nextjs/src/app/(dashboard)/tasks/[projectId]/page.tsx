@@ -118,19 +118,18 @@ export default function TasksPage({
       const validationResult = StatusSchema.array().safeParse(statusData);
       if (validationResult.success) {
         const statuses = validationResult.data;
-  
+
         // Find the 'Approved' column and move it to the end
         const approvedColumnIndex = statuses.findIndex(
           (col) => col.name === "Approved" && col.isProtected,
         );
         if (approvedColumnIndex !== -1) {
-          const approvedColumn = statuses.splice(approvedColumnIndex, 1)[0];  // Remove 'Approved' column
+          const approvedColumn = statuses.splice(approvedColumnIndex, 1)[0]; // Remove 'Approved' column
           if (approvedColumn) {
             statuses.push(approvedColumn); // Add it to the end
           }
         }
         setStatusColumns(statuses);
-        
       } else {
         console.error("Validation error:", validationResult.error.errors);
       }
@@ -144,7 +143,7 @@ export default function TasksPage({
       const approvedColumnIndex = prevStatusColumns.findIndex(
         (col) => col.name === "Approved" && col.isProtected,
       );
-  
+
       if (approvedColumnIndex === -1) {
         // No 'Approved' column found, append to the end
         return [...prevStatusColumns, newStatus];

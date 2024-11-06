@@ -10,9 +10,10 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/globals.css";
 
+import NextTopLoader from "nextjs-toploader";
+
 import { ThirdwebProvider } from "~/app/thirdweb";
 import { env } from "~/env";
-import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
