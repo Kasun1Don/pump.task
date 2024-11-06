@@ -12,6 +12,7 @@ import "~/app/globals.css";
 
 import { ThirdwebProvider } from "~/app/thirdweb";
 import { env } from "~/env";
+import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -54,6 +55,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           GeistMono.variable,
         )}
       >
+        <NextTopLoader color="#72D524" height={3} showSpinner={false} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThirdwebProvider>
             <TRPCReactProvider>{props.children}</TRPCReactProvider>

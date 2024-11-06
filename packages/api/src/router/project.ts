@@ -38,35 +38,31 @@ export const projectRouter = {
         // Create all status columns in order
         const statusColumns = [];
 
-        // if a template was selected, add template columns first
+        // Approved as the last column
+        statusColumns.push({
+          name: "Approved",
+          projectId: savedProject._id,
+          order: statusColumns.length, // Order after previous columns
+          isProtected: true,
+        });
+
+        // if a template was selected, create additional status columns
         if (input.templateId) {
           const template = await Template.findById(input.templateId);
           if (template) {
-            // sort template columns by order first
-            const sortedColumns = [...template.statusColumns].sort(
-              (a, b) => a.order - b.order,
-            );
-
-            sortedColumns.forEach((column, index) => {
+            template.statusColumns.forEach((column, index) => {
+              // loop through each column, adding 1 to the order
               statusColumns.push({
                 name: column.name,
                 projectId: savedProject._id,
-                order: index, // ordering sequentially starting from 0
+                order: index, // ordering starting after Approved
                 isProtected: column.isProtected,
               });
             });
           }
         }
 
-        // Add Approved column at the end with the last order number
-        statusColumns.push({
-          name: "Approved",
-          projectId: savedProject._id,
-          order: statusColumns.length, // puts at the end of the order sequence
-          isProtected: true,
-        });
-
-        // create all status columns at once
+        // create all status columns at once to maintain order
         await Status.insertMany(statusColumns);
 
         const user = await User.findOne({ walletId: input.members.user });
@@ -156,14 +152,8 @@ export const projectRouter = {
           throw new Error("Project not found");
         }
 
-        // Remove the project reference from the user
-        await User.updateMany(
-          { projects: projectId },
-          { $pull: { projects: projectId, activeProjects: projectId } },
-        );
-
         console.log(
-          "Project, associated tasks, statuses, and user references deleted successfully",
+          "Project and associated task and statuses deleted successfully",
         );
 
         return { message: "Project deleted successfully" };
