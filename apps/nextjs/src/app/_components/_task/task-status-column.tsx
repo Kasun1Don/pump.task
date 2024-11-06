@@ -206,17 +206,19 @@ const TaskStatusColumn = ({
       {...listeners}
       style={style}
     >
-      {/* Menu in the top right corner */}
-      <div
-        onClick={() => setIsOptionsVisible((prev) => !prev)}
-        className="group/menu-button absolute right-2 top-2 z-50 flex cursor-pointer items-center space-x-2 opacity-0 transition-opacity duration-300 group-hover/status-column:opacity-100"
-      >
-        <div aria-label="Options" className="flex gap-0.5 p-1">
-          <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
-          <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
-          <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+      {/* don't show menu if protected (approved column) */}
+      {statusColumn.isProtected === false && (
+        <div
+          onClick={() => setIsOptionsVisible((prev) => !prev)}
+          className="group/menu-button absolute right-2 top-2 z-50 flex cursor-pointer items-center space-x-2 opacity-0 transition-opacity duration-300 group-hover/status-column:opacity-100"
+        >
+          <div aria-label="Options" className="flex gap-0.5 p-1">
+            <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+            <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+            <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Options (delete and rename) */}
       {isOptionsVisible && (
@@ -224,7 +226,8 @@ const TaskStatusColumn = ({
           className="border-1 absolute right-2 top-4 z-50 flex flex-col gap-4 rounded border-white border-opacity-30 bg-black stroke-gray-500 p-3 text-sm shadow-lg"
           onMouseLeave={() => setIsOptionsVisible(false)}
         >
-          {/* Rename option */}
+          {/* Rename option - only show if not protected */}
+          {statusColumn.isProtected === false && (
           <button
             className="flex items-center gap-2 text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
             onClick={() => {
@@ -233,7 +236,8 @@ const TaskStatusColumn = ({
             }}
           >
             <EditIcon /> Rename
-          </button>
+            </button>
+          )}
 
           {/* Delete option */}
           {statusColumn.isProtected === false && (
