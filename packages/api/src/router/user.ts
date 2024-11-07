@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { z } from "zod";
 
 import type { BadgeClass } from "@acme/db";
-import { Badge, LoginHistory, User } from "@acme/db";
+import { Badge, LoginHistory, Member, Project, User } from "@acme/db";
 
 import { protectedProcedure, publicProcedure } from "../trpc";
 
@@ -340,6 +340,17 @@ export const userRouter = {
 
         if (!user) {
           throw new Error("User not found");
+        }
+
+        const project = await Project.findById(input.projectId);
+        if (project && project.isPrivate) {
+          const members = await Member.find({ projectId: input.projectId });
+          const member = members.find(
+            (member) => member.walletId === input.walletId,
+          );
+          if (!member) {
+            throw new Error("Not a member");
+          }
         }
 
         // Get the activeProjects array or initialize it if empty

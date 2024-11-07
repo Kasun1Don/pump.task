@@ -41,8 +41,11 @@ export default function NavProjectDropdown({
   projects,
   walletId,
 }: NavProjectDropdownProps) {
+  console.log("--projects:", projects);
   const router = useRouter();
   const [currentProject, setCurrentProject] = useState<string>("");
+
+  const utils = api.useUtils();
 
   // Use `api.useQueries` to fetch data for each project ID
   const projectQueries = api.useQueries((t) =>
@@ -64,26 +67,6 @@ export default function NavProjectDropdown({
   // Check if any of the queries are loading or have errors
   const isLoading = projectQueries.some((query) => query.isLoading);
   const isError = projectQueries.some((query) => query.isError);
-
-  // Extract and process project data from the queries
-  // const projectData = projectQueries
-  //   .map((query) => {
-  //     if (query.data) {
-  //       const project = query.data;
-  //       // Process the project data to match ProjectSchema
-  //       const processedProject = {
-  //         ...project,
-  //         _id: project._id.toString(), // Convert _id to string
-  //         // Optionally, convert date fields to strings or desired format
-  //         // If your ProjectSchema expects dates as strings, convert them:
-  //         // createdAt: project.createdAt.toISOString(),
-  //         // updatedAt: project.updatedAt.toISOString(),
-  //       };
-  //       return processedProject;
-  //     }
-  //     return undefined;
-  //   })
-  //   .filter((project): project is Project => project !== undefined);
 
   // Extract and process project data from the queries
   const projectData = projectQueries
@@ -116,7 +99,7 @@ export default function NavProjectDropdown({
         walletId: walletId,
         projectId: project._id.toString(),
       });
-
+      await utils.user.byWallet.invalidate();
       await revalidate("/");
       // Navigate to the project's task page
       router.push(`/tasks/${project._id}`);
@@ -140,6 +123,8 @@ export default function NavProjectDropdown({
       if (activeProject) {
         setCurrentProject(activeProject.name);
       }
+    } else if (!isLoading) {
+      setCurrentProject("No selected project");
     }
   }, [isLoading, projectData, projects]);
 
@@ -149,13 +134,6 @@ export default function NavProjectDropdown({
         {/* The Current selected Project */}
         <DropdownMenuTrigger className="relative flex cursor-default select-none items-center rounded-md border px-4 py-2 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
           <div className="flex flex-row items-center gap-4">
-            {/* <Image
-            className="inline-block h-4 w-4 rounded-full"
-            src="/badge.png"
-            alt="badge"
-            width={12}
-            height={12}
-          /> */}
             <h6 className="text-sm">{currentProject}</h6>
             <Image
               src="/chevron-down.svg"
@@ -189,13 +167,6 @@ export default function NavProjectDropdown({
                   }
                 }}
               >
-                {/* <Image
-                className="inline-block h-5 w-5 rounded-full"
-                src={project.image ?? "/default-project-image.png"}
-                alt={project.name}
-                width={20}
-                height={20}
-              /> */}
                 <h1 className="text-sm">{project.name}</h1>
               </DropdownMenuItem>
             ))

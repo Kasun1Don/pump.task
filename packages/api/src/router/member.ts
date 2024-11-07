@@ -138,7 +138,10 @@ export const memberRouter = {
   delete: adminProcedure
     .input(z.object({ walletId: z.string(), projectId: z.string() }))
     .mutation(async ({ input }) => {
-      await Member.deleteOne({ walletId: input.walletId });
+      await Member.deleteOne({
+        walletId: input.walletId,
+        projectId: input.projectId,
+      });
       await User.updateOne(
         { walletId: input.walletId },
         { $pull: { projects: input.projectId } },

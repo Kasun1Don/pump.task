@@ -15,7 +15,7 @@ import { ZodError } from "zod";
 
 import type { Session } from "@acme/auth";
 import { auth, validateToken } from "@acme/auth";
-import { Member, User } from "@acme/db";
+import { Member, Project, User } from "@acme/db";
 import dbConnect from "@acme/db/dbConnect";
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -206,16 +206,20 @@ export const memberProcedure = t.procedure.use(async ({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   const projectId = user.activeProjects.at(-1)?.toString();
-  const members = await Member.find({ projectId: projectId });
-  const member = members.find((member) => member.walletId === walletId);
-  if (!member) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+  const project = await Project.findById(projectId);
+  if (project?.isPrivate) {
+    const members = await Member.find({ projectId: projectId });
+    const member = members.find((member) => member.walletId === walletId);
+    if (!member) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
   }
 
   return next({
     ctx: {
       // infers the `session` as non-nullable
       session: { ...ctx.session },
+      projectId,
     },
   });
 });
