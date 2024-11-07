@@ -3,18 +3,23 @@ import { z } from "zod";
 
 import { Status } from "@acme/db";
 
-import { publicProcedure } from "../trpc";
+import { memberProcedure, publicProcedure } from "../trpc";
 
 export const statusRouter = {
   // Query to get statuses by project ID, ordered by 'order' field
-  getStatusesByProjectId: publicProcedure
+  getStatusesByProjectId: memberProcedure
     .input(
       z.object({
         projectId: z.string(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const { projectId } = input;
+
+      // Check nessessary to handle errors when sending links
+      if (input.projectId !== ctx.projectId) {
+        throw new Error("Unauthorized");
+      }
 
       // Fetch statuses ordered by the 'order' field in ascending order
       const statuses = await Status.find({ projectId }).sort({ order: 1 });

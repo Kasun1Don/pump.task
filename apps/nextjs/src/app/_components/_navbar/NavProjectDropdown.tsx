@@ -45,6 +45,8 @@ export default function NavProjectDropdown({
   const router = useRouter();
   const [currentProject, setCurrentProject] = useState<string>("");
 
+  const utils = api.useUtils();
+
   // Use `api.useQueries` to fetch data for each project ID
   const projectQueries = api.useQueries((t) =>
     projects.map((id) => t.project.byId({ id })),
@@ -117,7 +119,7 @@ export default function NavProjectDropdown({
         walletId: walletId,
         projectId: project._id.toString(),
       });
-
+      await utils.user.byWallet.invalidate();
       await revalidate("/");
       // Navigate to the project's task page
       router.push(`/tasks/${project._id}`);
