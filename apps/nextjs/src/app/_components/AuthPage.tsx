@@ -77,7 +77,7 @@ export default function UserLoginClient({
       toast.success("Code verified successfully!, Redireting to profile...");
       setSuccessMessage(true);
       setUserAuthenticated(true);
-      router.push("/profile");
+      router.push("/projects");
     } else {
       setErrorMessage(response.message);
       setValue("");
@@ -95,7 +95,7 @@ export default function UserLoginClient({
         location: locationData,
       });
       setSuccessMessage(true);
-      router.push("/profile");
+      router.push("/projects");
     } catch (error) {
       console.error("Login failed:", error);
       router.push("/");
