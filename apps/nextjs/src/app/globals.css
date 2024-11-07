@@ -48,3 +48,46 @@
     --ring: 240 4.9% 83.9%;
   }
 }
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-path {
+  animation: draw 2s forwards;
+  animation-delay: 0s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 600;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.loader {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #334155;
+  border-bottom-color: #72d524;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

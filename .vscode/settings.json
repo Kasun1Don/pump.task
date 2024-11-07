@@ -23,5 +23,6 @@
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
   "conventionalCommits.gitmoji": true,
-  "conventionalCommits.scopes": ["code optimization"]
+  "conventionalCommits.scopes": ["code optimization"],
+  "cSpell.words": ["sendgrid"]
 }

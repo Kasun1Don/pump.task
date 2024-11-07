@@ -3,13 +3,16 @@ import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
 import { cn } from "@acme/ui";
-import { ThemeProvider, ThemeToggle } from "@acme/ui/theme";
+import { ThemeProvider } from "@acme/ui/theme";
 import { Toaster } from "@acme/ui/toast";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/globals.css";
 
+import NextTopLoader from "nextjs-toploader";
+
+import { ThirdwebProvider } from "~/app/thirdweb";
 import { env } from "~/env";
 
 export const metadata: Metadata = {
@@ -18,19 +21,22 @@ export const metadata: Metadata = {
       ? "https://turbo.t3.gg"
       : "http://localhost:3000",
   ),
-  title: "Create T3 Turbo",
-  description: "Simple monorepo with shared backend for web & mobile apps",
+  title: "pump.task",
+  icons: {
+    icon: "/favicon.png",
+  },
+  description: "Project management with integrated web3 features",
   openGraph: {
-    title: "Create T3 Turbo",
-    description: "Simple monorepo with shared backend for web & mobile apps",
+    title: "pump.task",
+    description: "Project management with integrated web3 features",
     url: "https://create-t3-turbo.vercel.app",
-    siteName: "Create T3 Turbo",
+    siteName: "pump.task",
   },
-  twitter: {
-    card: "summary_large_image",
-    site: "@jullerino",
-    creator: "@jullerino",
-  },
+  // twitter: {
+  //   card: "summary_large_image",
+  //   site: "@jullerino",
+  //   creator: "@jullerino",
+  // },
 };
 
 export const viewport: Viewport = {
@@ -50,11 +56,14 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           GeistMono.variable,
         )}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <TRPCReactProvider>{props.children}</TRPCReactProvider>
-          <div className="absolute bottom-4 right-4">
+        <NextTopLoader color="#72D524" height={3} showSpinner={false} />
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <ThirdwebProvider>
+            <TRPCReactProvider>{props.children}</TRPCReactProvider>
+          </ThirdwebProvider>
+          {/* <div className="absolute bottom-4 right-4">
             <ThemeToggle />
-          </div>
+          </div> */}
           <Toaster />
         </ThemeProvider>
       </body>

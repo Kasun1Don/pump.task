@@ -8,11 +8,33 @@
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { createThirdwebClient } from "thirdweb";
+import { createAuth } from "thirdweb/auth";
+import { privateKeyToAccount } from "thirdweb/wallets";
 import { ZodError } from "zod";
 
 import type { Session } from "@acme/auth";
 import { auth, validateToken } from "@acme/auth";
+import { Member, Project, User } from "@acme/db";
 import dbConnect from "@acme/db/dbConnect";
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const client_id = process.env.NEXT_PUBLIC_CLIENT_ID!;
+
+export const client = createThirdwebClient({
+  clientId: client_id,
+});
+
+const privateKey = process.env.THIRDWEB_ADMIN_PRIVATE_KEY;
+
+if (!privateKey) {
+  throw new Error("Missing THIRDWEB_ADMIN_PRIVATE_KEY in .env file.");
+}
+
+const thirdwebAuth = createAuth({
+  domain: process.env.NEXT_PUBLIC_THIRDWEB_AUTH_DOMAIN ?? "",
+  adminAccount: privateKeyToAccount({ client, privateKey }),
+});
 
 /**
  * Isomorphic Session getter for API requests
@@ -43,9 +65,6 @@ export const createTRPCContext = async (opts: {
 }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
   const session = await isomorphicGetSession(opts.headers);
-
-  const source = opts.headers.get("x-trpc-source") ?? "unknown";
-  console.log(">>> tRPC Request from", source, "by", session?.user);
 
   await dbConnect();
 
@@ -108,14 +127,99 @@ export const publicProcedure = t.procedure;
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.session?.user) {
+export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+  if (!ctx.token) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
+  } else {
+    try {
+      const token = ctx.token.split(" ")[1] ?? "";
+      const verified = await thirdwebAuth.verifyJWT({ jwt: token });
+      if (!verified.valid) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+    } catch (error) {
+      console.log("Error in protectedProcedure", error);
+    }
   }
   return next({
     ctx: {
       // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      session: { ...ctx.session },
+    },
+  });
+});
+
+export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
+  let walletId = "";
+  if (!ctx.token) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const token = ctx.token.split(" ")[1]!;
+    const verified = await thirdwebAuth.verifyJWT({ jwt: token });
+    if (!verified.valid) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    walletId = verified.parsedJWT.sub;
+  }
+  const user = await User.findOne({ walletId });
+  if (!user?.activeProjects) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  const projectId = user.activeProjects.at(-1)?.toString();
+  const members = await Member.find({ projectId: projectId });
+  const member = members.find((member) => member.walletId === walletId);
+  if (member) {
+    if (
+      member.role.toLowerCase() !== "admin" &&
+      member.role.toLowerCase() !== "owner"
+    ) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+  } else {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session },
+    },
+  });
+});
+
+export const memberProcedure = t.procedure.use(async ({ ctx, next }) => {
+  let walletId = "";
+  if (!ctx.token) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const token = ctx.token.split(" ")[1]!;
+    const verified = await thirdwebAuth.verifyJWT({ jwt: token });
+    if (!verified.valid) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    walletId = verified.parsedJWT.sub;
+  }
+  const user = await User.findOne({ walletId });
+  if (!user?.activeProjects) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  const projectId = user.activeProjects.at(-1)?.toString();
+  const project = await Project.findById(projectId);
+  if (project?.isPrivate) {
+    const members = await Member.find({ projectId: projectId });
+    const member = members.find((member) => member.walletId === walletId);
+    if (!member) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+  }
+
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session },
+      projectId,
     },
   });
 });
