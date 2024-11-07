@@ -196,21 +196,15 @@ const TaskCard = ({
 
     // Create a badge for each tag
     try {
-      for (let i = 0; i < tagToBeMinted.length; i++) {
-        setTagBeingMinted(tagToBeMinted[i] ?? "");
-        const tag = tagToBeMinted[i];
-
-        // Delay between mints to avoid gas fluctuations
-        if (i < tagToBeMinted.length - 1 && i !== 0) {
-          await new Promise((resolve) => setTimeout(resolve, 5000));
-        }
+      for (const tag of tagToBeMinted) {
+        setTagBeingMinted(tag);
 
         // Try to mint the NFT for the current tag
         try {
           const result = await mutateCreateBadge.mutateAsync({
             taskId: task._id,
             walletId: task.assigneeId ?? "",
-            tags: [tag ?? ""],
+            tags: [tag],
             receivedDate: new Date(),
           });
 
@@ -347,7 +341,6 @@ const TaskCard = ({
           </div>
         }
       />
-
       <Dialog open={viewTaskMinting} onOpenChange={setViewTaskMinting}>
         <MintingDialog
           tagBeingMinted={tagBeingMinted}

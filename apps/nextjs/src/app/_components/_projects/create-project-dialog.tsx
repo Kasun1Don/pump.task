@@ -45,6 +45,7 @@ export function CreateProjectDialog({
         projectId: newProject.id.toString(),
       });
       await revalidate("/");
+      await revalidate("/tasks");
       router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
