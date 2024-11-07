@@ -23,13 +23,13 @@ export default async function UsersPage({
   }
 
   return (
-    <div className="mx-20 mt-3 flex flex-col gap-3">
+    <div className="mx-4 mt-3 flex flex-col gap-3 sm:mx-20">
       <div className="flex w-full justify-between">
         <h2>{projectData.name}</h2>
         <AddMember projectId={params.id} />
       </div>
 
-      <div className="grid grid-cols-6 gap-3 rounded border-2 p-5">
+      <div className="grid grid-cols-6 gap-3 rounded border-2 p-1">
         <div className="col-span-6 grid grid-cols-6 border-b-2 font-bold">
           <span>Name</span>
           <span>Email</span>
@@ -39,9 +39,12 @@ export default async function UsersPage({
         </div>
         {members.map((member, index) => (
           <>
-            <span>{member.userData.name}</span>
-            <span>{member.userData.email}</span>
-            <span className="col-span-2">{member.userData.walletId}</span>
+            {/* break-words allows long text to wrap to the next line*/}
+            <span className="break-words">{member.userData.name}</span>
+            <span className="break-words">{member.userData.email}</span>
+            <span className="col-span-2 break-all">
+              {member.userData.walletId}
+            </span>
             <span>{member.role}</span>
             <EditMember
               walletId={member.userData.walletId ?? ""}

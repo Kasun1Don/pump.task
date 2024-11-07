@@ -23,6 +23,7 @@ import { toast } from "@acme/ui/toast";
 
 import { api } from "~/trpc/react";
 import { send2FAEmail, verify2FACode } from "../actions/2FAFunctions";
+import LoadingSpinner from "./LoadingSpinner";
 
 const formSchema = z.object({
   email: z.string(),
@@ -76,7 +77,7 @@ export default function UserLoginClient({
       toast.success("Code verified successfully!, Redireting to profile...");
       setSuccessMessage(true);
       setUserAuthenticated(true);
-      router.push("/profile");
+      router.push("/projects");
     } else {
       setErrorMessage(response.message);
       setValue("");
@@ -94,7 +95,7 @@ export default function UserLoginClient({
         location: locationData,
       });
       setSuccessMessage(true);
-      router.push("/profile");
+      router.push("/projects");
     } catch (error) {
       console.error("Login failed:", error);
       router.push("/");
@@ -229,7 +230,9 @@ export default function UserLoginClient({
             </Form>
           </div>
         )
-      ) : null}
+      ) : (
+        <LoadingSpinner />
+      )}
     </>
   );
 }

@@ -146,8 +146,19 @@ export default function TasksPage({
     if (statusData) {
       const validationResult = StatusSchema.array().safeParse(statusData);
       if (validationResult.success) {
-        // set state directly with the validated data
-        setStatusColumns(validationResult.data);
+        const statuses = validationResult.data;
+
+        // Find the 'Approved' column and move it to the end
+        const approvedColumnIndex = statuses.findIndex(
+          (col) => col.name === "Approved" && col.isProtected,
+        );
+        if (approvedColumnIndex !== -1) {
+          const approvedColumn = statuses.splice(approvedColumnIndex, 1)[0]; // Remove 'Approved' column
+          if (approvedColumn) {
+            statuses.push(approvedColumn); // Add it to the end
+          }
+        }
+        setStatusColumns(statuses);
       } else {
         console.error("Validation error:", validationResult.error.errors);
       }
@@ -158,16 +169,20 @@ export default function TasksPage({
   const handleNewStatusCreated = (newStatus: StatusColumn) => {
     setStatusColumns((prevStatusColumns) => {
       // find the protected column
-      const protectedColumnIndex = prevStatusColumns.findIndex(
-        (col) => col.isProtected,
+      const approvedColumnIndex = prevStatusColumns.findIndex(
+        (col) => col.name === "Approved" && col.isProtected,
       );
-      if (protectedColumnIndex === -1) return [...prevStatusColumns, newStatus];
 
-      // insert the new status after the protected column
+      if (approvedColumnIndex === -1) {
+        // No 'Approved' column found, append to the end
+        return [...prevStatusColumns, newStatus];
+      }
+
+      // insert the new status before the protected column
       return [
-        ...prevStatusColumns.slice(0, protectedColumnIndex + 1),
+        ...prevStatusColumns.slice(0, approvedColumnIndex),
         newStatus,
-        ...prevStatusColumns.slice(protectedColumnIndex + 1),
+        ...prevStatusColumns.slice(approvedColumnIndex),
       ];
     });
   };
@@ -212,15 +227,18 @@ export default function TasksPage({
   if ("error" in project) return <p>Error fetching project: {project.error}</p>;
 
   // Function to handle drag and drop of status columns
+  // over is the column that the active column is being dragged over
+  // active is the column that is being dragged
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
     // find the active column
     const activeColumn = statusColumns.find((col) => col._id === active.id);
+    const overColumn = statusColumns.find((col) => col._id === over.id);
 
-    // prevent moving protected columns
-    if (activeColumn?.isProtected) return;
+    // prevent moving protected columns or moving columns to protected position
+    if (activeColumn?.isProtected || overColumn?.isProtected) return;
 
     setStatusColumns((statusColumns) => {
       const activeIndex = statusColumns.findIndex(
@@ -229,9 +247,6 @@ export default function TasksPage({
       const overIndex = statusColumns.findIndex(
         (column) => column._id === over.id,
       );
-
-      // can't drag protected column (index 0)
-      if (overIndex === 0) return statusColumns;
 
       const newOrder = arrayMove(statusColumns, activeIndex, overIndex);
 
@@ -335,13 +350,13 @@ export default function TasksPage({
                   selectedMembers={selectedMembers}
                 />
               ))}
-              {/* only allow owner to create new status columns */}
-              {isOwner() && (
+              {
                 <NewStatusColumn
                   projectId={projectId}
                   onStatusCreated={handleNewStatusCreated}
+                  disabled={!isOwner()}
                 />
-              )}
+              }
             </div>
           </div>
         </div>

@@ -34,18 +34,28 @@ export const statusRouter = {
     )
     .mutation(async ({ input }) => {
       try {
-        const updateOperations = input.statusIds.map((statusId, index) =>
+        const { statusIds } = input;
+        //find the 'Approved' column
+        const statuses = await Status.find({ _id: { $in: statusIds } });
+        const approvedColumn = statuses.find(
+          (status) => status.name === "Approved" && status.isProtected,
+        );
+        //remove the 'Approved' column ID from the statusIds array
+        const orderedStatusIds = statusIds.filter(
+          (id) => id !== approvedColumn?._id.toString(),
+        );
+        //append 'Approved' column ID to the end
+        if (approvedColumn) {
+          orderedStatusIds.push(approvedColumn._id.toString());
+        }
+        //update order for each status column
+        const updateOperations = orderedStatusIds.map((statusId, index) =>
           Status.findByIdAndUpdate(statusId, { order: index }),
         );
-
         await Promise.all(updateOperations);
-
         return { success: true };
       } catch (error) {
         console.error("Error updating status order:", error);
-        throw new Error(
-          `Failed to update status order: ${(error as Error).message}`,
-        );
       }
     }),
 } satisfies TRPCRouterRecord;

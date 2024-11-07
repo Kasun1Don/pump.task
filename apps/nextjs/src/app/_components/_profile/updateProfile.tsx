@@ -62,13 +62,15 @@ export default function UpdateProfile({
 
   return (
     <div className="flex gap-1 text-sm text-gray-400">
-      <div>
-        <div className="w-7/10 justify-start" style={{ maxWidth: "70%" }}></div>
-
+      <div
+        className="w-7/10 flex flex-col justify-start"
+        style={{ maxWidth: "70%" }}
+      >
         <h1 className="text-2xl font-bold text-white">{name}</h1>
         <p className="w-96 flex-1 p-1">{bio}</p>
       </div>
 
+      {/* Dialog for Edit Profile */}
       <Dialog>
         <DialogTrigger asChild>
           <button className="justify-content h-7 stroke-gray-400 p-1 hover:stroke-amber-300">

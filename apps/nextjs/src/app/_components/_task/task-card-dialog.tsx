@@ -52,6 +52,7 @@ export interface TaskCardDialogProps {
   isEditable?: boolean;
   loading: boolean;
   setSubmitButtonTextState?: (text: string) => void;
+  onModalStateChangeTask?: (isAnyModalOpen: boolean) => void;
 }
 
 const TaskCardDialog = ({
@@ -66,6 +67,7 @@ const TaskCardDialog = ({
   isEditable = false,
   loading,
   setSubmitButtonTextState,
+  onModalStateChangeTask,
 }: TaskCardDialogProps) => {
   const defaultTags = [
     "Frontend",
@@ -84,8 +86,28 @@ const TaskCardDialog = ({
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState<boolean>(false);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [isUserAdminOrOwner, setIsUserAdminOrOwner] = useState<boolean>(false);
-
   const [newFieldName, setNewFieldName] = useState("");
+
+  useEffect(() => {
+    if (onModalStateChangeTask) {
+      onModalStateChangeTask(
+        isDialogOpen ||
+          isTagDialogOpen ||
+          isFieldDialogOpen ||
+          isCalendarOpen ||
+          isEditMode ||
+          isNewTask,
+      );
+    }
+  }, [
+    onModalStateChangeTask,
+    isDialogOpen,
+    isTagDialogOpen,
+    isFieldDialogOpen,
+    isCalendarOpen,
+    isEditMode,
+    isNewTask,
+  ]);
 
   const cookieWallet = document.cookie
     .split("; ")
@@ -114,6 +136,7 @@ const TaskCardDialog = ({
     setValue,
     watch,
     trigger,
+    reset,
     formState: { errors },
   } = useForm<NewTaskCard | TaskCard>({
     resolver: zodResolver(isNewTask ? NewTaskCardSchema : TaskCardSchema),
@@ -220,6 +243,36 @@ const TaskCardDialog = ({
     // Trigger validation after removing
     void trigger("customFields");
   };
+
+  // (reset dialog inputs) effect to handle dialog state changes
+  useEffect(() => {
+    if (isDialogOpen === false) {
+      // reset initial values or default values when dialog closes
+      reset(
+        initialValues ?? {
+          title: "",
+          description: "",
+          dueDate: new Date(NaN),
+          statusId: statusId,
+          assigneeId: "unassigned",
+          projectId: projectId,
+          order: 0,
+          tags: {
+            defaultTags: [],
+            userGeneratedTags: [],
+          },
+          customFields: [],
+        },
+      );
+      setNewTag("");
+      setNewFieldName("");
+      setIsTagDialogOpen(false);
+      setIsCalendarOpen(false);
+      setIsFieldDialogOpen(false);
+
+      setIsEditMode(isNewTask);
+    }
+  }, [isDialogOpen, initialValues, isNewTask, projectId, reset, statusId]);
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -579,6 +632,28 @@ const TaskCardDialog = ({
               if (isNewTask) {
                 const newTaskData: NewTaskCard = taskData;
                 onSubmit(newTaskData);
+
+                reset({
+                  title: "",
+                  description: "",
+                  dueDate: new Date(NaN),
+                  statusId: statusId,
+                  assigneeId: "unassigned",
+                  projectId: projectId,
+                  order: 0,
+                  tags: {
+                    defaultTags: [],
+                    userGeneratedTags: [],
+                  },
+                  customFields: [],
+                });
+
+                // remove inputs from text fields on dialog close
+                setNewTag("");
+                setNewFieldName("");
+                setIsTagDialogOpen(false);
+                setIsCalendarOpen(false);
+                setIsFieldDialogOpen(false);
 
                 setIsDialogOpen(false);
               } else {

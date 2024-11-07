@@ -40,33 +40,33 @@ export default async function UserProfile() {
         }}
       ></section>
 
-      <div className="relative mx-52 mt-[10rem]">
+      <div className="relative mx-4 mt-16 lg:mx-32 xl:mx-52">
         <Image
           src={userData.image ?? "/labrysGreenSphere.png"}
           alt="User Profile Icon"
           width={120}
           height={120}
-          className="mb-4"
+          className="mx-auto mb-4 lg:mx-0"
         />
 
-        <div className="relative mb-4 flex h-auto justify-between gap-2">
+        <div className="relative mb-4 flex flex-col gap-2 lg:flex-row lg:justify-between">
           <UpdateProfile
             bio={userData.bio}
             walletId={walletId}
             name={userData.name}
             image={userData.image}
           />
-          <div className="absolute bottom-0 right-0 flex h-10 w-full items-center justify-end rounded-lg border bg-gray-800 py-1 pl-6 text-sm sm:w-auto">
+          <div className="flex h-10 w-full items-center justify-center rounded-lg border bg-gray-800 py-1 pl-6 text-sm lg:w-auto lg:justify-end">
             <p>Copy profile link</p>
             <CopyButton textToCopy={url} />
           </div>
         </div>
 
-        <div className="mb-10 flex gap-4">
-          <div className="w-3/5 self-start rounded-lg border border-gray-700 p-5">
+        <div className="mb-10 flex flex-col gap-4 lg:flex-row">
+          <div className="w-full self-start rounded-lg border border-gray-700 p-5 lg:w-3/5">
             <UserOverview walletId={walletId} />
           </div>
-          <div className="w-4/5 rounded-lg border border-gray-700 p-5">
+          <div className="w-full rounded-lg border border-gray-700 p-5 lg:w-4/5">
             <BadgeSection walletId={walletId} />
           </div>
         </div>

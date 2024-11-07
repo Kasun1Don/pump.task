@@ -53,7 +53,7 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
           "/nfts/Misc.png",
           "/nfts/Frontend.png",
           "/nfts/JSNinja.png",
-          "/nfts/SmartContracts.png",
+          "/nfts/Smart Contracts.png",
           "/nfts/Integration.png",
           "/nfts/UIUXSpec.png",
         ];
@@ -112,9 +112,11 @@ const Badges: React.FC<{ walletId: string | undefined }> = ({ walletId }) => {
           Complete tasks to earn badges. These badges represent your onchain
           resume, they’re minted as NFTs on Sepolia Testnet using Thirdweb.
         </p>
-        <p className="mb-4 text-sm text-gray-600">
-          There are currently no badges earned.
-        </p>
+        <div className="flex flex-grow items-center justify-center">
+          <p className="text-sm text-gray-600">
+            There are currently no badges earned.
+          </p>
+        </div>
       </div>
     );
   }

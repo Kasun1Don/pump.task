@@ -1,7 +1,7 @@
 "use client";
 
 import type { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -51,6 +51,7 @@ interface TaskCardProps {
       }[]
     | undefined;
   currentUserWalletId: string;
+  onModalStateChange?: (isAnyModalOpen: boolean) => void;
 }
 
 const TaskCard = ({
@@ -60,27 +61,51 @@ const TaskCard = ({
   members,
   currentUserWalletId,
   statusColumnName,
+  onModalStateChange,
 }: TaskCardProps) => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [submitButtonText, setSubmitButtonText] = useState("Submit");
+  const [viewTaskMinting, setViewTaskMinting] = useState(false);
+  const [bagsCreated, setBagsCreated] = useState(0);
+  const [tagBeingMinted, setTagBeingMinted] = useState<string>("");
+  const utils = api.useUtils();
+  const [isAnyTaskCardModalOpenTask, setIsAnyTaskCardModalOpenTask] =
+    useState(false);
+
+  const handleModalStateChangeTask = (isAnyModalOpen: boolean) => {
+    setIsAnyTaskCardModalOpenTask(isAnyModalOpen);
+  };
+
+  useEffect(() => {
+    if (onModalStateChange) {
+      onModalStateChange(
+        isDeleteModalOpen || viewTaskMinting || isAnyTaskCardModalOpenTask,
+      );
+    }
+  }, [
+    isDeleteModalOpen,
+    viewTaskMinting,
+    onModalStateChange,
+    isAnyTaskCardModalOpenTask,
+  ]);
+
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: task._id });
+    useSortable({
+      id: task._id,
+      disabled:
+        isDeleteModalOpen || viewTaskMinting || isAnyTaskCardModalOpenTask,
+    });
 
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
   };
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [submitButtonText, setSubmitButtonText] = useState("Submit");
-  const [viewTaskMinting, setViewTaskMinting] = useState(false);
-  const [bagsCreated, setBagsCreated] = useState(0);
-
-  const utils = api.useUtils();
-
   const mutateCreateBadge = api.badge.create.useMutation({
     onSuccess: () => {
       setBagsCreated((prevCount) => prevCount + 1);
       toast.success(`Badge Minted successfully`);
-      void utils.badge.getbadge.invalidate();
+      void utils.badge.invalidate();
       void utils.task.getTaskByStatusId.invalidate();
     },
     onError: (error) => {
@@ -91,7 +116,6 @@ const TaskCard = ({
 
   const deleteTask = api.task.deleteTask.useMutation({
     onSuccess: (task) => {
-      console.log("Task deleted successfully");
       void utils.task.getTaskByStatusId.invalidate();
       toast.success(`Task ${task.task.title} deleted successfully`);
     },
@@ -108,8 +132,6 @@ const TaskCard = ({
 
   const updateTaskMutation = api.task.updateTask.useMutation({
     onSuccess: (updatedTask) => {
-      // Handle success
-      console.log("Task updated successfully", updatedTask);
       setSubmitButtonText("Updated");
       void utils.task.getTaskByStatusId.invalidate();
       if (String(updatedTask.statusId) !== statusId) {
@@ -131,8 +153,6 @@ const TaskCard = ({
 
   const handleSubmit = async (taskData: TaskCard | NewTaskCard) => {
     try {
-      console.log("running handle submit function");
-      // Send the task data (validated in TaskCardDialog) to the tRPC mutation
       await updateTaskMutation.mutateAsync(taskData as TaskCard);
       void utils.task.getTaskByStatusId.invalidate();
     } catch (error) {
@@ -152,44 +172,67 @@ const TaskCard = ({
   );
 
   const handleMintingClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent the default button click event
     e.stopPropagation();
 
-    console.log("assigned", task.assigneeId);
-
+    // Check if the task is assigned to a user
     if (task.assigneeId === "unassigned") {
       toast.error("Task must be assigned to a user to claim rewards");
       return;
     }
 
+    // Open the Minting Dialog for the user
     setViewTaskMinting(true);
 
+    // Initialize the tags to be minted
     let tagToBeMinted = [...task.tags.defaultTags];
 
+    // Add the "Misc" tag if there are user-generated tags as this is the default tag for user-generated tags
     if (task.tags.userGeneratedTags.length > 0) {
       tagToBeMinted = [...tagToBeMinted, "Misc"];
     }
-    try {
-      for (let i = 0; i < tagToBeMinted.length; i++) {
-        const tag = tagToBeMinted[i];
-        await mutateCreateBadge.mutateAsync({
-          taskId: task._id,
-          walletId: task.assigneeId ?? "",
-          tags: [tag ?? ""],
-          receivedDate: new Date(),
-        });
 
-        // Add delay only if it's not the last iteration
-        if (i < tagToBeMinted.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 10000));
+    let successfullyMinted = true;
+
+    // Create a badge for each tag
+    try {
+      for (const tag of tagToBeMinted) {
+        setTagBeingMinted(tag);
+
+        // Try to mint the NFT for the current tag
+        try {
+          const result = await mutateCreateBadge.mutateAsync({
+            taskId: task._id,
+            walletId: task.assigneeId ?? "",
+            tags: [tag],
+            receivedDate: new Date(),
+          });
+
+          // Check the result of the minting operation
+          if (!result.success) {
+            successfullyMinted = false;
+            toast.error(`Error creating badge for tag: ${tag}`);
+          }
+        } catch (error) {
+          // Catch and log individual mint errors and continue
+          console.error(`Error creating badge for tag: ${tag}`, error);
+          successfullyMinted = false;
+          toast.error(
+            `Failed to mint badge for tag: ${tag}, moving to the next tag.`,
+          );
         }
+
+        // Reset the tag being minted
+        setTagBeingMinted("");
       }
 
-      updateTaskMutation.mutate({
+      // Mark the task as minted or not based on the success of minting badges
+      await updateTaskMutation.mutateAsync({
         ...task,
-        isMinted: true,
+        isMinted: successfullyMinted,
       });
 
-      toast.success("All Rewards Minted Successfully");
+      toast.success("Minting Complete");
     } catch (error) {
       console.error("Error creating badges:", error);
     }
@@ -198,6 +241,7 @@ const TaskCard = ({
   return (
     <div {...attributes} ref={setNodeRef} {...listeners} style={style}>
       <TaskCardDialog
+        onModalStateChangeTask={handleModalStateChangeTask}
         members={members}
         loading={updateTaskMutation.isPending}
         initialValues={task}
@@ -208,7 +252,10 @@ const TaskCard = ({
         setSubmitButtonTextState={setSubmitButtonText}
         isEditable={canEdit} //conditional based on user role
         dialogTrigger={
-          <div className="group relative max-w-[350px] rounded-2xl border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="group relative max-w-[350px] rounded-2xl border border-zinc-900 bg-zinc-950 p-4 text-white drop-shadow-md hover:cursor-pointer hover:border-[#27272a] hover:bg-[#0d0d0f]"
+          >
             {/* Delete Icon */}
             <button
               className="absolute right-2 top-2 stroke-gray-500 opacity-0 transition-opacity duration-300 hover:stroke-rose-500 group-hover:opacity-100"
@@ -221,7 +268,7 @@ const TaskCard = ({
               <TrashIcon />
             </button>
 
-            <div className="mb-3 flex space-x-2">
+            <div className="mb-3 flex flex-wrap gap-2">
               {task.tags.defaultTags.map((tag) => (
                 <span
                   key={tag}
@@ -245,7 +292,7 @@ const TaskCard = ({
               {task.description}
             </p>
 
-            {task.isMinted && statusColumnName === "Approved" ? (
+            {task.isMinted === true && statusColumnName === "Approved" ? (
               <Button
                 className="bg-zesty-green hover:bg-zesty-green mt-3 h-6 px-1 py-0 text-xs"
                 onClick={(e) => {
@@ -294,9 +341,9 @@ const TaskCard = ({
           </div>
         }
       />
-
       <Dialog open={viewTaskMinting} onOpenChange={setViewTaskMinting}>
         <MintingDialog
+          tagBeingMinted={tagBeingMinted}
           task={task}
           projectId={projectId}
           statusId={statusId}

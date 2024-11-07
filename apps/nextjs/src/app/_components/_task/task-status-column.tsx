@@ -60,7 +60,12 @@ const TaskStatusColumn = ({
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [newStatusName, setNewStatusName] = useState(statusColumn.name);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isOptionsVisible, setIsOptionsVisible] = useState(false); // State to control options visibility
+  const [isOptionsVisible, setIsOptionsVisible] = useState(false);
+  const [isAnyTaskCardModalOpen, setIsAnyTaskCardModalOpen] = useState(false);
+
+  const handleModalStateChange = (isAnyModalOpen: boolean) => {
+    setIsAnyTaskCardModalOpen(isAnyModalOpen);
+  };
 
   const cookieWallet = document.cookie
     .split("; ")
@@ -81,7 +86,14 @@ const TaskStatusColumn = ({
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: statusColumn._id,
-      disabled: statusColumn.isProtected, // disable drag and drop for approved column
+      disabled:
+        // I need to do this to disable sorting when a dialog is open or when the column is protected but eslint doesn't like it
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        statusColumn.isProtected ||
+        isDeleteModalOpen ||
+        isOptionsVisible ||
+        isRenameModalOpen ||
+        isAnyTaskCardModalOpen,
     });
   const style = {
     transition,
@@ -125,9 +137,12 @@ const TaskStatusColumn = ({
 
   // Mutation for renaming the status column
   const renameStatusColumn = api.task.renameStatusColumn.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       console.log("Status column renamed successfully");
-      void utils.task.getStatusesByProjectId.invalidate(); // Invalidate statuses to refresh data
+      // invalidate statuses and tasks to refresh data
+      await utils.task.getStatusesByProjectId.invalidate();
+      await utils.task.getTaskByStatusId.invalidate();
+      await utils.status.getStatusesByProjectId.invalidate();
     },
     onError: (error) => console.error("Error renaming status column:", error),
   });
@@ -148,10 +163,11 @@ const TaskStatusColumn = ({
 
   // Deletion mutation for the status column
   const deleteStatusColumn = api.task.deleteStatusColumn.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       console.log("Status column deleted successfully");
-      void utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
-      void utils.task.getStatusesByProjectId.invalidate();
+      await utils.task.getTaskByStatusId.invalidate(); // Invalidate tasks and refresh data
+      await utils.task.getStatusesByProjectId.invalidate();
+      await utils.status.getStatusesByProjectId.invalidate();
     },
     onError: (error) => {
       if (error instanceof Error) {
@@ -206,17 +222,19 @@ const TaskStatusColumn = ({
       {...listeners}
       style={style}
     >
-      {/* Menu in the top right corner */}
-      <div
-        onClick={() => setIsOptionsVisible((prev) => !prev)}
-        className="group/menu-button absolute right-2 top-2 z-50 flex cursor-pointer items-center space-x-2 opacity-0 transition-opacity duration-300 group-hover/status-column:opacity-100"
-      >
-        <div aria-label="Options" className="flex gap-0.5 p-1">
-          <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
-          <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
-          <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+      {/* don't show menu if protected (approved column) */}
+      {statusColumn.isProtected === false && (
+        <div
+          onClick={() => setIsOptionsVisible((prev) => !prev)}
+          className="group/menu-button absolute right-2 top-2 z-50 flex cursor-pointer items-center space-x-2 opacity-0 transition-opacity duration-300 group-hover/status-column:opacity-100"
+        >
+          <div aria-label="Options" className="flex gap-0.5 p-1">
+            <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+            <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+            <div className="h-1 w-1 rounded-full bg-gray-500 transition-all group-hover/menu-button:bg-white"></div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Options (delete and rename) */}
       {isOptionsVisible && (
@@ -224,16 +242,18 @@ const TaskStatusColumn = ({
           className="border-1 absolute right-2 top-4 z-50 flex flex-col gap-4 rounded border-white border-opacity-30 bg-black stroke-gray-500 p-3 text-sm shadow-lg"
           onMouseLeave={() => setIsOptionsVisible(false)}
         >
-          {/* Rename option */}
-          <button
-            className="flex items-center gap-2 text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
-            onClick={() => {
-              setIsRenameModalOpen(true);
-              setIsOptionsVisible(false); // Close the menu after rename
-            }}
-          >
-            <EditIcon /> Rename
-          </button>
+          {/* Rename option - only show if not protected */}
+          {statusColumn.isProtected === false && (
+            <button
+              className="flex items-center gap-2 text-gray-500 hover:stroke-blue-500 hover:text-blue-500"
+              onClick={() => {
+                setIsRenameModalOpen(true);
+                setIsOptionsVisible(false); // Close the menu after rename
+              }}
+            >
+              <EditIcon /> Rename
+            </button>
+          )}
 
           {/* Delete option */}
           {statusColumn.isProtected === false && (
@@ -265,6 +285,7 @@ const TaskStatusColumn = ({
         >
           {filteredTasks.map((task) => (
             <TaskCard
+              onModalStateChange={handleModalStateChange}
               members={members}
               currentUserWalletId={cookieWallet ?? ""}
               key={task._id}

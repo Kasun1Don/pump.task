@@ -22,11 +22,13 @@ import { api } from "~/trpc/react";
 interface NewStatusColumnProps {
   projectId: ObjectIdString;
   onStatusCreated: (newStatus: StatusColumn) => void;
+  disabled?: boolean;
 }
 
 export default function NewStatusColumn({
   projectId,
   onStatusCreated,
+  disabled = false,
 }: NewStatusColumnProps) {
   const [newStatusName, setNewStatusName] = useState("");
   const [order, setOrder] = useState(0); // Optional: You can handle order differently based on project
@@ -82,6 +84,7 @@ export default function NewStatusColumn({
             textOrientation: "mixed",
             alignItems: "flex-start",
           }}
+          disabled={disabled}
         >
           + New Status
         </Button>
@@ -93,7 +96,7 @@ export default function NewStatusColumn({
           <DialogTitle>Create New Status</DialogTitle>
         </DialogHeader>
 
-        <div className="mt-4">
+        <div className="bg- mt-4">
           <Input
             type="text"
             value={newStatusName}
@@ -104,7 +107,7 @@ export default function NewStatusColumn({
               }
             }}
             placeholder="Enter Status Name"
-            className="mb-4 w-full rounded-md bg-[#27272A] p-2 text-white"
+            className="mb-4 w-full rounded-md bg-black p-2 text-white"
           />
         </div>
 
