@@ -81,6 +81,35 @@ export default function TasksPage({
     { enabled: Boolean(projectId) },
   );
 
+  // Get wallet ID from cookie
+  const cookieWallet = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("wallet="))
+    ?.split("=")[1];
+
+  const user = api.user.byWallet.useSuspenseQuery({
+    walletId: cookieWallet ?? "",
+  });
+
+  const updateProjects = api.user.updateActiveProjects.useMutation({
+    onSuccess: () => {
+      window.location.reload();
+    },
+    onError: () => {
+      toast.error(`Failed to update active projects from url`);
+    },
+  });
+
+  // check if url and active project don't match
+  useEffect(() => {
+    if (user[0].activeProjects !== undefined && cookieWallet && projectId) {
+      if (user[0].activeProjects.at(-1)?.toString() !== projectId) {
+        updateProjects.mutate({ walletId: cookieWallet, projectId });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Retrieve status columns
   const {
     data: statusData,
@@ -179,25 +208,9 @@ export default function TasksPage({
     },
   });
 
-  // Get wallet ID from cookie
-  const cookieWallet = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("wallet="))
-    ?.split("=")[1];
-
-  const user = api.user.byWallet.useSuspenseQuery({
-    walletId: cookieWallet ?? "",
+  const [userMemberships] = api.member.byUserId.useSuspenseQuery({
+    userId: user[0]._id,
   });
-  const [userMemberships] = api.member.byUserId.useSuspenseQuery(
-    {
-      userId: user[0]._id,
-    },
-    {
-      //fetch the latest members without requiring a page reload (required for member permissions)
-      refetchOnWindowFocus: true,
-      refetchOnMount: true,
-    },
-  );
 
   const isOwner = () => {
     const result = userMemberships.some(
