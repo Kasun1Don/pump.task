@@ -57,7 +57,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         )}
       >
         <NextTopLoader color="#72D524" height={3} showSpinner={false} />
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <ThirdwebProvider>
             <TRPCReactProvider>{props.children}</TRPCReactProvider>
           </ThirdwebProvider>

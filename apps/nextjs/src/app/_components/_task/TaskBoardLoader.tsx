@@ -1,9 +1,12 @@
 import { Skeleton } from "@acme/ui/skeleton";
 
-const TaskBoardSkeleton = () => {
-  // Predefined static heights for skeleton tasks
-  const heights = ["h-20", "h-24", "h-28", "h-32"];
+// Helper function to generate random heights for skeleton tasks
+const getRandomHeight = () => {
+  const heights = ["h-20", "h-24", "h-28", "h-32"]; // Range of different heights
+  return heights[Math.floor(Math.random() * heights.length)];
+};
 
+const TaskBoardSkeleton = () => {
   return (
     <div>
       {/* Skeleton for project title */}
@@ -13,8 +16,11 @@ const TaskBoardSkeleton = () => {
         {/* Column 1: 3 tasks */}
         <div className="flex w-full flex-col">
           <Skeleton className="mb-4 h-8 w-full" />
-          {heights.slice(0, 3).map((height, idx) => (
-            <Skeleton key={idx} className={`${height} mb-4 w-full`} />
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <Skeleton
+              key={idx}
+              className={`${getRandomHeight()} mb-4 w-full`}
+            />
           ))}
           <Skeleton className="mx-auto h-8 w-2/3" />
         </div>
@@ -22,13 +28,50 @@ const TaskBoardSkeleton = () => {
         {/* Column 2: 2 tasks */}
         <div className="flex w-full flex-col">
           <Skeleton className="mb-4 h-8 w-full" />
-          {heights.slice(0, 2).map((height, idx) => (
-            <Skeleton key={idx} className={`${height} mb-4 w-full`} />
+          {Array.from({ length: 2 }).map((_, idx) => (
+            <Skeleton
+              key={idx}
+              className={`${getRandomHeight()} mb-4 w-full`}
+            />
           ))}
           <Skeleton className="mx-auto h-8 w-2/3" />
         </div>
 
-        {/* Other columns can be adjusted similarly */}
+        {/* Column 3: 3 tasks */}
+        <div className="flex w-full flex-col">
+          <Skeleton className="mb-4 h-8 w-full" />
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <Skeleton
+              key={idx}
+              className={`${getRandomHeight()} mb-4 w-full`}
+            />
+          ))}
+          <Skeleton className="mx-auto h-8 w-2/3" />
+        </div>
+
+        {/* Column 4: 1 task */}
+        <div className="flex w-full flex-col">
+          <Skeleton className="mb-4 h-8 w-full" />
+          {Array.from({ length: 1 }).map((_, idx) => (
+            <Skeleton
+              key={idx}
+              className={`${getRandomHeight()} mb-4 w-full`}
+            />
+          ))}
+          <Skeleton className="mx-auto h-8 w-2/3" />
+        </div>
+
+        {/* Column 5: 3 tasks */}
+        <div className="flex w-full flex-col">
+          <Skeleton className="mb-4 h-8 w-full" />
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <Skeleton
+              key={idx}
+              className={`${getRandomHeight()} mb-4 w-full`}
+            />
+          ))}
+          <Skeleton className="mx-auto h-8 w-2/3" />
+        </div>
       </div>
     </div>
   );

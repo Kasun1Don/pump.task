@@ -152,6 +152,12 @@ export const projectRouter = {
           throw new Error("Project not found");
         }
 
+        // Remove the project reference from the user
+        await User.updateMany(
+          { projects: projectId },
+          { $pull: { projects: projectId, activeProjects: projectId } },
+        );
+
         console.log(
           "Project and associated task and statuses deleted successfully",
         );
