@@ -35,6 +35,7 @@ export function CreateProjectDialog({
   const [description, setDescription] = useState("");
 
   const { data: templates = [] } = api.template.getAll.useQuery();
+  const utils = api.useUtils();
 
   const createProject = api.project.create.useMutation({
     onSuccess: async (newProject) => {
@@ -46,6 +47,7 @@ export function CreateProjectDialog({
       });
       await revalidate("/");
       await revalidate("/tasks");
+      await utils.user.byWallet.invalidate();
       router.push(`/tasks/${newProject.id.toString()}`);
     },
   });
