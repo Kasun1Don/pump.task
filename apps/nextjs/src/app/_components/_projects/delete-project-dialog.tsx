@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@acme/ui/dialog";
 
+import { revalidate } from "~/app/actions/revalidate";
 import { api } from "~/trpc/react";
 
 interface DeleteProjectDialogProps {
@@ -23,9 +24,15 @@ export function DeleteProjectDialog({
   projectId,
   onSuccess,
 }: DeleteProjectDialogProps) {
+  // TRPC utility function to invalidate cache data
+  const utils = api.useUtils();
+
   const deleteProject = api.project.delete.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       console.log("Project deleted successfully");
+      // invalidate and refetch user data
+      await utils.user.byWallet.invalidate();
+      await revalidate("/");
       onSuccess?.();
       onOpenChange(false);
     },
