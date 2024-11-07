@@ -17,7 +17,6 @@ import {
 import { z } from "zod";
 
 import type { ObjectIdString, StatusColumn } from "@acme/validators";
-import { Button } from "@acme/ui/button";
 import { toast } from "@acme/ui/toast";
 import { StatusSchema, validateObjectIdString } from "@acme/validators";
 
@@ -40,7 +39,6 @@ export default function TasksPage({
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [isRequestingAccess, setIsRequestingAccess] = useState(false);
 
   // // Retrieve projectId from URL
   // const rawProjectId = searchParams.get("projectId");
@@ -209,21 +207,6 @@ export default function TasksPage({
     );
   };
 
-  const requestAccess = api.email.requestAccess.useMutation({
-    onSuccess: () => {
-      toast.success("Access request sent successfully");
-      setIsRequestingAccess(false);
-    },
-    onError: () => {
-      toast.error("Failed to send access request");
-      setIsRequestingAccess(false);
-    },
-  });
-
-  const isMember = userMemberships.some(
-    (member) => member.projectId === projectId,
-  );
-
   if (validationError) return <p>{validationError}</p>;
   if (isLoading) return <TaskBoardSkeleton />;
   if (error) return <p>Error fetching statuses: {error.message}</p>;
@@ -277,58 +260,6 @@ export default function TasksPage({
       >
         <div className="flex h-[calc(100vh-12rem)] flex-col">
           <div className="relative flex items-center justify-center">
-            {!isMember && !project.isPrivate && (
-              <div className="absolute-left left-0 top-4 px-2">
-                <Button
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    setIsRequestingAccess(true);
-
-                    // Get the project owner's email
-                    const owner = members?.find(
-                      (member) => member.role === "Owner",
-                    );
-                    if (!owner?.userData.email) {
-                      toast.error("Project owner has not set an email address");
-                      setIsRequestingAccess(false);
-                      return;
-                    }
-
-                    if (!user[0].email) {
-                      toast.error(
-                        "Please add an email address to your profile to request access",
-                      );
-                      setIsRequestingAccess(false);
-                      return;
-                    }
-
-                    // Log the email request details
-                    console.log("Access Request Details:", {
-                      projectId,
-                      requesterEmail: user[0].email,
-                      requesterName:
-                        user[0].name ?? user[0].walletId ?? "Unknown User",
-                      ownerEmail: owner.userData.email,
-                      projectName: project.name,
-                    });
-
-                    await requestAccess.mutateAsync({
-                      projectId: projectId as string,
-                      requesterEmail: user[0].email,
-                      requesterName:
-                        user[0].name ?? user[0].walletId ?? "Unknown User",
-                      ownerEmail: owner.userData.email,
-                      projectName: project.name,
-                    });
-                  }}
-                  disabled={isRequestingAccess}
-                  className="bg-[#72D524] text-[#18181B] hover:bg-[#5CAB1D]"
-                  size="sm"
-                >
-                  {isRequestingAccess ? "Sending Request..." : "Request Access"}
-                </Button>
-              </div>
-            )}
             <div className="mb-3 flex-1 justify-center">
               {isEditing && isOwner() ? (
                 <div className="flex justify-center">
