@@ -200,11 +200,17 @@ export default function TasksPage({
   );
 
   const isOwner = () => {
-    return userMemberships.some(
+    const result = userMemberships.some(
       (member) =>
         member.projectId === projectId &&
         (member.role === "Owner" || member.role === "Admin"),
     );
+
+    if (!result) {
+      void utils.member.invalidate();
+    }
+
+    return result;
   };
 
   if (validationError) return <p>{validationError}</p>;
